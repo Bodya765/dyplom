@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Вхід</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Увійти</button>
+        </form>
+        <hr>
+        <p>Або увійдіть за допомогою Google:</p>
+        <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-login">
+            <i class="fab fa-google"></i> Sign in with Google
+        </a>
+        <p>Не маєте облікового запису? <a href="{% url 'account_signup' %}">Зареєструватися</a></p>
+        <p><a href="{% url 'password_reset' %}">Забули пароль?</a></p>
+    </div>
+</body>
+</html>

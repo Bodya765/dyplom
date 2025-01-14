@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %} {{ announcement.title }}{% endblock %}
+
+{% block content %}
+<main>
+    <div class="announcement-details">
+        <h1>{{ announcement.title }}</h1>
+        <p>{{ announcement.description }}</p>
+        <p>Ціна: {{ announcement.price }} грн</p>
+        <p>Місцезнаходження: {{ announcement.location }}</p>
+        <p>Категорія: {{ announcement.category.name }}</p>
+        <p>Автор: {% if announcement.author %}{{ announcement.author }}{% else %}не вказано{% endif %}</p>
+        <p>Дата створення: {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+
+        <h2>місце розташування</h2>
+        <p>{{ announcement.city }}, {{ announcement.region }}</p>
+        <div id="map"></div>
+
+        <div class="actions">
+            <a href="{% url 'edit_announcement' announcement.id %}" class="btn-edit">редагувати</a>
+            <a href="{% url 'delete_announcement' announcement.id %}"
+               onclick="return confirm('ви впевнені, що хочете видалити це оголошення?')"
+               class="btn-delete">Видалити</a>
+        </div>
+
+        <section class="review-form">
+            <h2>Додати відгук</h2>
+            <form method="post" action="{% url 'add_review' announcement.id %}">
+                {% csrf_token %}
+                <label for="rating">Оберіть рейтинг:</label>
+                <div class="rating">
+                    <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star5" title="5 зірок">&#9733;</label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4" title="4 зірки">&#9733;</label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3" title="3 зірки">&#9733;</label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2" title="2 зірки">&#9733;</label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1" title="1 зірка">&#9733;</label>
+                </div>
+
+                <label for="text">Ваш відгук:</label>
+                <textarea id="text" name="text" required></textarea>
+
+                <button type="submit">Залишити відгук</button>
+            </form>
+        </section>
+    </div>
+</main>
+{% endblock %}

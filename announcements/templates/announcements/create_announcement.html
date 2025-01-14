@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Створити оголошення</title>
+</head>
+<body>
+    <h1>Створити оголошення</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-field">
+            <label for="{{ form.title.id_for_label }}">Назва:</label>
+            {{ form.title }}
+            {% if form.title.errors %}
+                <ul class="errors">
+                    {% for error in form.title.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label for="{{ form.description.id_for_label }}">Опис:</label>
+            {{ form.description }}
+            {% if form.description.errors %}
+                <ul class="errors">
+                    {% for error in form.description.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label for="{{ form.price.id_for_label }}">Ціна:</label>
+            {{ form.price }}
+            {% if form.price.errors %}
+                <ul class="errors">
+                    {% for error in form.price.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label for="{{ form.location.id_for_label }}">Місцезнаходження:</label>
+            {{ form.location }}
+            {% if form.location.errors %}
+                <ul class="errors">
+                    {% for error in form.location.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <div class="form-field">
+            <label for="{{ form.image.id_for_label }}">Зображення:</label>
+            {{ form.image }}
+            {% if form.image.errors %}
+                <ul class="errors">
+                    {% for error in form.image.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <button type="submit">Створити оголошення</button>
+    </form>
+
+</body>
+</html>

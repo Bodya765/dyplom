@@ -1,0 +1,23 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ category.name }} - Оголошення{% endblock %}
+{% block content %}
+<main>
+    <section class="announcements">
+        {% for announcement in announcements %}
+            <article class="announcement">
+                <h2>{{ announcement.title }}</h2>
+                <p>{{ announcement.description|truncatewords:20 }}</p>
+                <p>Ціна: <strong>{{ announcement.price }} грн</strong></p>
+                <p>Місцезнаходження: {{ announcement.location }}</p>
+                <a href="{% url 'announcement_detail' announcement.id %}" class="details-link">Детальніше</a>
+            </article>
+        {% empty %}
+            <p>Немає оголошень у цій категорії.</p>
+        {% endfor %}
+    </section>
+</main>
+
+
+{% endblock %}

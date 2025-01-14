@@ -1,0 +1,61 @@
+{% load static %}
+{% load socialaccount %}
+
+<header class="header">
+    <div class="container">
+        <nav class="nav">
+            <a href="{% url 'home' %}" class="logo">VseOgolosha</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Головна</a></li>
+                <li><a href="{% url 'about_us' %}">Про нас</a></li>
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <a href="{% url 'create_announcement' %}" class="add-announcement-btn">Додати оголошення</a>
+            <div class="profile-menu">
+                {% if user.is_authenticated %}
+                    <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo" id="profilePhoto">
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="{% url 'logout' %}">Вийти</a>
+                        <button id="theme-toggle" class="theme-toggle">Змінити тему</button>
+                    </div>
+                {% else %}
+                    <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo" id="profilePhoto">
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Увійти
+                        </a>
+                        <a href="{% url 'signup' %}">
+                            <i class="fas fa-user-plus"></i> Зареєструватися
+                        </a>
+
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <p>&copy; 2025 VseOgolosha. Всі права захищені.</p>
+            <nav class="footer-nav">
+                <a href="{% url 'about_us' %}">Про нас</a>
+                <a href="{% url 'terms' %}">Умови використання</a>
+                <a href="{% url 'privacy' %}">Політика конфіденційності</a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+
+{% block extra_styles %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="{% static 'js/map.js' %}"></script>
+{% endblock %}

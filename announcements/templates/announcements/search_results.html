@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Результати пошуку{% endblock %}
+
+{% block content %}
+<main>
+    <div class="container">
+        <h1>Результати пошуку</h1>
+
+        {% if results %}
+            <p class="results-count">Знайдено {{ results|length }} оголошень:</p>
+            <ul class="results-list">
+                {% for announcement in results %}
+                    <li class="result-item">
+                        <h2>
+                            <a href="{% url 'announcement_detail' announcement.id %}" class="result-link">{{ announcement.title }}</a>
+                        </h2>
+                        <p class="price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
+                        <p class="category">Категорія: {{ announcement.category.name }}</p>
+                        <p class="description">{{ announcement.description|truncatechars:100 }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="no-results">Нічого не знайдено за запитом "{{ request.GET.q }}".</p>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
