@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ room_name }}</h2>
+
+    <div id="chat-date" style="text-align: center; font-weight: bold; margin-bottom: 10px;"></div>
+
+    <div id="status-container" style="display: flex; align-items: center; gap: 5px; margin-bottom: 10px;">
+        <div id="status-circle" style="width: 10px; height: 10px; border-radius: 50%; background-color: red;"></div>
+        <span id="user-status">Офлайн</span>
+    </div>
+
+    <div id="chat" class="chat-container" style="max-height: 400px; overflow-y: scroll; display: flex; flex-direction: column; gap: 5px;">
+    </div>
+
+    <div id="message-container" style="display: flex; justify-content: space-between; margin-top: 10px;">
+        <input id="message-input" type="text" placeholder="Напишіть повідомлення..." style="width: 80%; padding: 10px;">
+        <button onclick="sendMessage()">Надіслати</button>
+    </div>
+
+    <script>
+        const roomName = "{{ room_name|default:'general' }}";
+        const username = "{{ request.user.username }}";
+        const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+
+        let messageHistory = [];
+        let lastSeen = "Невідомо";
+
+        document.getElementById("chat-date").innerText = new Date().toLocaleDateString();
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.message) {
+                const messageContainer = document.getElementById("chat");
+
+                let isMine = data.username === username;
+                let messageClass = isMine ? 'my-message' : 'other-message';
+                let messageColor = isMine ? 'lightgray' : 'lightblue';
+                let textAlign = isMine ? 'left' : 'right';
+
+                messageHistory.push(data);
+
+                messageContainer.innerHTML += `
+                    <div class="${messageClass}" style="background-color: ${messageColor}; padding: 5px 10px; border-radius: 8px; max-width: 60%; align-self: ${isMine ? 'flex-start' : 'flex-end'};">
+                        <b>${data.username}</b>
+                        <div>${data.message}</div>
+                        <div style="text-align: ${textAlign}; font-size: 12px; color: gray;">${data.timestamp.split(' ')[1]}</div>
+                    </div>
+                `;
+
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+
+            if (data.status_update) {
+                updateUserStatus(data.username, data.is_online, data.last_seen);
+            }
+        };
+
+        function sendMessage() {
+            const message = document.getElementById("message-input").value;
+            if (message.trim() !== "") {
+                socket.send(JSON.stringify({"message": message}));
+
+                const messageContainer = document.getElementById("chat");
+                const timestamp = new Date().toLocaleTimeString();
+
+                messageContainer.innerHTML += `
+                    <div class="my-message" style="background-color: lightgray; padding: 5px 10px; border-radius: 8px; max-width: 60%; align-self: flex-start;">
+                        <b>${username}</b>
+                        <div>${message}</div>
+                        <div style="text-align: left; font-size: 12px; color: gray;">${timestamp}</div>
+                    </div>
+                `;
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+                document.getElementById("message-input").value = "";
+            }
+        }
+
+        function updateUserStatus(user, is_online, last_seen_time) {
+            const statusCircle = document.getElementById("status-circle");
+            const statusText = document.getElementById("user-status");
+
+            if (is_online) {
+                statusCircle.style.backgroundColor = "green";
+                statusText.innerText = "В мережі";
+            } else {
+                statusCircle.style.backgroundColor = "red";
+                lastSeen = last_seen_time || "Невідомо";
+                statusText.innerText = `Офлайн (був: ${lastSeen})`;
+            }
+        }
+
+        document.getElementById("message-input").addEventListener("keypress", function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+
+{% endblock %}

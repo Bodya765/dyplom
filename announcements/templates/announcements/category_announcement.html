@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Категорія: {{ category.name }}{% endblock %}
+
+{% block content %}
+<div class="category-container">
+    <header class="category-header">
+        <h1 class="category-title">{{ category.name }}</h1>
+        <p class="category-description">{{ category.description }}</p>
+    </header>
+
+    {% if announcements %}
+        <ul class="announcement-list">
+            {% for announcement in announcements %}
+                <li class="announcement-item">
+                    <div class="announcement-thumbnail">
+                        <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'default-image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-image">
+                    </div>
+                    <div class="announcement-details">
+                        <h2 class="announcement-title">
+                            <a href="{% url 'announcement-detail' announcement.id %}" class="announcement-link">{{ announcement.title }}</a>
+                        </h2>
+                        <p class="announcement-price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
+                        <p class="announcement-description">{{ announcement.description|truncatechars:100 }}</p>
+                        <p class="announcement-location">Місцезнаходження: {{ announcement.city }}, {{ announcement.region }}</p>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Пагінація -->
+        <nav class="pagination-nav">
+            <ul class="pagination-list">
+                {% if announcements.has_previous %}
+                    <li><a href="?page=1" class="pagination-link first-page">&laquo; Перша</a></li>
+                    <li><a href="?page={{ announcements.previous_page_number }}" class="pagination-link prev-page">Попередня</a></li>
+                {% endif %}
+                <li><span class="current-page">Сторінка {{ announcements.number }} із {{ announcements.paginator.num_pages }}</span></li>
+                {% if announcements.has_next %}
+                    <li><a href="?page={{ announcements.next_page_number }}" class="pagination-link next-page">Наступна</a></li>
+                    <li><a href="?page={{ announcements.paginator.num_pages }}" class="pagination-link last-page">Остання &raquo;</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <p class="no-announcements">Немає оголошень у цій категорії.</p>
+    {% endif %}
+</div>
+{% endblock %}

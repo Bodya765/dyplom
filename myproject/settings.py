@@ -6,6 +6,8 @@ import os
 # Читання .env файлу
 env = environ.Env()
 environ.Env.read_env()
+TIME_ZONE = 'Europe/Kiev'
+USE_TZ = True
 
 # Завантажуємо змінні з файлу .env
 load_dotenv()
@@ -25,23 +27,23 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
     'announcements',
     'rest_framework',
     'django_filters',
     'django.contrib.sites',
     'channels',
     'chat',
-    'allauth',  # Allauth app for authentication and registration
-    'allauth.account',  # Account app for managing users
-    'allauth.socialaccount',  # Social authentication app
-
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'social_django',
 
 ]
 
@@ -77,15 +79,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myproject.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DB_NAME', default='mydatabase'),
-        'USER': env('DB_USER', default='root'),
-        'PASSWORD': env('DB_PASSWORD', default='2358bogdan'),
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='3306'),
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
     }
 }
 
@@ -108,18 +109,20 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 LANGUAGE_CODE = 'uk'
 
-TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
-
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'announcements', 'static'),
+]
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'users.CustomUser'
+
+
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2',  # Google OAuth2
@@ -131,22 +134,26 @@ SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_PASSWORD_MIN_LENGTH = 8
-LOGIN_URL = 'social:login'
 LOGIN_REDIRECT_URL = '/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = 'login'
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = env.int('EMAIL_PORT', default=587)
-EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
-EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='vovkbogdan20@gmail.com')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='2358bogdan')
 
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='vovkbogdan20@gmail.com')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='vovkbogdan20@gmail.com')
+
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -155,16 +162,17 @@ SOCIALACCOUNT_PROVIDERS = {
         'OAUTH_PKCE_ENABLED': True,
     }
 }
-ACCOUNT_FORMS = {
-    'signup': 'announcements.CustomSignupForm',
-    'login': 'announcements.forms.CustomLoginForm',
-}
 ASGI_APPLICATION = 'myproject.asgi.application'
+
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('127.0.0.1', 6379)],  # Redis сервер
         },
     },
 }
+
+AUTH_PASSWORD_VALIDATORS = []
+

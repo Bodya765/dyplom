@@ -5,16 +5,18 @@
 
 {% block content %}
 <main>
-    <div class="container">
-        <h1>Результати пошуку</h1>
+    <div class="container search-results">
+        <h1 class="search-title">Результати пошуку</h1>
 
         {% if results %}
             <p class="results-count">Знайдено {{ results|length }} оголошень:</p>
             <ul class="results-list">
                 {% for announcement in results %}
                     <li class="result-item">
-                        <h2>
-                            <a href="{% url 'announcement_detail' announcement.id %}" class="result-link">{{ announcement.title }}</a>
+                        <h2 class="result-title">
+                            <a href="{% url 'announcements:detail' announcement.id %}" class="result-link">
+                                {{ announcement.title }}
+                            </a>
                         </h2>
                         <p class="price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
                         <p class="category">Категорія: {{ announcement.category.name }}</p>
@@ -22,8 +24,25 @@
                     </li>
                 {% endfor %}
             </ul>
+
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?q={{ request.GET.q }}&page=1" class="pagination-link">Перша</a>
+                    <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}" class="pagination-link">Попередня</a>
+                {% endif %}
+
+                <span class="current-page">
+                    Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}" class="pagination-link">Наступна</a>
+                    <a href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}" class="pagination-link">Остання</a>
+                {% endif %}
+            </div>
+
         {% else %}
-            <p class="no-results">Нічого не знайдено за запитом "{{ request.GET.q }}".</p>
+            <p class="no-results">Нічого не знайдено за запитом "<strong>{{ request.GET.q }}</strong>".</p>
         {% endif %}
     </div>
 </main>

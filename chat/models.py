@@ -1,13 +1,17 @@
 from django.db import models
-from django.conf import settings
+from django.contrib.auth.models import User
+from django.utils.timezone import now
 
-class Chat(models.Model):
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='seller')
-    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='buyer')
-    created_at = models.DateTimeField(auto_now_add=True)
+class ChatRoom(models.Model):
+    name = models.CharField(max_length=255, unique=True)
 
 class Message(models.Model):
-    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    timestamp = models.DateTimeField(default=now)
+
+class UserStatus(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    last_seen = models.DateTimeField(default=now)
+    is_online = models.BooleanField(default=False)

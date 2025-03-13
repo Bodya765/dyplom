@@ -1,0 +1,22 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Реєстрація</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="container registration-container">
+        <h1 class="registration-title">Реєстрація</h1>
+        <form method="post" enctype="multipart/form-data" class="registration-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Зареєструватися</button>
+        </form>
+        <p class="login-prompt">Вже маєте обліковий запис? <a href="{% url 'announcements:login' %}" class="login-link">Увійти</a></p>
+    </div>
+</body>
+</html>

@@ -1,25 +1,26 @@
-from django.contrib.auth import views as auth_views
 from django.contrib import admin
 from django.urls import path, include
-from announcements import views as announcement_views
+from django.contrib.auth import views as auth_views
+from announcements import views
 
 urlpatterns = [
-    # Admin Panel
+    # Панель адміністратора
     path('admin/', admin.site.urls),
 
-    # Authentication URLs
+    # Головна сторінка
+    path('', views.home, name='home'),
+
+    # Аутентифікація та авторизація
     path('auth/', include('social_django.urls', namespace='social')),
-    path('accounts/password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('accounts/password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('accounts/password_reset_confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('accounts/password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    path('accounts/', include([
+        path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+        path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
+        path('password_reset_confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+        path('password_reset_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
+    ])),
 
-    # Announcements API
-    path('api/', include('announcements.urls')),
+    # API для оголошень
+    path('api/', include('announcements.urls', namespace='announcements')),
 
-    # Home Page and Category Pages
-    path('', announcement_views.home, name='home'),
-    path('category/<slug:category_slug>/', announcement_views.category_detail, name='category_announcements'),
-    path('accounts/', include('allauth.urls')),
-    path('chat/', include('chat.urls')),
+
 ]

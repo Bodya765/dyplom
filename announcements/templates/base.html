@@ -1,61 +1,96 @@
 {% load static %}
 {% load socialaccount %}
 
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VseOgolosha</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
+<body>
+
 <header class="header">
     <div class="container">
-        <nav class="nav">
-            <a href="{% url 'home' %}" class="logo">VseOgolosha</a>
-            <ul class="nav-links">
-                <li><a href="{% url 'home' %}">Головна</a></li>
-                <li><a href="{% url 'about_us' %}">Про нас</a></li>
-            </ul>
-        </nav>
-        <div class="header-actions">
-            <a href="{% url 'create_announcement' %}" class="add-announcement-btn">Додати оголошення</a>
-            <div class="profile-menu">
-                {% if user.is_authenticated %}
-                    <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo" id="profilePhoto">
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="{% url 'logout' %}">Вийти</a>
-                        <button id="theme-toggle" class="theme-toggle">Змінити тему</button>
-                    </div>
-                {% else %}
-                    <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo" id="profilePhoto">
-                    <div class="dropdown-menu" id="dropdownMenu">
-                        <a href="{% url 'login' %}">
-                            <i class="fas fa-sign-in-alt"></i> Увійти
+        <nav class="nav navigation">
+            <div class="nav-left"> <!-- Додано клас nav-left для лівого блоку -->
+                <a href="{% url 'home' %}" class="logo nav-logo">
+                    <i>VseOgolosha</i>
+                </a>
+                <ul class="nav-links nav-list">
+                    <li class="nav-item">
+                        <a href="{% url 'home' %}" class="nav-link">
+                            <i class="bi bi-house-door"></i> Головна
                         </a>
-                        <a href="{% url 'signup' %}">
-                            <i class="fas fa-user-plus"></i> Зареєструватися
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'announcements:about_us' %}" class="nav-link">
+                            <i class="bi bi-info-circle"></i> Про нас
                         </a>
-
-                    </div>
-                {% endif %}
+                    </li>
+                </ul>
             </div>
-        </div>
+            <div class="header-actions">
+                <a href="{% url 'announcements:announcement-create' %}" class="add-announcement-btn action-link">
+                    <i class="bi bi-plus-circle"></i> Створити оголошення
+                </a>
+                <a href="{% url 'announcements:chat' %}" class="chat-icon action-link" title="Перейти до чату">
+                    <i class="bi bi-chat-dots"></i>Чати
+                </a>
+                <div class="profile-menu">
+                    {% if user.is_authenticated %}
+                        <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo authenticated" id="profilePhoto">
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="{% url 'announcements:profile_edit' %}" class="dropdown-link">
+                                <i class="bi bi-pencil-square"></i> Редагувати профіль
+                            </a>
+                            <form method="POST" action="{% url 'announcements:logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-btn">
+                                    <i class="bi bi-box-arrow-right"></i> Вийти
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo unauthenticated" id="profilePhoto">
+                        <div class="dropdown-menu" id="dropdownMenu">
+                            <a href="{% url 'announcements:login' %}" class="dropdown-link">
+                                <i class="bi bi-box-arrow-in-right"></i> Увійти
+                            </a>
+                            <a href="{% url 'announcements:signup' %}" class="dropdown-link">
+                                <i class="bi bi-person-plus"></i> Реєстрація
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
     </div>
 </header>
+
+{% block content %}{% endblock %}
 
 <footer class="footer">
     <div class="container">
         <div class="footer-content">
-            <p>&copy; 2025 VseOgolosha. Всі права захищені.</p>
+            <p class="footer-text">© 2025 VseOgolosha. Всі права захищені.</p>
             <nav class="footer-nav">
-                <a href="{% url 'about_us' %}">Про нас</a>
-                <a href="{% url 'terms' %}">Умови використання</a>
-                <a href="{% url 'privacy' %}">Політика конфіденційності</a>
+                <a href="{% url 'announcements:about_us' %}" class="footer-link">
+                    <i class="bi bi-info-circle"></i> Про нас
+                </a>
+                <a href="{% url 'announcements:terms' %}" class="footer-link">
+                    <i class="bi bi-file-earmark-text"></i> Умови використання
+                </a>
+                <a href="{% url 'announcements:privacy' %}" class="footer-link">
+                    <i class="bi bi-shield-lock"></i> Політика конфіденційності
+                </a>
             </nav>
         </div>
     </div>
 </footer>
 
-
-{% block extra_styles %}
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-{% endblock %}
-
-{% block extra_scripts %}
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="{% static 'js/map.js' %}"></script>
-{% endblock %}
+<script src="{% static 'js/profile-dropdown.js' %}"></script>
+</body>
+</html>

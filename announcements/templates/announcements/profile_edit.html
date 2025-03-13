@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Редагування профілю{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Редагувати профіль</h2>
+
+    {% if form.errors %}
+        <div class="form-errors">
+            <p>Будь ласка, виправте помилки:</p>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="profile-edit-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+        <a href="{% url 'announcements:profile' %}" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>
+{% endblock %}

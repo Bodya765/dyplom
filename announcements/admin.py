@@ -1,31 +1,33 @@
 from django.contrib import admin
-from .models import Announcement, Category, Review, Location
+from .models import Announcement, Review, Location,Category
 
 class AnnouncementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'price', 'category', 'location', 'author', 'created_at')  # Додаємо 'price' в list_display
+    list_display = ('title', 'formatted_price', 'category', 'location', 'author', 'created_at', 'price')  # Add 'price' here
     search_fields = ('title', 'description')
-    list_filter = ('category', 'location', 'author')  # Фільтрація за категорією, локацією, автором
-    list_editable = ('price',)  # Додаємо можливість редагувати 'price'
-    ordering = ('-created_at',)  # Сортуємо за датою створення, найновіші спочатку
+    list_filter = ('category', 'location', 'author', 'price')  # Include price in list_filter
+    list_editable = ('price',)  # Keep 'price' editable if you want
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'author')  # Make fields readonly
 
     def formatted_price(self, obj):
-        return f"{obj.price} грн"  # Форматуємо ціну для відображення в адмінці
+        return f"{obj.price} грн"
     formatted_price.short_description = 'Ціна'
 
-class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description')
-    search_fields = ('name',)  # Пошук за назвою категорії
+# class CategoryAdmin(admin.ModelAdmin):
+#     list_display = ('name', 'description')
+#     search_fields = ('name',)
+#     ordering = ('name',)
 
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('announcement', 'user', 'rating', 'text', 'created_at')  # Відображаємо 'text' та 'created_at'
-    search_fields = ('text', 'user__username')  # Пошук за текстом та користувачем
-    list_filter = ('rating', 'announcement')  # Фільтрація за рейтингом та оголошенням
+    list_display = ('announcement', 'user', 'rating', 'text', 'created_at')
+    search_fields = ('text', 'user__username')
+    list_filter = ('rating', 'announcement', 'created_at')
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('announcement', 'latitude', 'longitude', 'address')  # Тепер додаємо 'address'
+    list_display = ('name','district')
 
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Announcement, AnnouncementAdmin)
-admin.site.register(Category, CategoryAdmin)
+admin.site.register(Category)
 admin.site.register(Review, ReviewAdmin)
 

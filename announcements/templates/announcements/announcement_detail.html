@@ -1,51 +1,85 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %} {{ announcement.title }}{% endblock %}
+
+{% block title %}{{ announcement.title }}{% endblock %}
 
 {% block content %}
 <main>
-    <div class="announcement-details">
-        <h1>{{ announcement.title }}</h1>
-        <p>{{ announcement.description }}</p>
-        <p>Ціна: {{ announcement.price }} грн</p>
-        <p>Місцезнаходження: {{ announcement.location }}</p>
-        <p>Категорія: {{ announcement.category.name }}</p>
-        <p>Автор: {% if announcement.author %}{{ announcement.author }}{% else %}не вказано{% endif %}</p>
-        <p>Дата створення: {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+    <div class="detail-section">
+        <h1 class="detail-header">{{ announcement.title }}</h1>
+        <p class="detail-desc">{{ announcement.description }}</p>
+        {% if announcement.price %}
+            <p class="detail-price">Ціна: {{ announcement.price }} грн</p>
+        {% else %}
+            <p class="detail-price">Ціна не вказана</p>
+        {% endif %}
+        <p class="detail-location">Місцезнаходження:
+            {% if announcement.city and announcement.region %}
+                {{ announcement.city }}, {{ announcement.region }}
+            {% else %}
+                невідомо
+            {% endif %}
+        </p>
+        <p class="detail-category">Категорія: {{ announcement.category.name }}</p>
+        <p class="detail-author">Автор:
+            {% if announcement.author %}
+                {{ announcement.author.username }}
+            {% else %}
+                Не вказано
+            {% endif %}
+        </p>
+        <p class="detail-created">Дата створення: {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
 
-        <h2>місце розташування</h2>
-        <p>{{ announcement.city }}, {{ announcement.region }}</p>
-        <div id="map"></div>
+        {% if announcement.city and announcement.region %}
+            <h2 class="location-title">Місце розташування</h2>
+            <div class="map-container">
+                <div id="map" style="height: 400px;"></div>
+            </div>
+        {% else %}
+            <p class="no-location">Місцезнаходження не вказано.</p>
+        {% endif %}
 
         <div class="actions">
-            <a href="{% url 'edit_announcement' announcement.id %}" class="btn-edit">редагувати</a>
+            <a href="{% url 'edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
             <a href="{% url 'delete_announcement' announcement.id %}"
-               onclick="return confirm('ви впевнені, що хочете видалити це оголошення?')"
-               class="btn-delete">Видалити</a>
+               onclick="return confirm('Ви впевнені, що хочете видалити це оголошення?')"
+               class="btn btn-delete">Видалити</a>
         </div>
 
+        <section class="reviews">
+            <h2>Відгуки</h2>
+            {% for review in reviews %}
+                <div class="review">
+                    <p><strong>{{ review.user.username }}</strong></p>
+                    <p>{{ review.rating }} зірок</p>
+                    <p>{{ review.text }}</p>
+                    <p><small>{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+                </div>
+            {% endfor %}
+        </section>
+
         <section class="review-form">
-            <h2>Додати відгук</h2>
-            <form method="post" action="{% url 'add_review' announcement.id %}">
+            <h2 class="review-title">Додати відгук</h2>
+            <form method="post" action="{% url 'announcement-detail' announcement.id %}">
                 {% csrf_token %}
-                <label for="rating">Оберіть рейтинг:</label>
+                <label for="rating" class="rating-label">Оберіть рейтинг:</label>
                 <div class="rating">
                     <input type="radio" id="star5" name="rating" value="5">
-                    <label for="star5" title="5 зірок">&#9733;</label>
+                    <label for="star5" title="5 зірок">★</label>
                     <input type="radio" id="star4" name="rating" value="4">
-                    <label for="star4" title="4 зірки">&#9733;</label>
+                    <label for="star4" title="4 зірки">★</label>
                     <input type="radio" id="star3" name="rating" value="3">
-                    <label for="star3" title="3 зірки">&#9733;</label>
+                    <label for="star3" title="3 зірки">★</label>
                     <input type="radio" id="star2" name="rating" value="2">
-                    <label for="star2" title="2 зірки">&#9733;</label>
+                    <label for="star2" title="2 зірки">★</label>
                     <input type="radio" id="star1" name="rating" value="1">
-                    <label for="star1" title="1 зірка">&#9733;</label>
+                    <label for="star1" title="1 зірка">★</label>
                 </div>
 
-                <label for="text">Ваш відгук:</label>
-                <textarea id="text" name="text" required></textarea>
+                <label for="text" class="review-text-label">Ваш відгук:</label>
+                <textarea id="text" name="text" class="review-text" required></textarea>
 
-                <button type="submit">Залишити відгук</button>
+                <button type="submit" class="btn btn-primary">Залишити відгук</button>
             </form>
         </section>
     </div>
