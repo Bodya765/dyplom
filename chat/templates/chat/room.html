@@ -21,7 +21,11 @@
     <script>
         const roomName = "{{ room_name|default:'general' }}";
         const username = "{{ request.user.username }}";
-        const socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+        let socket = new WebSocket(`ws://${window.location.host}/ws/chat/${roomName}/`);
+
+        if (window.location.protocol === "https:") {
+            socket = new WebSocket(`wss://${window.location.host}/ws/chat/${roomName}/`);
+        }
 
         let messageHistory = [];
         let lastSeen = "Невідомо";

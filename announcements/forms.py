@@ -1,19 +1,25 @@
 from django import forms
-from .models import Announcement, Review, Category
+from .models import Announcement, Review, Category, Location
 from allauth.account.forms import SignupForm
 from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.models import User
 
 
-
 class CustomSignupForm(SignupForm):
     first_name = forms.CharField(max_length=30, label='Імʼя', widget=forms.TextInput(attrs={'placeholder': 'Введіть ваше імʼя', 'aria-label': 'Ваше імʼя'}))
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name:
+            raise forms.ValidationError("Імʼя не може бути порожнім.")
+        return first_name
 
     def save(self, request):
         user = super().save(request)
         user.first_name = self.cleaned_data['first_name']
         user.save()
         return user
+
 
 class ReviewForm(forms.ModelForm):
     class Meta:
@@ -26,37 +32,48 @@ class ReviewForm(forms.ModelForm):
 
     def save(self, commit=True):
         review = super().save(commit=False)
-        # Set announcement and user if available
         review.announcement = self.cleaned_data.get('announcement')
         review.user = self.cleaned_data.get('user')
         if commit:
             review.save()
         return review
 
+
 class AnnouncementForm(forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ['title', 'description', 'price', 'location', 'category', 'image', 'city', 'region']
+        fields = ['title', 'description', 'price', 'location', 'category', 'image']
         widgets = {
             'title': forms.TextInput(attrs={'placeholder': 'Введіть заголовок', 'aria-label': 'Заголовок оголошення'}),
             'description': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Опис оголошення', 'aria-label': 'Опис'}),
             'price': forms.NumberInput(attrs={'placeholder': 'Вкажіть ціну', 'aria-label': 'Ціна'}),
-            'location': forms.TextInput(attrs={'placeholder': 'Місцезнаходження', 'aria-label': 'Місцезнаходження'}),
-            'city': forms.TextInput(attrs={'placeholder': 'Місто', 'aria-label': 'Місто'}),
-            'region': forms.TextInput(attrs={'placeholder': 'Область', 'aria-label': 'Область'}),
-            'category': forms.Select(attrs={'aria-label': 'Категорія'})  # Вибір категорії
+            'category': forms.Select(attrs={'aria-label': 'Категорія'}),
+            'image': forms.ClearableFileInput(attrs={'aria-label': 'Зображення оголошення'})
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Додаємо список категорій до поля 'category'
-        self.fields['category'].queryset = Category.objects.all()
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.fields['category'].queryset = Category.objects.all()
+    #     self.fields['location'] = forms.ModelChoiceField(queryset=Location.objects.all(),
+    #                                                      empty_label="Виберіть місто",
+    #                                                      widget=forms.Select(attrs={'aria-label': 'Місто'}))
 
     def clean_image(self):
         image = self.cleaned_data.get('image')
         if image and not image.name.endswith(('jpg', 'jpeg', 'png')):
             raise forms.ValidationError("Дозволено завантажувати лише зображення формату jpg, jpeg або png.")
         return image
+
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price is not None and price <= 0:
+            raise forms.ValidationError("Ціна має бути більшою за 0.")
+        return price
+
+    def clean_location(self):
+        location = self.cleaned_data.get('location')
+        print(location)
+        return location
 
 
 class ProfileForm(UserChangeForm):
@@ -66,3 +83,9 @@ class ProfileForm(UserChangeForm):
     class Meta:
         model = User
         fields = ['username', 'password', 'profile_picture']
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if not password:
+            raise forms.ValidationError("Пароль не може бути порожнім.")
+        return password

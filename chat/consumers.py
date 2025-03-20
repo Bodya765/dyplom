@@ -1,9 +1,11 @@
 import json
 from datetime import datetime
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 from .models import Message, ChatRoom, UserStatus
+
 
 
 class ChatConsumer(AsyncWebsocketConsumer):

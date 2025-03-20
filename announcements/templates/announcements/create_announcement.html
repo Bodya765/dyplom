@@ -25,13 +25,8 @@
     </div>
 
     <div class="form-field">
-        <label for="category" class="form-label">Категорія:</label>
-        <select name="category" id="category" class="form-control">
-            <option value="">Оберіть категорію</option>
-            {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-            {% endfor %}
-        </select>
+        <label for="{{ form.category.id_for_label }}" class="form-label">Категорія:</label>
+        {{ form.category }}
     </div>
 
     <div class="form-field" style="position: relative;">
@@ -47,7 +42,6 @@
 
     <button type="submit" class="btn btn-primary">Створити оголошення</button>
 </form>
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

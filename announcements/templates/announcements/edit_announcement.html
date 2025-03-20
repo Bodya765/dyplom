@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Редагування оголошення{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Редагування оголошення</h2>
+
+    <div class="card shadow-sm p-4">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Заголовок</label>
+                <input type="text" name="title" value="{{ form.title.value|default:'' }}" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Опис</label>
+                <textarea name="description" rows="5" class="form-control" required>{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ціна</label>
+                <input type="number" name="price" value="{{ form.price.value|default:'' }}" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Місто</label>
+                <input type="text" name="city" value="{{ form.city.value|default:'' }}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Регіон</label>
+                <input type="text" name="region" value="{{ form.region.value|default:'' }}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Фото</label>
+                <input type="file" name="image" class="form-control">
+                {% if announcement.image %}
+                    <img src="{{ announcement.image.url }}" alt="зображення оголошення" class="img-thumbnail mt-2" style="max-width: 200px;">
+                {% endif %}
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success px-4">Зберегти</button>
+                <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="btn btn-secondary px-4">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

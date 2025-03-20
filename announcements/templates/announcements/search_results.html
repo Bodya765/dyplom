@@ -1,49 +1,55 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}Результати пошуку{% endblock %}
+{% block title %}Редагування профілю{% endblock %}
 
 {% block content %}
-<main>
-    <div class="container search-results">
-        <h1 class="search-title">Результати пошуку</h1>
+<div class="container">
+    <h2>Редагувати профіль</h2>
 
-        {% if results %}
-            <p class="results-count">Знайдено {{ results|length }} оголошень:</p>
-            <ul class="results-list">
-                {% for announcement in results %}
-                    <li class="result-item">
-                        <h2 class="result-title">
-                            <a href="{% url 'announcements:detail' announcement.id %}" class="result-link">
-                                {{ announcement.title }}
-                            </a>
-                        </h2>
-                        <p class="price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
-                        <p class="category">Категорія: {{ announcement.category.name }}</p>
-                        <p class="description">{{ announcement.description|truncatechars:100 }}</p>
-                    </li>
+    {% if form.errors %}
+        <div class="form-errors">
+            <p>Будь ласка, виправте помилки:</p>
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
             </ul>
+        </div>
+    {% endif %}
 
-            <div class="pagination">
-                {% if page_obj.has_previous %}
-                    <a href="?q={{ request.GET.q }}&page=1" class="pagination-link">Перша</a>
-                    <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}" class="pagination-link">Попередня</a>
-                {% endif %}
+    <form method="POST" enctype="multipart/form-data" class="profile-edit-form">
+        {% csrf_token %}
+        <div class="form-group {% if form.first_name.errors %}is-invalid{% endif %}">
+            <label for="id_first_name">Ім'я</label>
+            {{ form.first_name }}
+            {% for error in form.first_name.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+        </div>
 
-                <span class="current-page">
-                    Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}
-                </span>
+        <div class="form-group {% if form.profile_picture.errors %}is-invalid{% endif %}">
+            <label for="id_profile_picture">Фото профілю</label>
+            {{ form.profile_picture }}
+            {% for error in form.profile_picture.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+            {% endfor %}
+            <img id="profile-picture-preview" src="{{ form.profile_picture.value }}" alt="Profile Picture" style="max-width: 150px; margin-top: 10px;">
+        </div>
 
-                {% if page_obj.has_next %}
-                    <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}" class="pagination-link">Наступна</a>
-                    <a href="?q={{ request.GET.q }}&page={{ page_obj.paginator.num_pages }}" class="pagination-link">Остання</a>
-                {% endif %}
-            </div>
+        <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+        <a href="{% url 'announcements:profile' %}" class="btn btn-secondary" onclick="return confirm('Ви впевнені, що хочете скасувати зміни?')">Скасувати</a>
+    </form>
+</div>
 
-        {% else %}
-            <p class="no-results">Нічого не знайдено за запитом "<strong>{{ request.GET.q }}</strong>".</p>
-        {% endif %}
-    </div>
-</main>
+<script>
+    document.querySelector('input[name="profile_picture"]').addEventListener('change', function(event) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profile-picture-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    });
+</script>
 {% endblock %}

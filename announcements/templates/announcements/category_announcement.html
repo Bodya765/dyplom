@@ -19,11 +19,11 @@
                     </div>
                     <div class="announcement-details">
                         <h2 class="announcement-title">
-                            <a href="{% url 'announcement-detail' announcement.id %}" class="announcement-link">{{ announcement.title }}</a>
+                            <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-link">{{ announcement.title }}</a>
                         </h2>
                         <p class="announcement-price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
                         <p class="announcement-description">{{ announcement.description|truncatechars:100 }}</p>
-                        <p class="announcement-location">Місцезнаходження: {{ announcement.city }}, {{ announcement.region }}</p>
+                        <p class="announcement-location">Місцезнаходження: {{ announcement.location }}, {{ announcement.district }}</p> <!-- Fixed location -->
                     </div>
                 </li>
             {% endfor %}
@@ -44,7 +44,7 @@
             </ul>
         </nav>
     {% else %}
-        <p class="no-announcements">Немає оголошень у цій категорії.</p>
+        <p>Оголошення в цій категорії відсутні.</p> <!-- Optional message when no announcements are found -->
     {% endif %}
 </div>
 {% endblock %}

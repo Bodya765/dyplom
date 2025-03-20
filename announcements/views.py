@@ -1,107 +1,101 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import login, update_session_auth_hash
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.contrib.auth import login
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from rest_framework import viewsets
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse
+from unicodedata import category
+
 from .models import Announcement, Category, Location
 from .forms import AnnouncementForm, ProfileForm
 from .serializers import AnnouncementSerializer
-
 
 class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = Announcement.objects.select_related('category').prefetch_related('reviews').all()
     serializer_class = AnnouncementSerializer
 
-
 def paginate_queryset(queryset, request, per_page=10):
     paginator = Paginator(queryset, per_page)
     page_number = request.GET.get('page')
     try:
-        page_obj = paginator.get_page(page_number)
+        return paginator.get_page(page_number)
     except PageNotAnInteger:
-        page_obj = paginator.get_page(1)
+        return paginator.get_page(1)
     except EmptyPage:
-        page_obj = paginator.get_page(paginator.num_pages)
-    return page_obj
-
+        return paginator.get_page(paginator.num_pages)
 
 def profile(request):
     return render(request, 'profile.html')
-
 
 def home(request):
     announcements = Announcement.objects.select_related('category').all()
     page_obj = paginate_queryset(announcements, request)
     return render(request, 'announcements/home.html', {'announcements': page_obj})
 
-
 def announcement_detail(request, pk):
-    try:
-        announcement = Announcement.objects.prefetch_related('reviews').get(pk=pk)
-    except Announcement.DoesNotExist:
-        raise Http404("Оголошення не знайдено")
-
+    announcement = get_object_or_404(Announcement, pk=pk)
     reviews = announcement.reviews.all()
-    average_rating = announcement.average_rating() if callable(getattr(announcement, 'average_rating', None)) else None
-
+    average_rating = announcement.average_rating() if hasattr(announcement, 'average_rating') else None
     return render(request, 'announcements/announcement_detail.html', {
         'announcement': announcement,
         'reviews': reviews,
         'average_rating': average_rating,
     })
 
-
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            login(request, form.get_user())
-            return redirect('home')
+            user = form.get_user()
+            login(request, user)
+            return redirect('home')  # Redirect to some page after login
     else:
         form = AuthenticationForm()
     return render(request, 'announcements/login.html', {'form': form})
 
-
+@login_required(login_url='announcements:login')  # Redirects to the login page if the user is not authenticated
 def create_announcement(request):
     if request.method == 'POST':
         form = AnnouncementForm(request.POST, request.FILES)
         if form.is_valid():
             announcement = form.save(commit=False)
-            announcement.user = request.user
-            announcement.save()
-            return redirect('category_detail', slug=announcement.category.slug)
+            announcement.author = request.user  # Встановлюємо користувача
+            # announcement.location =
+            # announcement.save()
+            # Перенаправляємо на сторінку оголошень відповідної категорії
+            return redirect('announcements:category_announcements', slug=announcement.category.slug)
     else:
         form = AnnouncementForm()
 
     categories = Category.objects.all()
+    locations = Location.objects.all()
+
     return render(request, 'announcements/create_announcement.html', {
         'form': form,
         'categories': categories,
+        'locations': locations,
     })
 
 
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
     announcements = Announcement.objects.filter(category=category)
+    page_obj = paginate_queryset(announcements, request)
     return render(request, 'announcements/category_announcement.html', {
         'category': category,
-        'announcements': announcements,
+        'announcements': page_obj,
     })
-
 
 def about_us(request):
     return render(request, 'announcements/about_us.html')
 
-
 def terms(request):
     return render(request, 'announcements/terms.html')
 
-
 def privacy(request):
     return render(request, 'announcements/privacy.html')
-
 
 def signup_view(request):
     if request.method == 'POST':
@@ -114,7 +108,6 @@ def signup_view(request):
         form = UserCreationForm()
     return render(request, 'announcements/signup.html', {'form': form})
 
-
 def category_announcements(request, category_id):
     category = get_object_or_404(Category, id=category_id)
     announcements = Announcement.objects.filter(category=category)
@@ -125,9 +118,9 @@ def category_announcements(request, category_id):
     })
 
 
+
 def chat_view(request):
     return render(request, 'chat/room.html')
-
 
 def location_list(request):
     search_query = request.GET.get('search', '').strip()
@@ -143,7 +136,7 @@ def location_list(request):
     data = [{"name": loc.name, "district": loc.district} for loc in locations]
     return JsonResponse(data, safe=False)
 
-
+@login_required
 def profile_edit(request):
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=request.user)
@@ -153,5 +146,29 @@ def profile_edit(request):
             return redirect('profile_edit')
     else:
         form = ProfileForm(instance=request.user)
-
     return render(request, 'announcements/profile_edit.html', {'form': form})
+
+@login_required
+def edit_announcement(request, pk):
+    announcement = get_object_or_404(Announcement, pk=pk)
+
+    if request.user != announcement.owner:
+        return redirect('announcements:announcement-detail', pk=pk)
+
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST, request.FILES, instance=announcement)
+        if form.is_valid():
+            form.save()
+            return redirect('announcements:announcement-detail', pk=pk)
+    else:
+        form = AnnouncementForm(instance=announcement)
+
+    return render(request, 'announcements/edit_announcement.html', {'form': form, 'announcement': announcement})
+
+@login_required
+def delete_announcement(request, pk):
+    announcement = get_object_or_404(Announcement, pk=pk)
+    if request.user != announcement.owner:
+        return redirect('announcements:announcement-detail', pk=pk)
+    announcement.delete()
+    return redirect('announcements:announcement-list')
