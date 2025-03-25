@@ -71,9 +71,9 @@ class Announcement(models.Model):
                                  related_name="announcements")
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Автор")
     rating = models.FloatField(default=0, verbose_name="Рейтинг")
-    image = models.ImageField(upload_to='announcements/', blank=True, null=True)
+    image = models.ImageField(upload_to='announcement_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
-
+    updated_at = models.DateTimeField(auto_now=True)
     def save(self, *args, **kwargs):
         if not self.pk and not self.author:
             self.author = None  # Allow admin to manually set the author

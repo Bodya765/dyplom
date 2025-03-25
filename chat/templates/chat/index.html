@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мої чати</title>
+    <link rel="stylesheet" href="{% static 'chat/css/styles.css' %}">
+</head>
+<body>
+    <div class="chat-app">
+        <!-- Ліва панель (список чатів) -->
+        <div class="chat-sidebar">
+            <div class="sidebar-header">
+                <h1>Мої чати</h1>
+                <div class="user-controls">
+                    <span class="username">{{ request.user.username }}</span>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Пошук чату..." oninput="filterChatList(this.value)">
+            </div>
+
+            <div class="chat-list" id="chatList">
+                <div class="chat-list-loading">
+                    Завантаження чатів...
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-main empty-state">
+            <div class="empty-state-content">
+                <div class="empty-state-icon">💬</div>
+                <h2>Виберіть чат зі списку або почніть новий</h2>
+                <p>Натисніть на чат зліва, щоб почати спілкування</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const currentUserId = {{ user_id|default:request.user.id }};
+        document.addEventListener('DOMContentLoaded', function() {
+            connectToChatList();
+            loadChatList();
+            setInterval(loadChatList, 30000);
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

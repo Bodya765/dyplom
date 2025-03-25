@@ -9,28 +9,55 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <div class="container registration-container">
-        <h1 class="registration-title">Реєстрація</h1>
+    <div class="registration-wrapper">
+        <div class="registration-container">
+            <h1 class="registration-title">Реєстрація</h1>
 
-        {% if form.errors %}
-            <div class="form-errors">
-                <ul>
-                    {% for field in form %}
-                        {% for error in field.errors %}
-                            <li>{{ error }}</li>
+            {% if form.errors %}
+                <div class="form-errors">
+                    <p>Будь ласка, виправте помилки:</p>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
                         {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="registration-form">
+                {% csrf_token %}
+
+                <div class="form-group {% if form.username.errors %}is-invalid{% endif %}">
+                    <label for="id_username">Ім'я користувача</label>
+                    {{ form.username }}
+                    {% for error in form.username.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
                     {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+                </div>
 
-        <form method="post" enctype="multipart/form-data" class="registration-form">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Зареєструватися</button>
-        </form>
+                <div class="form-group {% if form.password1.errors %}is-invalid{% endif %}">
+                    <label for="id_password1">Пароль</label>
+                    {{ form.password1 }}
+                    {% for error in form.password1.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
 
-        <p class="login-prompt">Вже маєте обліковий запис? <a href="{% url 'announcements:login' %}" class="login-link">Увійти</a></p>
+                <div class="form-group {% if form.password2.errors %}is-invalid{% endif %}">
+                    <label for="id_password2">Підтвердьте пароль</label>
+                    {{ form.password2 }}
+                    {% for error in form.password2.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Зареєструватися</button>
+            </form>
+
+            <p class="login-prompt">Вже маєте обліковий запис? <a href="{% url 'announcements:login' %}" class="login-link">Увійти</a></p>
+        </div>
     </div>
 </body>
 </html>

@@ -7,11 +7,10 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from rest_framework import viewsets
 from django.http import JsonResponse
 from unicodedata import category
-
-from .models import Announcement, Category, Location
+from .models import Announcement, Category, Location,Review
 from .forms import AnnouncementForm, ProfileForm
 from .serializers import AnnouncementSerializer
-
+from django.http import HttpResponseRedirect
 class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = Announcement.objects.select_related('category').prefetch_related('reviews').all()
     serializer_class = AnnouncementSerializer
@@ -62,10 +61,9 @@ def create_announcement(request):
         if form.is_valid():
             announcement = form.save(commit=False)
             announcement.author = request.user  # Встановлюємо користувача
-            # announcement.location =
-            # announcement.save()
-            # Перенаправляємо на сторінку оголошень відповідної категорії
-            return redirect('announcements:category_announcements', slug=announcement.category.slug)
+            announcement.save()
+            return redirect('announcements:category_products', announcement.category.id)
+
     else:
         form = AnnouncementForm()
 
@@ -152,7 +150,7 @@ def profile_edit(request):
 def edit_announcement(request, pk):
     announcement = get_object_or_404(Announcement, pk=pk)
 
-    if request.user != announcement.owner:
+    if request.user != announcement.author:
         return redirect('announcements:announcement-detail', pk=pk)
 
     if request.method == 'POST':
@@ -165,10 +163,36 @@ def edit_announcement(request, pk):
 
     return render(request, 'announcements/edit_announcement.html', {'form': form, 'announcement': announcement})
 
-@login_required
+
 def delete_announcement(request, pk):
-    announcement = get_object_or_404(Announcement, pk=pk)
-    if request.user != announcement.owner:
-        return redirect('announcements:announcement-detail', pk=pk)
+    announcement = Announcement.objects.get(pk=pk)
+    category_id = announcement.category.id  # Зберігаємо ID категорії
+
     announcement.delete()
-    return redirect('announcements:announcement-list')
+
+    return redirect('announcements:category_products', category_id=category_id)
+def chat_view(request, other_user_id):
+    # Логіка чату
+    return render(request, 'chat/room.html')
+
+
+@login_required
+def add_review(request, announcement_id):
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        text = request.POST.get('text')
+
+        # Create a new review
+        review = Review.objects.create(
+            announcement=announcement,
+            rating=rating,
+            text=text,
+            user=request.user
+        )
+
+        # Redirect back to the announcement detail page
+        return redirect('announcement_detail', pk=announcement.id)
+
+    return redirect('announcement_detail', pk=announcement.id)

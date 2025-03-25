@@ -19,7 +19,7 @@
                     </div>
                     <div class="announcement-details">
                         <h2 class="announcement-title">
-                            <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-link">{{ announcement.title }}</a>
+                            <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-link">{{ announcement.title|escape }}</a>
                         </h2>
                         <p class="announcement-price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
                         <p class="announcement-description">{{ announcement.description|truncatechars:100 }}</p>

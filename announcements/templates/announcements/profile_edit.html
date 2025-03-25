@@ -3,10 +3,11 @@
 {% block title %}Редагування профілю{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Редагувати профіль</h2>
+<div class="profile-edit-container">
+    <div class="profile-edit-form">
+        <h2>Редагувати профіль</h2>
 
-    {% if form.errors %}
+        {% if form.errors %}
         <div class="form-errors">
             <p>Будь ласка, виправте помилки:</p>
             <ul>
@@ -17,13 +18,14 @@
                 {% endfor %}
             </ul>
         </div>
-    {% endif %}
+        {% endif %}
 
-    <form method="POST" enctype="multipart/form-data" class="profile-edit-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-        <a href="{% url 'announcements:profile' %}" class="btn btn-secondary">Скасувати</a>
-    </form>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+            <a href="{% url 'announcements:profile_edit' %}" class="btn btn-secondary">Скасувати</a>
+        </form>
+    </div>
 </div>
 {% endblock %}

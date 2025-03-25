@@ -7,75 +7,89 @@
 <main>
     <div class="detail-section">
         <h1 class="detail-header">{{ announcement.title }}</h1>
-        <p class="detail-desc">{{ announcement.description }}</p>
-        {% if announcement.price %}
-            <p class="detail-price">Ціна: {{ announcement.price }} грн</p>
-        {% else %}
-            <p class="detail-price">Ціна не вказана</p>
-        {% endif %}
-        <p class="detail-location">Місцезнаходження:
-            {% if announcement.city and announcement.region %}
-                {{ announcement.city }}, {{ announcement.region }}
-            {% else %}
-                невідомо
-            {% endif %}
-        </p>
-        <p class="detail-category">Категорія: {{ announcement.category.name }}</p>
-        <p class="detail-author">Автор:
-            {% if announcement.author %}
-                {{ announcement.author.username }}
-            {% else %}
-                Не вказано
-            {% endif %}
-        </p>
-        <p class="detail-created">Дата створення: {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
 
-        {% if average_rating %}
-            <p class="detail-rating">Середній рейтинг:
-                <span class="stars">{{ average_rating|floatformat:1 }} ★</span>
-            </p>
-        {% endif %}
+        <div class="announcement-content">
+            {% if announcement.image %}
+                <div class="announcement-image">
+                    <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="announcement-img">
+                </div>
+            {% endif %}
 
-        <div class="actions">
-            <a href="{% url 'announcements:edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
-            <form method="post" action="{% url 'announcements:delete_announcement' announcement.id %}" style="display: inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-delete" onclick="return confirm('Ви впевнені, що хочете видалити це оголошення?')">Видалити</button>
-            </form>
+            <div class="announcement-details">
+                <p class="detail-desc">{{ announcement.description }}</p>
+
+                {% if announcement.price %}
+                    <p class="detail-price">Ціна: {{ announcement.price }} грн</p>
+                {% else %}
+                    <p class="detail-price">Ціна не вказана</p>
+                {% endif %}
+
+                <p class="detail-location">Місцезнаходження:
+                    {% if announcement.location or announcement.district %}
+                        {{ announcement.location }}, {{ announcement.district }}
+                    {% else %}
+                        невідомо
+                    {% endif %}
+                </p>
+
+                <p class="detail-category">Категорія: {{ announcement.category.name }}</p>
+                <p class="detail-author">Автор: {{ announcement.author.username }}</p>
+                <p class="detail-created">Дата створення: {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+
+                {% if average_rating %}
+                    <p class="detail-rating">Середній рейтинг:
+                        <span class="stars">{{ average_rating|floatformat:1 }} ★</span>
+                    </p>
+                {% endif %}
+            </div>
         </div>
+
+        {% if user.is_authenticated and user == announcement.author %}
+            <div class="actions">
+                <a href="{% url 'announcements:edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
+                <form method="post" action="{% url 'announcements:delete_announcement' announcement.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-delete" onclick="return confirm('Ви впевнені, що хочете видалити це оголошення?')">Видалити</button>
+                </form>
+            </div>
+        {% endif %}
 
         <section class="reviews">
             <h2>Відгуки</h2>
-            {% for review in reviews %}
-                <div class="review">
-                    <p><strong>{{ review.user.username }}</strong></p>
-                    <p class="review-stars">{{ review.rating }} ★</p>
-                    <p>{{ review.text }}</p>
-                    <p><small>{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
-                </div>
-            {% empty %}
-                <p>Ще немає відгуків.</p>
-            {% endfor %}
+            <div id="reviews-container">
+                {% for review in reviews %}
+                    <div class="review">
+                        <p><strong>{{ review.user.username }}</strong></p>
+                        <p class="review-stars">{{ review.rating }} ★</p>
+                        <p>{{ review.text }}</p>
+                        <p><small>{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+                    </div>
+                {% empty %}
+                    <p>Ще немає відгуків.</p>
+                {% endfor %}
+            </div>
         </section>
 
-        <section class="review-form">
-            <h2 class="review-title">Додати відгук</h2>
-            <form method="post" action="{% url 'announcements:announcement-detail' announcement.id %}">
-                {% csrf_token %}
-                <label for="rating" class="rating-label">Оберіть рейтинг:</label>
-                <div class="rating">
-                    {% for i in "54321" %}
-                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
-                        <label for="star{{ i }}" title="{{ i }} зірок">★</label>
-                    {% endfor %}
-                </div>
+        {% if user.is_authenticated %}
+            <section class="review-form">
+                <h2 class="review-title">Додати відгук</h2>
+                <form method="post" action="{% url 'announcements:add_review' announcement.id %}">
+                    {% csrf_token %}
+                    <label for="rating" class="rating-label">Оберіть рейтинг:</label>
+                    <div class="rating">
+                        {% for i in "54321" %}
+                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" aria-label="Оцінка {{ i }} зірок" required>
+                            <label for="star{{ i }}" title="{{ i }} зірок" aria-hidden="true">★</label>
+                        {% endfor %}
+                    </div>
 
-                <label for="text" class="review-text-label">Ваш відгук:</label>
-                <textarea id="text" name="text" class="review-text" required></textarea>
+                    <label for="text" class="review-text-label">Ваш відгук:</label>
+                    <textarea id="text" name="text" class="review-text" required></textarea>
 
-                <button type="submit" class="btn btn-primary">Залишити відгук</button>
-            </form>
-        </section>
+                    <button type="submit" class="btn btn-primary">Залишити відгук</button>
+                </form>
+            </section>
+        {% endif %}
     </div>
 </main>
 {% endblock %}

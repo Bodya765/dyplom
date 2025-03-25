@@ -8,55 +8,58 @@
 
 <form method="POST" enctype="multipart/form-data" class="announcement-form">
     {% csrf_token %}
+    <div class="form-container">
+        <div class="form-column">
+            <div class="form-field">
+                <label for="{{ form.title.id_for_label }}" class="form-label">Назва:</label>
+                {{ form.title }}
+            </div>
 
-    <div class="form-field">
-        <label for="{{ form.title.id_for_label }}" class="form-label">Назва:</label>
-        {{ form.title }}
-    </div>
+            <div class="form-field">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Опис:</label>
+                {{ form.description }}
+            </div>
 
-    <div class="form-field">
-        <label for="{{ form.description.id_for_label }}" class="form-label">Опис:</label>
-        {{ form.description }}
-    </div>
+            <div class="form-field">
+                <label for="{{ form.price.id_for_label }}" class="form-label">Ціна:</label>
+                {{ form.price }}
+            </div>
+        </div>
 
-    <div class="form-field">
-        <label for="{{ form.price.id_for_label }}" class="form-label">Ціна:</label>
-        {{ form.price }}
-    </div>
+        <div class="form-column">
+            <div class="form-field">
+                <label for="{{ form.category.id_for_label }}" class="form-label">Категорія:</label>
+                {{ form.category }}
+            </div>
 
-    <div class="form-field">
-        <label for="{{ form.category.id_for_label }}" class="form-label">Категорія:</label>
-        {{ form.category }}
-    </div>
+            <div class="form-field" style="position: relative;">
+                <label for="location" class="form-label">Місцезнаходження:</label>
+                {{ form.location }}
+                <div id="location-suggestions" class="suggestions"></div>
+            </div>
 
-    <div class="form-field" style="position: relative;">
-        <label for="location" class="form-label">Місцезнаходження:</label>
-        <input type="text" id="location" name="location" class="form-control" placeholder="Введіть місто">
-        <div id="location-suggestions" class="suggestions"></div>
-    </div>
-
-    <div class="form-field">
-        <label for="{{ form.image.id_for_label }}" class="form-label">Зображення:</label>
-        {{ form.image }}
+            <div class="form-field">
+                <label for="{{ form.image.id_for_label }}" class="form-label">Зображення:</label>
+                {{ form.image }}
+            </div>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-primary">Створити оголошення</button>
 </form>
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const locationInput = document.getElementById("location");
         const suggestionsBox = document.getElementById("location-suggestions");
-        let isFetching = false; // Прапорець для запобігання одночасним запитам
+        let isFetching = false;
 
         function updateSuggestions(cities) {
-            console.log("Отримано міста:", cities);
-            suggestionsBox.innerHTML = ""; // Очищаємо перед додаванням
+            suggestionsBox.innerHTML = "";
             if (cities && cities.length > 0) {
-                const uniqueCities = new Set(); // Для уникнення дублікатів
+                const uniqueCities = new Set();
                 cities.forEach(city => {
                     const displayText = city.district ? `${city.name}, ${city.district}` : city.name;
-                    if (!uniqueCities.has(displayText)) { // Перевіряємо унікальність
+                    if (!uniqueCities.has(displayText)) {
                         uniqueCities.add(displayText);
                         const item = document.createElement("div");
                         item.classList.add("suggestion-item");
@@ -75,9 +78,8 @@
         }
 
         function fetchLocations(url) {
-            if (isFetching) return; // Уникаємо одночасних запитів
+            if (isFetching) return;
             isFetching = true;
-            console.log("Запит до:", url);
             fetch(url)
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -93,7 +95,6 @@
                 });
         }
 
-        // Пошук при введенні
         locationInput.addEventListener("input", function () {
             const query = locationInput.value.trim();
             if (query.length >= 2) {
@@ -103,19 +104,17 @@
             }
         });
 
-        // Відкриття списку при фокусі
         locationInput.addEventListener("focus", function () {
             const query = locationInput.value.trim();
             if (query.length >= 2) {
                 fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
-            } else if (!suggestionsBox.children.length) { // Завантажуємо лише якщо список порожній
+            } else if (!suggestionsBox.children.length) {
                 fetchLocations('/api/locations/?random=10');
             } else {
-                suggestionsBox.style.display = "block"; // Показуємо існуючий список
+                suggestionsBox.style.display = "block";
             }
         });
 
-        // Закриття при кліку поза списком
         document.addEventListener("click", function (e) {
             if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
                 suggestionsBox.style.display = "none";

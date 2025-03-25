@@ -1,0 +1,14 @@
+Pillow
+django
+dotenv
+environ
+django-environ
+daphne
+djangorestframework
+django-filter
+channels
+django-allauth
+social-auth-app-django
+mysqlclient
+clerk
+django-clerk

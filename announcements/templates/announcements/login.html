@@ -17,11 +17,6 @@
                 {{ form.as_p }}
                 <button type="submit" class="btn btn-primary">Увійти</button>
             </form>
-            <hr class="divider">
-            <p class="login-alt">Або увійдіть за допомогою Google:</p>
-            <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-login btn btn-google">
-                <i class="fab fa-google"></i> Увійти через Google
-            </a>
             <p class="signup-prompt">Не маєте облікового запису? <a href="{% url 'announcements:signup' %}" class="signup-link">Зареєструватися</a></p>
         </div>
     </div>

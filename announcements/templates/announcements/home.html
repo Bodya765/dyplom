@@ -8,80 +8,64 @@
     <div class="container">
         <h2 class="category-title">Категорії</h2>
         <div class="categories">
-            <div class="category-row">
+            <div class="category-row top-row">
                 <a href="{% url 'announcements:category_products' category_id=1 %}" class="category">
-                    <p class="category-name">Транспорт</p>
                     <img src="{% static 'images/transport.png' %}" alt="Транспорт" class="category-image">
+                    <p class="category-name">Транспорт</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=2 %}" class="category">
-                    <p class="category-name">Нерухомість</p>
                     <img src="{% static 'images/neruhomist.png' %}" alt="Нерухомість" class="category-image">
+                    <p class="category-name">Нерухомість</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=3 %}" class="category">
-                    <p class="category-name">Електроніка</p>
                     <img src="{% static 'images/electronic.png' %}" alt="Електроніка" class="category-image">
+                    <p class="category-name">Електроніка</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=4 %}" class="category">
-                    <p class="category-name">Одяг</p>
                     <img src="{% static 'images/odah.png' %}" alt="Одяг" class="category-image">
+                    <p class="category-name">Одяг</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=5 %}" class="category">
-                    <p class="category-name">Меблі</p>
                     <img src="{% static 'images/mebli.png' %}" alt="Меблі" class="category-image">
+                    <p class="category-name">Меблі</p>
                 </a>
             </div>
-            <div class="category-row">
+            <div class="category-row bottom-row">
                 <a href="{% url 'announcements:category_products' category_id=6 %}" class="category">
-                    <p class="category-name">Книги</p>
                     <img src="{% static 'images/book.png' %}" alt="Книги" class="category-image">
+                    <p class="category-name">Книги</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=7 %}" class="category">
-                    <p class="category-name">Віддам безкоштовно</p>
                     <img src="{% static 'images/free.png' %}" alt="Безкоштовно" class="category-image">
+                    <p class="category-name">Віддам безкоштовно</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=8 %}" class="category">
-                    <p class="category-name">Товари для геймерів</p>
                     <img src="{% static 'images/gamer.png' %}" alt="Товари для геймерів" class="category-image">
+                    <p class="category-name">Товари для геймерів</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=9 %}" class="category">
-                    <p class="category-name">Спорт і хобі</p>
                     <img src="{% static 'images/sport.png' %}" alt="Спорт і хобі" class="category-image">
+                    <p class="category-name">Спорт і хобі</p>
                 </a>
                 <a href="{% url 'announcements:category_products' category_id=10 %}" class="category">
-                    <p class="category-name">Тварини</p>
                     <img src="{% static 'images/animals.png' %}" alt="Тварини" class="category-image">
+                    <p class="category-name">Тварини</p>
                 </a>
             </div>
         </div>
 
-        <div class="suggestions-and-recent">
-            <h3 class="suggestions-title">Пропозиції для вас</h3>
-            <div class="suggestions">
-                {% for similar in similar_announcements %}
-                    <div class="suggestion">
-                        <img src="{{ similar.image.url }}" alt="{{ similar.title }}" class="suggestion-image">
-                        <p class="suggestion-title">{{ similar.title }}</p>
-                        <p class="suggestion-price">{{ similar.price }} грн</p>
-                        <a href="{% url 'announcements:announcement_detail' similar.id %}" class="suggestion-link">Детальніше</a>
-                    </div>
-                {% empty %}
-                    <p class="no-suggestions">Немає пропозицій для вас.</p>
-                {% endfor %}
-            </div>
-
-            <h3 class="recent-title">Останні переглянуті оголошення</h3>
-            <div class="recent-announcements">
-                {% for recent in recent_announcements %}
-                    <div class="announcement">
-                        <img src="{{ recent.image.url }}" alt="{{ recent.title }}" class="announcement-image">
-                        <p class="announcement-title">{{ recent.title }}</p>
-                        <p class="announcement-price">{{ recent.price }} грн</p>
-                        <a href="{% url 'announcements:announcement_detail' recent.id %}" class="announcement-link">Детальніше</a>
-                    </div>
-                {% empty %}
-                    <p class="no-announcements">Ви ще не переглядали оголошення.</p>
-                {% endfor %}
-            </div>
+        <h3 class="recent-title">Останні переглянуті оголошення</h3>
+        <div class="recent-announcements">
+            {% for recent in recent_announcements %}
+                <div class="announcement">
+                    <img src="{{ recent.image.url }}" alt="{{ recent.title }}" class="announcement-image">
+                    <p class="announcement-title">{{ recent.title }}</p>
+                    <p class="announcement-price">{{ recent.price }} грн</p>
+                    <a href="{% url 'announcements:announcement_detail' recent.id %}" class="announcement-link">Детальніше</a>
+                </div>
+            {% empty %}
+                <p class="no-announcements">Ви ще не переглядали оголошення.</p>
+            {% endfor %}
         </div>
     </div>
 </main>

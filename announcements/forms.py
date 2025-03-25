@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 
 
 class CustomSignupForm(SignupForm):
-    first_name = forms.CharField(max_length=30, label='Імʼя', widget=forms.TextInput(attrs={'placeholder': 'Введіть ваше імʼя', 'aria-label': 'Ваше імʼя'}))
+    first_name = forms.CharField(max_length=30, label='Імʼя', widget=forms.TextInput(
+        attrs={'placeholder': 'Введіть ваше імʼя', 'aria-label': 'Ваше імʼя'}))
 
     def clean_first_name(self):
         first_name = self.cleaned_data.get('first_name')
@@ -40,6 +41,17 @@ class ReviewForm(forms.ModelForm):
 
 
 class AnnouncementForm(forms.ModelForm):
+    location = forms.CharField(
+        max_length=255,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'aria-label': 'Місцезнаходження',
+            'class': 'form-control',
+            'id': 'location',
+            'placeholder': 'Введіть місто'
+        })
+    )
+
     class Meta:
         model = Announcement
         fields = ['title', 'description', 'price', 'location', 'category', 'image']
@@ -48,15 +60,16 @@ class AnnouncementForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Опис оголошення', 'aria-label': 'Опис'}),
             'price': forms.NumberInput(attrs={'placeholder': 'Вкажіть ціну', 'aria-label': 'Ціна'}),
             'category': forms.Select(attrs={'aria-label': 'Категорія'}),
-            'image': forms.ClearableFileInput(attrs={'aria-label': 'Зображення оголошення'})
+            'image': forms.ClearableFileInput(attrs={'aria-label': 'Зображення оголошення'}),
         }
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.fields['category'].queryset = Category.objects.all()
-    #     self.fields['location'] = forms.ModelChoiceField(queryset=Location.objects.all(),
-    #                                                      empty_label="Виберіть місто",
-    #                                                      widget=forms.Select(attrs={'aria-label': 'Місто'}))
+    def clean_location(self):
+        location_name = self.cleaned_data.get('location')
+        if not location_name:
+            raise forms.ValidationError("Місцезнаходження не може бути порожнім.")
+
+        location, created = Location.objects.get_or_create(name=location_name)
+        return location
 
     def clean_image(self):
         image = self.cleaned_data.get('image')
@@ -70,15 +83,10 @@ class AnnouncementForm(forms.ModelForm):
             raise forms.ValidationError("Ціна має бути більшою за 0.")
         return price
 
-    def clean_location(self):
-        location = self.cleaned_data.get('location')
-        print(location)
-        return location
-
 
 class ProfileForm(UserChangeForm):
-    password = forms.CharField(widget=forms.PasswordInput(), required=False)  # Password is optional
-    profile_picture = forms.ImageField(required=False)  # Field for uploading profile photo
+    password = forms.CharField(widget=forms.PasswordInput(), required=False)
+    profile_picture = forms.ImageField(required=False)
 
     class Meta:
         model = User

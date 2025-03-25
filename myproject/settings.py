@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'social_django',
 
 ]
 
@@ -175,4 +174,5 @@ CHANNEL_LAYERS = {
 }
 
 AUTH_PASSWORD_VALIDATORS = []
-
+MEDIA_URL = '/media/'  # URL для доступу до медіа файлів
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
