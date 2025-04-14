@@ -4,47 +4,65 @@
 {% block title %}Категорія: {{ category.name }}{% endblock %}
 
 {% block content %}
-<div class="category-container">
-    <header class="category-header">
-        <h1 class="category-title">{{ category.name }}</h1>
-        <p class="category-description">{{ category.description }}</p>
-    </header>
+<main class="category-page">
+    <div class="category-container">
+        <header class="category-header">
+            <h1 class="category-title">{{ category.name }}</h1>
+            <p class="category-description">{{ category.description }}</p>
+        </header>
 
-    {% if announcements %}
-        <ul class="announcement-list">
-            {% for announcement in announcements %}
-                <li class="announcement-item">
-                    <div class="announcement-thumbnail">
-                        <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'default-image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-image">
-                    </div>
-                    <div class="announcement-details">
-                        <h2 class="announcement-title">
-                            <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-link">{{ announcement.title|escape }}</a>
-                        </h2>
-                        <p class="announcement-price">Ціна: <strong>{{ announcement.price }} грн</strong></p>
-                        <p class="announcement-description">{{ announcement.description|truncatechars:100 }}</p>
-                        <p class="announcement-location">Місцезнаходження: {{ announcement.location }}, {{ announcement.district }}</p> <!-- Fixed location -->
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
+        {% if announcements %}
+            <div class="announcement-grid">
+                {% for announcement in announcements %}
+                    <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-card">
+                        <div class="announcement-image-wrapper">
+                            <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'default-image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-image">
+                        </div>
+                        <div class="announcement-info">
+                            <h2 class="announcement-title">{{ announcement.title|escape }}</h2>
+                            <p class="announcement-price">
+                                {% if announcement.price %}
+                                    {{ announcement.price }} грн
+                                {% else %}
+                                    Не вказано
+                                {% endif %}
+                            </p>
+                            <p class="announcement-description">
+                                {% if announcement.description %}
+                                    {{ announcement.description|truncatechars:80 }}
+                                {% else %}
+                                    Опис відсутній
+                                {% endif %}
+                            </p>
+                            <p class="announcement-location">
+                                {% if announcement.location %}
+                                    {{ announcement.location }}{% if announcement.district %}, {{ announcement.district }}{% endif %}
+                                {% else %}
+                                    Невідомо
+                                {% endif %}
+                            </p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
 
-        <!-- Пагінація -->
-        <nav class="pagination-nav">
-            <ul class="pagination-list">
-                {% if announcements.has_previous %}
-                    <li><a href="?page=1" class="pagination-link first-page">&laquo; Перша</a></li>
-                    <li><a href="?page={{ announcements.previous_page_number }}" class="pagination-link prev-page">Попередня</a></li>
-                {% endif %}
-                <li><span class="current-page">Сторінка {{ announcements.number }} із {{ announcements.paginator.num_pages }}</span></li>
-                {% if announcements.has_next %}
-                    <li><a href="?page={{ announcements.next_page_number }}" class="pagination-link next-page">Наступна</a></li>
-                    <li><a href="?page={{ announcements.paginator.num_pages }}" class="pagination-link last-page">Остання &raquo;</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-    {% else %}
-        <p>Оголошення в цій категорії відсутні.</p> <!-- Optional message when no announcements are found -->
-    {% endif %}
-</div>
+            <!-- Пагінація -->
+            <nav class="pagination" role="navigation" aria-label="Пагінація">
+                <ul class="pagination-list">
+                    {% if announcements.has_previous %}
+                        <li><a href="?page=1" class="pagination-link" aria-label="Перша сторінка">«</a></li>
+                        <li><a href="?page={{ announcements.previous_page_number }}" class="pagination-link" aria-label="Попередня сторінка">‹</a></li>
+                    {% endif %}
+                    <li><span class="pagination-current">Сторінка {{ announcements.number }} із {{ announcements.paginator.num_pages }}</span></li>
+                    {% if announcements.has_next %}
+                        <li><a href="?page={{ announcements.next_page_number }}" class="pagination-link" aria-label="Наступна сторінка">›</a></li>
+                        <li><a href="?page={{ announcements.paginator.num_pages }}" class="pagination-link" aria-label="Остання сторінка">»</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <p class="no-announcements">Оголошення в цій категорії відсутні.</p>
+        {% endif %}
+    </div>
+</main>
 {% endblock %}

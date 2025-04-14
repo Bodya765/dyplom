@@ -1,11 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/search.css' %}">
+{% endblock %}
+
 {% block title %}VseOgolosha{% endblock %}
 
 {% block content %}
 <main class="main-content">
     <div class="container">
+        <!-- Додаємо поле пошуку з автодоповненням -->
+        <div class="search-container">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Введіть запит, наприклад: Продам будинок..." autocomplete="off">
+                <button id="search-button">Шукати</button>
+                <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
+            </div>
+        </div>
+
         <h2 class="category-title">Категорії</h2>
         <div class="categories">
             <div class="category-row top-row">
@@ -69,4 +82,81 @@
         </div>
     </div>
 </main>
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("search-input");
+        const suggestionsContainer = document.getElementById("autocomplete-suggestions");
+        const searchButton = document.getElementById("search-button");
+
+        // Обробка автодоповнення
+        searchInput.addEventListener("input", function () {
+            const query = this.value.trim();
+            if (query.length < 2) {
+                suggestionsContainer.style.display = "none";
+                suggestionsContainer.innerHTML = "";
+                return;
+            }
+
+            console.log("Запит автодоповнення для:", query);  // Дебагінг
+            fetch(`/api/api/announcement/autocomplete/?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    console.log("Статус відповіді:", response.status);  // Дебагінг
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Дані автодоповнення:", data);  // Дебагінг
+                    suggestionsContainer.innerHTML = "";
+                    if (data.length > 0) {
+                        data.forEach(suggestion => {
+                            const div = document.createElement("div");
+                            div.classList.add("autocomplete-suggestion");
+                            div.textContent = suggestion;
+                            div.addEventListener("click", () => {
+                                searchInput.value = suggestion;
+                                suggestionsContainer.style.display = "none";
+                                searchButton.click();
+                            });
+                            suggestionsContainer.appendChild(div);
+                        });
+                        suggestionsContainer.style.display = "block";
+                    } else {
+                        suggestionsContainer.style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    console.error("Помилка автодоповнення:", error);
+                    suggestionsContainer.style.display = "none";
+                });
+        });
+
+        // Приховати автодоповнення при кліку поза полем
+        document.addEventListener("click", (e) => {
+            if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
+                suggestionsContainer.style.display = "none";
+            }
+        });
+
+        // Обробка пошуку
+        searchButton.addEventListener("click", () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                console.log("Перенаправлення на пошук:", query);  // Дебагінг
+                window.location.href = `/api/search_results/?search=${encodeURIComponent(query)}`;
+            }
+        });
+
+        // Пошук при натисканні Enter
+        searchInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                searchButton.click();
+            }
+        });
+    });
+</script>
+{% endblock %}
 {% endblock %}

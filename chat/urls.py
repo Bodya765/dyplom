@@ -1,13 +1,17 @@
+# chat/urls.py
 from django.urls import path
 from . import views
 
-urlpatterns = [
-    path('', views.index, name='index'),
-    path('room/<int:room_id>/', views.room, name='room'),
-    path('start_chat/<int:user_id>/', views.start_chat, name='start_chat'),
+app_name = 'chat'
 
-    # API endpoints
-    path('api/chat_rooms/', views.chat_rooms, name='chat_rooms'),
-    path('api/messages/<int:room_id>/', views.get_messages, name='get_messages'),
-    path('api/mark_read/<int:room_id>/', views.mark_messages_as_read, name='mark_messages_as_read'),
+urlpatterns = [
+    path('announcement/<int:announcement_id>/start-chat/', views.start_chat, name='start_chat'),
+
+    path('chat/<int:pk>/', views.chat_detail, name='chat_detail'),
+
+    path('chats/', views.chat_list, name='chat_list'),
+
+    path('unread-messages-count/', views.unread_messages_count, name='unread_messages_count'),
+
+    path('send_message/', views.send_message, name='send_message'),
 ]

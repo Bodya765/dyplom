@@ -4,92 +4,327 @@
 {% block title %}{{ announcement.title }}{% endblock %}
 
 {% block content %}
-<main>
-    <div class="detail-section">
-        <h1 class="detail-header">{{ announcement.title }}</h1>
-
-        <div class="announcement-content">
-            {% if announcement.image %}
-                <div class="announcement-image">
-                    <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="announcement-img">
-                </div>
-            {% endif %}
-
-            <div class="announcement-details">
-                <p class="detail-desc">{{ announcement.description }}</p>
-
-                {% if announcement.price %}
-                    <p class="detail-price">Ціна: {{ announcement.price }} грн</p>
-                {% else %}
-                    <p class="detail-price">Ціна не вказана</p>
-                {% endif %}
-
-                <p class="detail-location">Місцезнаходження:
-                    {% if announcement.location or announcement.district %}
-                        {{ announcement.location }}, {{ announcement.district }}
-                    {% else %}
-                        невідомо
+<main class="announcement-detail-page">
+    <div class="announcement-detail-container">
+        <div class="announcement-main">
+            <!-- Основний вміст -->
+            <div class="announcement-content">
+                <div class="left-column">
+                    {% if announcement.image %}
+                        <div class="announcement-image-d">
+                            <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="announcement-img">
+                        </div>
                     {% endif %}
-                </p>
+                    <span class="detail-desc"><span>Опис:</span>{{ announcement.description }}</span>
+                </div>
 
-                <p class="detail-category">Категорія: {{ announcement.category.name }}</p>
-                <p class="detail-author">Автор: {{ announcement.author.username }}</p>
-                <p class="detail-created">Дата створення: {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
-
-                {% if average_rating %}
-                    <p class="detail-rating">Середній рейтинг:
-                        <span class="stars">{{ average_rating|floatformat:1 }} ★</span>
+                <div class="right-column">
+                    <span class="detail-header">{{ announcement.title }}</span>
+                    <p class="detail-price">
+                        {% if announcement.price %}
+                            {{ announcement.price }} грн
+                        {% else %}
+                            Ціна не вказана
+                        {% endif %}
                     </p>
-                {% endif %}
-            </div>
-        </div>
-
-        {% if user.is_authenticated and user == announcement.author %}
-            <div class="actions">
-                <a href="{% url 'announcements:edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
-                <form method="post" action="{% url 'announcements:delete_announcement' announcement.id %}" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-delete" onclick="return confirm('Ви впевнені, що хочете видалити це оголошення?')">Видалити</button>
-                </form>
-            </div>
-        {% endif %}
-
-        <section class="reviews">
-            <h2>Відгуки</h2>
-            <div id="reviews-container">
-                {% for review in reviews %}
-                    <div class="review">
-                        <p><strong>{{ review.user.username }}</strong></p>
-                        <p class="review-stars">{{ review.rating }} ★</p>
-                        <p>{{ review.text }}</p>
-                        <p><small>{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+                    <div class="detail-author">
+                        <span class="author-name"><span>Автор:</span> {{ announcement.author.username }}</span>
+                        <span class="author-date">
+                            <span>Створено:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}
+                        </span>
+                        {% if announcement.updated_at != announcement.created_at %}
+                            <span class="author-date-updated">
+                                <span>Оновлено:</span> {{ announcement.updated_at|date:"d.m.Y H:i" }}
+                            </span>
+                        {% endif %}
                     </div>
-                {% empty %}
-                    <p>Ще немає відгуків.</p>
-                {% endfor %}
-            </div>
-        </section>
-
-        {% if user.is_authenticated %}
-            <section class="review-form">
-                <h2 class="review-title">Додати відгук</h2>
-                <form method="post" action="{% url 'announcements:add_review' announcement.id %}">
-                    {% csrf_token %}
-                    <label for="rating" class="rating-label">Оберіть рейтинг:</label>
-                    <div class="rating">
-                        {% for i in "54321" %}
-                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" aria-label="Оцінка {{ i }} зірок" required>
-                            <label for="star{{ i }}" title="{{ i }} зірок" aria-hidden="true">★</label>
-                        {% endfor %}
+                    <div class="location-map">
+                        <p class="detail-location">
+                            <span>Місцезнаходження:</span>
+                            {{ announcement.location|default:"Невідомо" }}{% if announcement.district %}, {{ announcement.district }}{% endif %}
+                        </p>
+                        <div id="map" class="map-container"></div>
                     </div>
+                    {% if user.is_authenticated and user != announcement.author %}
+                        <div class="chat-action">
+                            <a href="{% url 'chat:start_chat' announcement.id %}" class="btn btn-primary">Зв’язатися з продавцем</a>
+                        </div>
+                    {% endif %}
+                    {% if user.is_authenticated and user == announcement.author %}
+                        <div class="actions">
+                            <div class="menu">
+                                <button class="menu-button" aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div class="menu-dropdown">
+                                    <a href="{% url 'announcements:edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
+                                    <button id="open-delete-modal" class="btn btn-delete">Видалити оголошення</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
 
-                    <label for="text" class="review-text-label">Ваш відгук:</label>
-                    <textarea id="text" name="text" class="review-text" required></textarea>
-
-                    <button type="submit" class="btn btn-primary">Залишити відгук</button>
-                </form>
+            <!-- Відгуки -->
+            <section class="reviews">
+                <h2 class="reviews-title">Відгуки</h2>
+                <div id="reviews-container">
+                    {% for review in reviews %}
+                        <div class="review">
+                            <p class="review-user"><strong>{{ review.user.username }}</strong></p>
+                            <p class="review-stars">{{ review.rating }} ★</p>
+                            <p class="review-text">{{ review.text }}</p>
+                            <p class="review-date"><small>{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+                        </div>
+                    {% empty %}
+                        <p class="no-reviews">Ще немає відгуків.</p>
+                    {% endfor %}
+                </div>
             </section>
-        {% endif %}
+
+            <!-- Форма відгуку -->
+            {% if user.is_authenticated %}
+                <section class="review-form">
+                    <h2 class="review-title">Додати відгук</h2>
+                    <form method="post" action="{% url 'announcements:add_review' announcement.id %}">
+                        {% csrf_token %}
+                        <label for="rating" class="rating-label">Рейтинг:</label>
+                        <div class="star-rating">
+                            <input type="hidden" name="rating" id="rating-value" value="0" required>
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <label for="text" class="review-text-label">Відгук:</label>
+                        <textarea id="text" name="text" class="review-text" required></textarea>
+                        <button type="submit" class="btn btn-primary">Залишити відгук</button>
+                    </form>
+                </section>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Модальне вікно для карти -->
+    <div id="map-modal" class="map-modal">
+        <div class="map-modal-content">
+            <button class="map-close-btn" aria-label="Закрити карту">✔</button>
+            <div id="map-expanded" class="map-expanded"></div>
+        </div>
+    </div>
+
+    <!-- Модальне вікно для підтвердження видалення -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <span class="btn-cancel" id="close-modal">✖</span>
+            <h3>Підтвердження видалення</h3>
+            <p>Ви дійсно хочете видалити це оголошення?</p>
+            <button id="confirm-delete-btn" class="btn btn-danger" data-delete-url="{% url 'announcements:delete_announcement' announcement.id %}">Підтвердити видалення</button>
+        </div>
     </div>
 </main>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const location = "{{ announcement.location|escapejs }}";
+        const district = "{{ announcement.district|escapejs }}";
+        let lat, lon, smallMap, expandedMap;
+
+        function getCsrfToken() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (!token) {
+                console.error('CSRF-токен не знайдено');
+                return '';
+            }
+            return token.value;
+        }
+
+        function initMap(containerId, height, zoom) {
+            if (location) {
+                const searchQuery = district ? `${location}, ${district}, Україна` : `${location}, Україна`;
+                console.log("Шукаємо місце:", searchQuery);
+
+                const cachedCoords = localStorage.getItem(`coords_${searchQuery}`);
+                if (cachedCoords) {
+                    const { lat, lon } = JSON.parse(cachedCoords);
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        console.log("Використовуємо кешовані координати:", lat, lon);
+                        const map = L.map(containerId, {
+                            zoomControl: false
+                        }).setView([lat, lon], zoom);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        }).addTo(map);
+                        L.marker([lat, lon]).addTo(map)
+                            .bindPopup("{{ announcement.location|escapejs }}").openPopup();
+                        return map;
+                    }
+                }
+
+                const apiKey = "7d958339ccd968afdbacf3e6ef50174a";
+                const geocodeUrl = `http://api.positionstack.com/v1/forward?access_key=${apiKey}&query=${encodeURIComponent(searchQuery)}&country=UA&limit=1`;
+                return fetch(geocodeUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Результат від PositionStack:", data);
+                        if (data.data && data.data.length > 0) {
+                            lat = parseFloat(data.data[0].latitude);
+                            lon = parseFloat(data.data[0].longitude);
+                            if (!isNaN(lat) && !isNaN(lon)) {
+                                localStorage.setItem(`coords_${searchQuery}`, JSON.stringify({ lat, lon }));
+                                const map = L.map(containerId, {
+                                    zoomControl: false
+                                }).setView([lat, lon], zoom);
+                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                }).addTo(map);
+                                L.marker([lat, lon]).addTo(map)
+                                    .bindPopup("{{ announcement.location|escapejs }}").openPopup();
+                                return map;
+                            }
+                        }
+
+                        if (district) {
+                            const fallbackQuery = `${district}, Україна`;
+                            console.log("Спроба другого запиту (лише область):", fallbackQuery);
+                            const fallbackUrl = `http://api.positionstack.com/v1/forward?access_key=${apiKey}&query=${encodeURIComponent(fallbackQuery)}&country=UA&limit=1`;
+                            return fetch(fallbackUrl)
+                                .then(response => response.json())
+                                .then(fallbackData => {
+                                    console.log("Результат від PositionStack (другий запит):", fallbackData);
+                                    if (fallbackData.data && fallbackData.data.length > 0) {
+                                        lat = parseFloat(fallbackData.data[0].latitude);
+                                        lon = parseFloat(fallbackData.data[0].longitude);
+                                        if (!isNaN(lat) && !isNaN(lon)) {
+                                            localStorage.setItem(`coords_${searchQuery}`, JSON.stringify({ lat, lon }));
+                                            const map = L.map(containerId, {
+                                                zoomControl: false
+                                            }).setView([lat, lon], zoom);
+                                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                            }).addTo(map);
+                                            L.marker([lat, lon]).addTo(map)
+                                                .bindPopup("{{ announcement.location|escapejs }}").openPopup();
+                                            return map;
+                                        }
+                                    }
+                                    document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не знайдено</p>';
+                                });
+                        } else {
+                            document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не знайдено</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Помилка запиту до PositionStack:", error);
+                        document.getElementById(containerId).innerHTML = '<p>Помилка завантаження карти</p>';
+                    });
+            } else {
+                document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не вказано</p>';
+            }
+        }
+
+        smallMap = initMap('map', 150, 14);
+
+        const mapContainer = document.getElementById('map');
+        const modal = document.getElementById('map-modal');
+        const closeBtn = document.querySelector('.map-close-btn');
+        mapContainer.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            if (!expandedMap) {
+                expandedMap = initMap('map-expanded', 500, 13);
+            }
+        });
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                modal.style.display = 'none';
+            }
+        });
+
+        const stars = document.querySelectorAll(".star");
+        const ratingInput = document.getElementById("rating-value");
+        stars.forEach(star => {
+            star.addEventListener("click", function () {
+                const value = this.getAttribute("data-value");
+                ratingInput.value = value;
+                stars.forEach(s => {
+                    s.classList.toggle("selected", s.getAttribute("data-value") <= value);
+                });
+            });
+        });
+
+        const menuButton = document.querySelector(".menu-button");
+        const menuDropdown = document.querySelector(".menu-dropdown");
+        if (menuButton) {
+            menuButton.addEventListener("click", () => {
+                const expanded = menuButton.getAttribute("aria-expanded") === "true";
+                menuButton.setAttribute("aria-expanded", !expanded);
+                menuDropdown.style.display = expanded ? "none" : "block";
+            });
+            document.addEventListener("click", (e) => {
+                if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
+                    menuDropdown.style.display = "none";
+                    menuButton.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+
+        // Обробка видалення оголошення
+        const openDeleteModalButton = document.getElementById("open-delete-modal");
+        const deleteModal = document.getElementById("delete-modal");
+        const closeModalButton = document.getElementById("close-modal");
+        const confirmDeleteButton = document.getElementById("confirm-delete-btn");
+
+        openDeleteModalButton.addEventListener("click", () => {
+            deleteModal.style.display = "block";
+        });
+
+        closeModalButton.addEventListener("click", () => {
+            deleteModal.style.display = "none";
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!deleteModal.contains(e.target) && !openDeleteModalButton.contains(e.target)) {
+                deleteModal.style.display = "none";
+            }
+        });
+
+        confirmDeleteButton.addEventListener("click", () => {
+            const deleteUrl = confirmDeleteButton.getAttribute("data-delete-url");
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = '/'; // Перенаправлення на головну сторінку
+                } else {
+                    alert('Помилка при видаленні оголошення: ' + (data.error || 'Невідома помилка'));
+                }
+            })
+            .catch(error => {
+                console.error('Помилка:', error);
+                alert('Помилка при видаленні оголошення');
+            });
+        });
+
+        function getCsrfToken() {
+            const token = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (!token) {
+                console.error('CSRF-токен не знайдено');
+                return '';
+            }
+            return token.value;
+        }
+    });
+</script>
 {% endblock %}

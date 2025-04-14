@@ -31,23 +31,6 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         ]
 
     def validate_price(self, value):
-        if value is not None and value < 0:
+        if value < 0:
             raise serializers.ValidationError("Ціна не може бути від'ємною.")
         return value
-
-    def create(self, validated_data):
-        category = validated_data.pop('category', None)
-        announcement = Announcement.objects.create(**validated_data)
-        if category:
-            announcement.category = category
-            announcement.save()
-        return announcement
-
-    def update(self, instance, validated_data):
-        category = validated_data.pop('category', None)
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        if category:
-            instance.category = category
-        instance.save()
-        return instance

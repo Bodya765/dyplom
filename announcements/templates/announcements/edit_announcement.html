@@ -1,78 +1,264 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Редагування оголошення{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Редагування оголошення</h2>
+<div class="announcement-edit-container">
+    <h2 class="edit-title">Редагування оголошення</h2>
 
-    <!-- Основний контейнер для форми -->
-    <div class="form-container card shadow-sm p-4">
+    <!-- Спеціальний контейнер для форми -->
+    <div class="form-container">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <!-- Контейнер для заголовка -->
-            <div class="form-group mb-4">
+            <div class="form-group">
                 <label class="form-label">Заголовок</label>
                 <input type="text" name="title" value="{{ form.title.value|default:'' }}" class="form-control" required>
             </div>
 
             <!-- Контейнер для опису -->
-            <div class="form-group mb-4">
+            <div class="form-group">
                 <label class="form-label">Опис</label>
                 <textarea name="description" rows="5" class="form-control" required>{{ form.description.value|default:'' }}</textarea>
             </div>
 
             <!-- Контейнер для ціни -->
-            <div class="form-group mb-4">
+            <div class="form-group">
                 <label class="form-label">Ціна</label>
                 <input type="number" name="price" value="{{ form.price.value|default:'' }}" class="form-control" required>
             </div>
 
             <!-- Контейнер для місцезнаходження -->
-            <div class="form-group mb-4">
+            <div class="form-group location-field">
                 <label class="form-label">Місцезнаходження</label>
                 <input type="text" id="location" name="city" value="{{ form.city.value|default:'' }}" class="form-control" placeholder="Введіть місто" autocomplete="off" required>
-                <div id="location-suggestions" class="suggestions-box" style="display:none;"></div>
+                <div id="location-suggestions" class="suggestions-box"></div>
             </div>
 
             <!-- Контейнер для фото -->
-            <div class="form-group mb-4">
+            <div class="form-group">
                 <label class="form-label">Фото</label>
-                <input type="file" name="image" class="form-control">
+                <div class="custom-file-upload">
+                    <input type="file" name="image" id="id_image" class="form-control">
+                    <span class="custom-file-label">Вибрати фото</span>
+                </div>
                 {% if announcement.image %}
-                    <img src="{{ announcement.image.url }}" alt="зображення оголошення" class="img-thumbnail mt-2" style="max-width: 200px;">
+                    <img src="{{ announcement.image.url }}" alt="зображення оголошення" class="img-thumbnail" style="max-width: 200px;">
                 {% endif %}
             </div>
 
             <!-- Кнопки -->
-            <div class="text-center">
-                <button type="submit" class="btn btn-success px-4">Зберегти</button>
-                <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="btn btn-secondary px-4">Скасувати</a>
+            <div class="button-group">
+                <button type="submit" class="btn btn-success">Зберегти</button>
+                <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="btn btn-secondary">Скасувати</a>
             </div>
         </form>
     </div>
 </div>
-{% endblock %}
 
 <style>
-    /* Style for the suggestions box */
+    .announcement-edit-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .edit-title {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-container {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+    .location-field {
+        position: relative;
+    }
+
     .suggestions-box {
         border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
         background-color: white;
         position: absolute;
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
         z-index: 1000;
+        width: calc(100% - 2px);
+        display: none;
     }
 
     .suggestion-item {
-        padding: 10px;
+        padding: 8px;
         cursor: pointer;
     }
 
     .suggestion-item:hover {
         background-color: #f0f0f0;
     }
+
+    .custom-file-upload {
+        position: relative;
+    }
+
+    .custom-file-label {
+        display: inline-block;
+        padding: 8px 12px;
+        background-color: #007bff;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .img-thumbnail {
+        margin-top: 10px;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
 </style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Логіка автодоповнення для поля location
+        const locationInput = document.getElementById("location");
+        const suggestionsBox = document.getElementById("location-suggestions");
+        let isFetching = false;
+
+        function updateSuggestions(cities) {
+            suggestionsBox.innerHTML = "";
+            if (cities && cities.length > 0) {
+                const uniqueCities = new Set();
+                cities.forEach(city => {
+                    const displayText = city.district ? `${city.name}, ${city.district}` : city.name;
+                    if (!uniqueCities.has(displayText)) {
+                        uniqueCities.add(displayText);
+                        const item = document.createElement("div");
+                        item.classList.add("suggestion-item");
+                        item.textContent = displayText;
+                        item.addEventListener("click", function () {
+                            locationInput.value = displayText;
+                            suggestionsBox.style.display = "none";
+                        });
+                        suggestionsBox.appendChild(item);
+                    }
+                });
+                suggestionsBox.style.display = "block";
+            } else {
+                suggestionsBox.style.display = "none";
+            }
+        }
+
+        function fetchLocations(url) {
+            if (isFetching) return;
+            isFetching = true;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    updateSuggestions(data);
+                    isFetching = false;
+                })
+                .catch(error => {
+                    console.error("Помилка:", error);
+                    isFetching = false;
+                });
+        }
+
+        locationInput.addEventListener("input", function () {
+            const query = locationInput.value.trim();
+            if (query.length >= 2) {
+                fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
+            } else {
+                suggestionsBox.style.display = "none";
+            }
+        });
+
+        locationInput.addEventListener("focus", function () {
+            const query = locationInput.value.trim();
+            if (query.length >= 2) {
+                fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
+            } else if (!suggestionsBox.children.length) {
+                fetchLocations('/api/locations/?random=10');
+            } else {
+                suggestionsBox.style.display = "block";
+            }
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+
+        // Логіка для відображення назви файлу при виборі фото
+        const fileInput = document.getElementById("id_image");
+        const fileLabel = document.querySelector(".custom-file-label");
+
+        fileInput.addEventListener("change", function () {
+            const fileName = fileInput.files[0] ? fileInput.files[0].name : "Вибрати фото";
+            fileLabel.textContent = fileName;
+        });
+    });
+</script>
+{% endblock %}

@@ -94,6 +94,6 @@ class ProfileForm(UserChangeForm):
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
-        if not password:
-            raise forms.ValidationError("Пароль не може бути порожнім.")
+        if password and len(password) < 8:
+            raise forms.ValidationError("Пароль має бути не менше 8 символів.")
         return password

@@ -1,154 +1,136 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse, HttpResponseForbidden
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-from django.db.models import Q, Max, Count, Exists, OuterRef
-from django.core.serializers.json import DjangoJSONEncoder
-from django.utils import timezone
+# chat/views.py
 import json
+import logging
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.db import models, transaction
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.utils import timezone
+from .models import Chat, Message, Announcement
 
-from .models import ChatRoom, Message, UserStatus
-
-
-@login_required
-def index(request):
-    """Головна сторінка чатів з списком усіх чатів користувача"""
-    return render(request, 'chat/index.html', {
-        'user_id': request.user.id,
-        'username': request.user.username,
-    })
-
-
-@login_required
-def room(request, room_id):
-    """Сторінка конкретного чату"""
-    room = get_object_or_404(ChatRoom, id=room_id)
-
-    # Перевірка, чи користувач є учасником чату
-    if not room.participants.filter(id=request.user.id).exists():
-        return HttpResponseForbidden("Ви не є учасником цього чату")
-
-    other_user = room.get_other_participant(request.user)
-
-    return render(request, 'chat/room.html', {
-        'room_id': room_id,
-        'user_id': request.user.id,
-        'username': request.user.username,
-        'other_user_id': other_user.id,
-        'other_username': other_user.username,
-    })
-
+# Налаштування логування
+logger = logging.getLogger(__name__)
 
 @login_required
-def start_chat(request, user_id):
-    """Розпочати чат з конкретним користувачем"""
-    # Перевірка, чи існує користувач
-    other_user = get_object_or_404(User, id=user_id)
+@transaction.atomic
+def start_chat(request, announcement_id):
+    announcement = get_object_or_404(Announcement, id=announcement_id)
+    buyer = request.user
+    seller = announcement.author
 
-    # Перевірка, чи не намагається користувач почати чат з самим собою
-    if request.user.id == user_id:
-        return HttpResponseForbidden("Не можна почати чат з самим собою")
+    if buyer == seller:
+        logger.warning(f"Користувач {buyer.username} намагався створити чат із самим собою для оголошення {announcement_id}")
+        return redirect('home')
 
-    # Шукаємо існуючий чат між користувачами
-    chat_room = ChatRoom.objects.filter(
-        participants=request.user
-    ).filter(
-        participants=other_user
-    ).first()
+    chat = Chat.objects.filter(announcement=announcement, buyer=buyer, seller=seller).first()
+    if not chat:
+        chat = Chat.objects.create(announcement=announcement, buyer=buyer, seller=seller)
+        logger.info(f"Створено новий чат {chat.id} між {buyer.username} і {seller.username} для оголошення {announcement_id}")
 
-    # Якщо чат не існує, створюємо новий
-    if not chat_room:
-        chat_room = ChatRoom.objects.create()
-        chat_room.participants.add(request.user, other_user)
-
-    return redirect('chat:room', room_id=chat_room.id)
-
+    return redirect('chat:chat_detail', pk=chat.id)
 
 @login_required
-def chat_rooms(request):
-    """API для отримання списку чатів користувача"""
-    # Отримуємо чати користувача з найновішими повідомленнями зверху
-    chat_rooms = (
-        ChatRoom.objects.filter(participants=request.user)
-        .annotate(last_message_time=Max('messages__timestamp'))
-        .annotate(unread_count=Count(
-            'messages',
-            filter=Q(messages__is_read=False) & ~Q(messages__sender=request.user)
-        ))
-        .order_by('-last_message_time')
-    )
+def chat_detail(request, pk):
+    chat = get_object_or_404(Chat, pk=pk)
+    if request.user not in [chat.buyer, chat.seller]:
+        logger.warning(f"Користувач {request.user.username} намагався отримати доступ до чату {pk} без дозволу")
+        return redirect('home')
 
-    result = []
-    for room in chat_rooms:
-        other_user = room.get_other_participant(request.user)
-        last_message = room.get_last_message()
+    # Позначаємо всі непрочитані повідомлення як прочитані одним запитом
+    chat.messages.filter(is_read=False).exclude(sender=request.user).update(is_read=True, read_at=timezone.now())
 
-        # Отримуємо статус користувача
-        try:
-            user_status = UserStatus.objects.get(user=other_user)
-            is_online = user_status.is_online
-            is_typing = user_status.typing_to_user_id == request.user.id
-        except UserStatus.DoesNotExist:
-            is_online = False
-            is_typing = False
+    # Отримуємо повідомлення з оптимізацією (використовуємо select_related для sender)
+    messages = chat.messages.select_related('sender').order_by('timestamp')
 
-        result.append({
-            'id': room.id,
-            'other_user_id': other_user.id,
-            'other_username': other_user.username,
-            'last_message': last_message.content if last_message else "",
-            'last_message_time': last_message.timestamp if last_message else room.created_at,
-            'unread_count': room.unread_count,
-            'is_online': is_online,
-            'is_typing': is_typing,
-        })
-
-    # Конвертуємо datetime в ISO формат для правильної серіалізації
-    return JsonResponse(json.loads(json.dumps(result, cls=DjangoJSONEncoder)))
-
-
-@login_required
-def get_messages(request, room_id):
-    """API для отримання повідомлень конкретного чату"""
-    room = get_object_or_404(ChatRoom, id=room_id)
-
-    # Перевірка, чи користувач є учасником чату
-    if not room.participants.filter(id=request.user.id).exists():
-        return HttpResponseForbidden("Ви не є учасником цього чату")
-
-    # Отримуємо повідомлення
-    messages = Message.objects.filter(room=room).order_by('timestamp')
-
-    result = []
+    # Групуємо повідомлення за датою
+    messages_by_date = {}
     for message in messages:
-        result.append({
-            'id': message.id,
-            'sender_id': message.sender.id,
-            'sender_username': message.sender.username,
-            'content': message.content,
-            'timestamp': message.timestamp,
-            'is_read': message.is_read,
-        })
+        message_date = message.timestamp.date()
+        if message_date not in messages_by_date:
+            messages_by_date[message_date] = []
+        messages_by_date[message_date].append(message)
 
-    # Конвертуємо datetime в ISO формат для правильної серіалізації
-    return JsonResponse(json.loads(json.dumps(result, cls=DjangoJSONEncoder)))
+    # Використовуємо related_name для спрощення запиту
+    user_chats = (request.user.buyer_chats.all() | request.user.seller_chats.all()).select_related('buyer', 'seller', 'announcement').order_by('-created_at')
 
+    return render(request, 'chat/chat_detail.html', {
+        'chat': chat,
+        'messages_by_date': messages_by_date,
+        'user_chats': user_chats,
+    })
 
 @login_required
-def mark_messages_as_read(request, room_id):
-    """API для позначення повідомлень як прочитаних"""
-    room = get_object_or_404(ChatRoom, id=room_id)
+def chat_list(request):
+    # Використовуємо related_name для спрощення запиту з оптимізацією
+    user_chats = (request.user.buyer_chats.all() | request.user.seller_chats.all()).select_related('buyer', 'seller', 'announcement').order_by('-created_at')
+    return render(request, 'chat/chat_list.html', {
+        'user_chats': user_chats,
+    })
 
-    # Перевірка, чи користувач є учасником чату
-    if not room.participants.filter(id=request.user.id).exists():
-        return HttpResponseForbidden("Ви не є учасником цього чату")
+@login_required
+def unread_messages_count(request):
+    # Оптимізуємо запит: використовуємо annotate для підрахунку
+    unread_count = Message.objects.filter(
+        chat__in=(request.user.buyer_chats.all() | request.user.seller_chats.all()),
+        is_read=False,
+    ).exclude(sender=request.user).count()
 
-    # Позначаємо повідомлення як прочитані
-    updated = Message.objects.filter(
-        room=room,
-        is_read=False
-    ).exclude(
-        sender=request.user
-    ).update(is_read=True)
+    return JsonResponse({'unread_count': unread_count})
 
-    return JsonResponse({'status': 'success', 'updated': updated})
+@login_required
+@require_POST
+@transaction.atomic
+def send_message(request):
+    chat_id = request.POST.get('chat_id')
+    content = request.POST.get('content', '').strip()
+    image = request.FILES.get('image')
+
+    # Перевіряємо, чи передано chat_id
+    if not chat_id:
+        logger.error(f"Користувач {request.user.username} намагався відправити повідомлення без chat_id")
+        return JsonResponse({'status': 'error', 'error': 'chat_id не вказано'}, status=400)
+
+    # Перевіряємо, чи є хоча б текст або зображення
+    if not content and not image:
+        logger.warning(f"Користувач {request.user.username} намагався відправити порожнє повідомлення у чат {chat_id}")
+        return JsonResponse({'status': 'error', 'error': 'Повідомлення не може бути порожнім'}, status=400)
+
+    # Валідація розміру зображення (максимум 5 МБ)
+    if image and image.size > 5 * 1024 * 1024:  # 5 МБ у байтах
+        logger.warning(f"Користувач {request.user.username} намагався завантажити зображення розміром {image.size} байт, що перевищує ліміт")
+        return JsonResponse({'status': 'error', 'error': 'Зображення занадто велике (максимум 5 МБ)'}, status=400)
+
+    try:
+        chat = Chat.objects.get(id=chat_id)
+    except ValueError:
+        logger.error(f"Невірний формат chat_id: {chat_id} для користувача {request.user.username}")
+        return JsonResponse({'status': 'error', 'error': 'Невірний формат chat_id'}, status=400)
+    except Chat.DoesNotExist:
+        logger.error(f"Чат {chat_id} не знайдено для користувача {request.user.username}")
+        return JsonResponse({'status': 'error', 'error': 'Чат не знайдено'}, status=404)
+
+    if request.user not in [chat.buyer, chat.seller]:
+        logger.warning(f"Користувач {request.user.username} намагався відправити повідомлення у чат {chat_id} без дозволу")
+        return JsonResponse({'status': 'error', 'error': 'Доступ заборонений'}, status=403)
+
+    try:
+        message = Message.objects.create(
+            chat=chat,
+            sender=request.user,
+            image=image
+        )
+        if content:
+            message.set_content(content)
+        message.save()
+        logger.info(f"Користувач {request.user.username} відправив повідомлення {message.id} у чат {chat_id}")
+    except Exception as e:
+        logger.error(f"Помилка при створенні повідомлення у чаті {chat_id} для користувача {request.user.username}: {str(e)}")
+        return JsonResponse({'status': 'error', 'error': 'Помилка при відправці повідомлення'}, status=500)
+
+    return JsonResponse({
+        'status': 'success',
+        'message_id': message.id,
+        'image_url': message.image.url if message.image else None,
+        'content': message.get_content() if content else None,
+    })

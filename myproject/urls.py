@@ -14,7 +14,6 @@ urlpatterns = [
     # Аутентифікація та авторизація
     path('auth/', include('social_django.urls', namespace='social')),
     path('chat/', include('chat.urls')),
-
     # API для оголошень
     path('api/', include('announcements.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

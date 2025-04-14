@@ -10,15 +10,33 @@
 </head>
 <body>
     <div class="login-page-container">
-        <div class="container login-container">
+        <div class="container login-container form-container">
             <h1 class="login-title">Вхід</h1>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
             <form method="post" class="login-form">
                 {% csrf_token %}
                 {{ form.as_p }}
+                <!-- Додаємо reCAPTCHA -->
+                <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}" aria-label="Перевірка reCAPTCHA"></div>
                 <button type="submit" class="btn btn-primary">Увійти</button>
             </form>
-            <p class="signup-prompt">Не маєте облікового запису? <a href="{% url 'announcements:signup' %}" class="signup-link">Зареєструватися</a></p>
+            <p class="signup-prompt">
+                Не маєте облікового запису?
+                <a href="{% url 'announcements:signup' %}" class="signup-link">Зареєструватися</a>
+            </p>
+            <a href="{% url 'home' %}" class="back-to-home-btn">
+                <i class="fas fa-arrow-left"></i> Назад на головну
+            </a>
         </div>
     </div>
+
+    <!-- Скрипти в кінці body для кращої продуктивності -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </body>
 </html>

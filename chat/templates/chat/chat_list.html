@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мої чати{% endblock %}
+
+
+{% block content %}
+<div class="chat-list-page">
+    <h2>Мої чати</h2>
+    <div class="chat-list">
+        {% for chat in user_chats %}
+            <a href="{% url 'chat:chat_detail' chat.id %}" class="chat-item">
+                <div class="chat-item-info">
+                    <span class="chat-item-name">
+                        {% if chat.buyer == request.user %}
+                            {{ chat.seller.username }}
+                        {% else %}
+                            {{ chat.buyer.username }}
+                        {% endif %}
+                    </span>
+                    <span class="chat-item-status" data-username="{% if chat.buyer == request.user %}{{ chat.seller.username }}{% else %}{{ chat.buyer.username }}{% endif %}">
+                        {% if chat.buyer == request.user %}
+                            {% if chat.seller.status.is_online %}
+                                Онлайн
+                            {% else %}
+                                Офлайн
+                            {% endif %}
+                        {% else %}
+                            {% if chat.buyer.status.is_online %}
+                                Онлайн
+                            {% else %}
+                                Офлайн
+                            {% endif %}
+                        {% endif %}
+                    </span>
+                </div>
+            </a>
+        {% empty %}
+            <p>У вас ще немає чатів.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

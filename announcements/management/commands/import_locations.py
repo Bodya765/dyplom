@@ -12,7 +12,7 @@ class Command(BaseCommand):
             with open(json_path, encoding='utf-8') as file:
                 data = json.load(file)
 
-            Location.objects.all().delete()  # Очистка таблиці перед імпортом
+            Location.objects.all().delete()
 
             locations = [Location(name=item["name"], district=item["district"]) for item in data]
             Location.objects.bulk_create(locations)

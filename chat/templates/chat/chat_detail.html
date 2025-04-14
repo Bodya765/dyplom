@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ chat.seller.username }}{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+    <div class="chat-sidebar">
+        <h3>Ваші чати</h3>
+        <div class="chat-list">
+            {% for user_chat in user_chats %}
+                <a href="{% url 'chat:chat_detail' user_chat.id %}" class="chat-item {% if user_chat.id == chat.id %}active{% endif %}">
+                    <div class="chat-item-info">
+                        <span class="chat-item-name">
+                            {% if user_chat.buyer == request.user %}
+                                {{ user_chat.seller.username }}
+                            {% else %}
+                                {{ user_chat.buyer.username }}
+                            {% endif %}
+                        </span>
+                        <span class="chat-item-status" data-username="{% if user_chat.buyer == request.user %}{{ user_chat.seller.username }}{% else %}{{ user_chat.buyer.username }}{% endif %}">
+                            {% if user_chat.buyer == request.user %}
+                                {% if user_chat.seller.status.is_online %}
+                                    Онлайн
+                                {% else %}
+                                    Офлайн
+                                {% endif %}
+                            {% else %}
+                                {% if user_chat.buyer.status.is_online %}
+                                    Онлайн
+                                {% else %}
+                                    Офлайн
+                                {% endif %}
+                            {% endif %}
+                        </span>
+                    </div>
+                </a>
+            {% empty %}
+                <p>У вас ще немає чатів.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="chat-main">
+        <div class="chat-header">
+            <h2>
+                Чат з {% if chat.buyer == request.user %}{{ chat.seller.username }}{% else %}{{ chat.buyer.username }}{% endif %}
+                <span id="typing-indicator" style="display: none;"> пише...</span>
+            </h2>
+        </div>
+        <div id="chat-messages" class="chat-messages">
+            {% for date, messages in messages_by_date.items %}
+                <div class="date-divider">{{ date|date:"d.m.Y" }}</div>
+                {% for message in messages %}
+                    <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}" data-message-id="{{ message.id }}">
+                        {% if message.sender != request.user %}
+                            <span class="message-sender">{{ message.sender.username }}</span>
+                        {% endif %}
+                        {% if message.image %}
+                            <img src="{{ message.image.url }}" alt="Фото" class="message-image">
+                        {% endif %}
+                        {% if message.get_content %}
+                            <p class="message-content">{{ message.get_content }}</p>
+                        {% endif %}
+                        <div class="message-meta">
+                            <span class="message-timestamp">{{ message.timestamp|date:"H:i" }}</span>
+                            {% if message.edited_at %}
+                                <span class="message-edited">(редаговано {{ message.edited_at|date:"H:i" }})</span>
+                            {% endif %}
+                            {% if message.sender == request.user %}
+                                <span class="message-actions">
+                                    <button class="edit-message-btn" data-message-id="{{ message.id }}">Редагувати</button>
+                                </span>
+                                <span class="message-status">
+                                    {% if message.is_read %}
+                                        <span class="read-ticks">✔✔</span>
+                                    {% else %}
+                                        <span class="unread-ticks">✔✔</span>
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+        <div class="chat-input">
+            <textarea id="chat-message-input" rows="3" placeholder="Введіть повідомлення..."></textarea>
+            <div class="chat-actions">
+                <label for="chat-image-input" class="image-upload-btn">
+                    <i class="fas fa-image"></i>
+                </label>
+                <input type="file" id="chat-image-input" accept="image/*" style="display: none;">
+                <button id="chat-message-submit" class="btn btn-primary">Надіслати</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="edit-message-modal" class="modal">
+    <div class="modal-content">
+        <span class="btn-cancel" id="close-edit-modal">✖</span>
+        <h3>Редагувати повідомлення</h3>
+        <textarea id="edit-message-input" rows="3"></textarea>
+        <button id="save-edit-message" class="btn btn-primary">Зберегти</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script src="{% static 'js/chat.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChat({{ chat.id }}, '{{ request.user.username }}');
+            // Оновлюємо кількість непрочитаних повідомлень після завантаження сторінки
+            setTimeout(() => {
+                if (typeof updateUnreadMessagesCount === 'function') {
+                    updateUnreadMessagesCount();
+                }
+            }, 1000);
+        });
+    </script>
+{% endblock %}

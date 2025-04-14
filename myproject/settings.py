@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 import environ
 import os
 
-# Читання .env файлу
 env = environ.Env()
 environ.Env.read_env()
 TIME_ZONE = 'Europe/Kiev'
@@ -71,6 +70,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'myproject.context_processors.recaptcha_keys',
             ],
         },
     },
@@ -168,11 +168,14 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],  # Redis сервер
+            'hosts': [('127.0.0.1', 6379)],
         },
     },
 }
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY').encode()
 
 AUTH_PASSWORD_VALIDATORS = []
-MEDIA_URL = '/media/'  # URL для доступу до медіа файлів
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+RECAPTCHA_SITE_KEY = env('RECAPTCHA_SITE_KEY')
+RECAPTCHA_SECRET_KEY = env('RECAPTCHA_SECRET_KEY')

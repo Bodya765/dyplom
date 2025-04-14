@@ -9,6 +9,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.timezone import now
 
 
+
 class City(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name="Місто")
     district = models.CharField(max_length=255, verbose_name="Район")
@@ -26,16 +27,6 @@ class Location(models.Model):
         return f"{self.name}, {self.district}"
 
 
-class Chat(models.Model):
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='seller')
-    buyer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='buyer')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Чат"
-        verbose_name_plural = "Чати"
-
-
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Категорія")
     image = models.ImageField(upload_to='categories/', blank=True, null=True, verbose_name="Зображення")
@@ -47,18 +38,17 @@ class Category(models.Model):
 
     @receiver(pre_save, sender='announcements.Category')
     def set_category_slug(sender, instance, **kwargs):
-        if not instance.slug or instance.pk is None:
-            instance.slug = slugify(instance.name)
-        elif instance.pk:
-            old_instance = Category.objects.get(pk=instance.pk)
-            if old_instance.name != instance.name:
-                instance.slug = slugify(instance.name)
-            counter = 1
-            unique_slug = instance.slug
-            while Category.objects.filter(slug=unique_slug).exclude(pk=instance.pk).exists():
-                unique_slug = f"{instance.slug}-{counter}"
-                counter += 1
-            instance.slug = unique_slug
+        # Генеруємо slug, якщо він порожній або об’єкт новий
+        if not instance.slug:
+            instance.slug = slugify(instance.name, allow_unicode=True)
+
+        # Перевіряємо унікальність slug
+        counter = 1
+        unique_slug = instance.slug
+        while Category.objects.filter(slug=unique_slug).exclude(pk=instance.pk).exists():
+            unique_slug = f"{instance.slug}-{counter}"
+            counter += 1
+        instance.slug = unique_slug
 
 
 class Announcement(models.Model):
@@ -112,6 +102,7 @@ def delete_announcement_image(sender, instance, **kwargs):
         instance.image.delete(save=False)
 
 
+
 class Review(models.Model):
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name="reviews",
                                      verbose_name="Оголошення")
@@ -135,3 +126,4 @@ class Review(models.Model):
 @receiver(post_save, sender=Review)
 def update_announcement_avg_rating(sender, instance, created, **kwargs):
     instance.announcement.update_rating()
+

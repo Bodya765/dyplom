@@ -1,508 +1,332 @@
-// WebSocket з'єднання для чату
+// chat.js
 let chatSocket = null;
-// WebSocket з'єднання для списку чатів
-let chatListSocket = null;
-// Ідентифікатор для відкладеного оновлення прокрутки
-let scrollUpdateTimeout = null;
-// Флаг, що показує, чи був прокручений чат до кінця
-let wasScrolledToBottom = true;
+let typingTimeout = null;
 
-/**
- * Підключаємо WebSocket для чату
- */
-function connectToChat(roomId) {
-    const chatSocketUrl = `ws://${window.location.host}/ws/chat/${roomId}/`;
+function getCsrfToken() {
+    const token = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!token) {
+        console.error('CSRF-токен не знайдено');
+        return '';
+    }
+    return token.value;
+}
 
-    chatSocket = new WebSocket(chatSocketUrl);
+function initializeChat(chatId, username) {
+    // Ініціалізація WebSocket
+    chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/${chatId}/`);
 
     chatSocket.onopen = function(e) {
-        console.log('WebSocket з\'єднання відкрито');
+        console.log('WebSocket з’єднання відкрито');
     };
 
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-
-        // Перевіряємо, чи прокручений чат до кінця
-        const messagesContainer = document.getElementById('messagesContainer');
-        wasScrolledToBottom = isScrolledToBottom(messagesContainer);
-
+        console.log('Отримано WebSocket-повідомлення:', data);
         if (data.type === 'message') {
-            // Додаємо повідомлення в чат
-            appendMessage(data);
-
-            // Оновлюємо прокрутку, якщо чат був прокручений до кінця
-            if (wasScrolledToBottom) {
-                clearTimeout(scrollUpdateTimeout);
-                scrollUpdateTimeout = setTimeout(() => {
-                    scrollToBottom(messagesContainer);
-                }, 100);
-            }
-
-            // Позначаємо повідомлення як прочитані, якщо вони не від поточного користувача
-            if (data.sender_id !== currentUserId) {
-                markMessagesAsRead(roomId);
-            }
+            appendMessage(data, username);
         } else if (data.type === 'typing') {
-            // Показуємо/приховуємо індикатор "користувач пише"
-            const typingIndicator = document.getElementById('typingIndicator');
-
-            if (data.user_id !== currentUserId) {
-                if (data.is_typing) {
-                    typingIndicator.style.display = 'flex';
-                } else {
-                    typingIndicator.style.display = 'none';
-                }
-            }
+            handleTypingIndicator(data, username);
         } else if (data.type === 'status') {
-            // Оновлюємо статус користувача
-            const otherUserStatus = document.getElementById('otherUserStatus');
-
-            if (data.user_id !== currentUserId) {
-                if (data.status === 'online') {
-                    otherUserStatus.textContent = 'онлайн';
-                    otherUserStatus.className = 'status online';
-                } else {
-                    otherUserStatus.textContent = 'офлайн';
-                    otherUserStatus.className = 'status offline';
-                }
-            }
-        } else if (data.type === 'messages_read') {
-            // Оновлюємо статус прочитання повідомлень
-            if (data.user_id !== currentUserId) {
-                const messages = document.querySelectorAll('.message.sent');
-                messages.forEach(message => {
-                    const readStatus = message.querySelector('.message-read-status');
-                    if (readStatus) {
-                        readStatus.textContent = 'Прочитано';
-                    }
-                });
-            }
+            updateUserStatus(data);
+        } else if (data.type === 'edit_message') {
+            console.log('Повідомлення успішно відредаговано:', data);
+            updateEditedMessage(data);
+        } else if (data.type === 'error') {
+            console.error('Помилка WebSocket:', data.message);
+            alert('Помилка при редагуванні: ' + data.message);
         }
     };
 
     chatSocket.onclose = function(e) {
-        console.error('WebSocket з\'єднання закрито');
-
-        // Спроба повторного з'єднання через 5 секунд
-        setTimeout(() => {
-            connectToChat(roomId);
-        }, 5000);
+        console.error('WebSocket закрито:', e);
+        alert('З’єднання з чатом втрачено. Спробуйте оновити сторінку.');
     };
 
     chatSocket.onerror = function(e) {
-        console.error('WebSocket помилка:', e);
-    };
-}
-
-/**
- * Підключаємо WebSocket для оновлення списку чатів
- */
-function connectToChatList() {
-    const chatListSocketUrl = `ws://${window.location.host}/ws/chat_list/`;
-
-    chatListSocket = new WebSocket(chatListSocketUrl);
-
-    chatListSocket.onopen = function(e) {
-        console.log('WebSocket з\'єднання для списку чатів відкрито');
+        console.error('Помилка WebSocket:', e);
+        alert('Виникла помилка з’єднання з чатом.');
     };
 
-    chatListSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-
-        if (data.type === 'chat_list_update') {
-            // Оновлюємо список чатів
-            loadChatList();
+    // Обробка введення тексту (індикатор набору)
+    const messageInput = document.getElementById('chat-message-input');
+    messageInput.addEventListener('input', function() {
+        if (chatSocket.readyState !== WebSocket.OPEN) {
+            console.error('WebSocket не підключений');
+            return;
         }
-    };
-
-    chatListSocket.onclose = function(e) {
-        console.error('WebSocket з\'єднання для списку чатів закрито');
-
-        // Спроба повторного з'єднання через 5 секунд
-        setTimeout(() => {
-            connectToChatList();
-        }, 5000);
-    };
-
-    chatListSocket.onerror = function(e) {
-        console.error('WebSocket помилка:', e);
-    };
-}
-
-/**
- * Відправляємо повідомлення через WebSocket
- */
-function sendMessage() {
-    const messageInput = document.getElementById('messageInput');
-    const message = messageInput.value.trim();
-
-    if (message && chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-        chatSocket.send(JSON.stringify({
-            'type': 'message',
-            'message': message
-        }));
-
-        messageInput.value = '';
-
-        // Скидаємо статус "користувач пише"
-        sendTypingStatus(false);
-    }
-}
-
-/**
- * Відправляємо статус "користувач пише" через WebSocket
- */
-function sendTypingStatus(isTyping) {
-    if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+        clearTimeout(typingTimeout);
         chatSocket.send(JSON.stringify({
             'type': 'typing',
-            'is_typing': isTyping
+            'sender': username
         }));
-    }
-}
-
-/**
- * Завантажуємо історію повідомлень з API
- */
-function loadMessages(roomId) {
-    fetch(`/api/messages/${roomId}/`)
-        .then(response => response.json())
-        .then(messages => {
-            const messagesContainer = document.getElementById('messages');
-            messagesContainer.innerHTML = '';
-
-            if (messages.length === 0) {
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'messages-empty';
-                emptyMessage.textContent = 'Ще немає повідомлень. Почніть розмову!';
-                messagesContainer.appendChild(emptyMessage);
-            } else {
-                messages.forEach(message => {
-                    appendMessage(message);
-                });
-            }
-
-            // Прокручуємо до останнього повідомлення
-            scrollToBottom(messagesContainer);
-
-            // Оновлюємо статус користувача
-            updateUserStatus();
-        })
-        .catch(error => {
-            console.error('Помилка при завантаженні повідомлень:', error);
-
-            const messagesContainer = document.getElementById('messages');
-            messagesContainer.innerHTML = '<div class="messages-error">Помилка при завантаженні повідомлень. Спробуйте оновити сторінку.</div>';
-        });
-}
-
-/**
- * Додаємо повідомлення в чат
- */
-function appendMessage(message) {
-    const messagesContainer = document.getElementById('messages');
-
-    // Видаляємо повідомлення про відсутність повідомлень, якщо воно є
-    const emptyMessage = messagesContainer.querySelector('.messages-empty');
-    if (emptyMessage) {
-        messagesContainer.removeChild(emptyMessage);
-    }
-
-    // Створюємо елемент повідомлення
-    const messageElement = document.createElement('div');
-    messageElement.className = `message ${message.sender_id == currentUserId ? 'sent' : 'received'}`;
-    messageElement.setAttribute('data-message-id', message.id);
-
-    // Додаємо текст повідомлення
-    messageElement.textContent = message.content;
-
-    // Додаємо час повідомлення
-    const timeElement = document.createElement('div');
-    timeElement.className = 'message-time';
-
-    // Форматуємо дату для відображення
-    const messageDate = new Date(message.timestamp);
-    let timeText = '';
-
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (messageDate.toDateString() === now.toDateString()) {
-        // Сьогодні: показуємо тільки час
-        timeText = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else if (messageDate.toDateString() === yesterday.toDateString()) {
-        // Вчора: показуємо "Вчора" і час
-        timeText = `Вчора, ${messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-        // Інші дні: показуємо дату і час
-        timeText = `${messageDate.toLocaleDateString()} ${messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    }
-
-    timeElement.textContent = timeText;
-    messageElement.appendChild(timeElement);
-
-    // Додаємо статус прочитання для власних повідомлень
-    if (message.sender_id == currentUserId) {
-        const readStatusElement = document.createElement('div');
-        readStatusElement.className = 'message-read-status';
-        readStatusElement.textContent = message.is_read ? 'Прочитано' : '';
-        messageElement.appendChild(readStatusElement);
-    }
-
-    // Додаємо повідомлення в контейнер
-    messagesContainer.appendChild(messageElement);
-}
-
-/**
- * Завантажуємо список чатів з API
- */
-function loadChatList() {
-    fetch('/api/chat_rooms/')
-        .then(response => response.json())
-        .then(rooms => {
-            const chatList = document.getElementById('chatList');
-            chatList.innerHTML = '';
-
-            if (rooms.length === 0) {
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'chat-list-empty';
-                emptyMessage.textContent = 'У вас ще немає чатів.';
-                chatList.appendChild(emptyMessage);
-            } else {
-                rooms.forEach(room => {
-                    appendChatItem(room);
-                });
-            }
-
-            // Позначаємо активний чат, якщо ми на сторінці чату
-            if (typeof roomId !== 'undefined') {
-                const activeChat = chatList.querySelector(`.chat-item[data-chat-id="${roomId}"]`);
-                if (activeChat) {
-                    activeChat.classList.add('active');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Помилка при завантаженні списку чатів:', error);
-
-            const chatList = document.getElementById('chatList');
-            chatList.innerHTML = '<div class="chat-list-error">Помилка при завантаженні списку чатів. Спробуйте оновити сторінку.</div>';
-        });
-}
-
-/**
- * Додаємо елемент чату в список
- */
-function appendChatItem(room) {
-    const chatList = document.getElementById('chatList');
-
-    // Створюємо елемент чату
-    const chatItem = document.createElement('div');
-    chatItem.className = 'chat-item';
-    chatItem.setAttribute('data-chat-id', room.id);
-    chatItem.setAttribute('data-user-id', room.other_user_id);
-    chatItem.setAttribute('data-username', room.other_username);
-
-    // Додаємо обробник кліку
-    chatItem.addEventListener('click', function() {
-        window.location.href = `/room/${room.id}/`;
-    });
-
-    // Ліва частина (інформація про чат)
-    const chatItemLeft = document.createElement('div');
-    chatItemLeft.className = 'chat-item-left';
-
-    // Заголовок чату
-    const chatItemHeader = document.createElement('div');
-    chatItemHeader.className = 'chat-item-header';
-
-    // Ім'я співрозмовника
-    const chatName = document.createElement('div');
-    chatName.className = 'chat-name';
-    chatName.textContent = room.other_username;
-
-    // Час останнього повідомлення
-    const chatTime = document.createElement('div');
-    chatTime.className = 'chat-time';
-
-    if (room.last_message_time) {
-        const messageDate = new Date(room.last_message_time);
-        let timeText = '';
-
-        const now = new Date();
-        const yesterday = new Date(now);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        if (messageDate.toDateString() === now.toDateString()) {
-            // Сьогодні: показуємо тільки час
-            timeText = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        } else if (messageDate.toDateString() === yesterday.toDateString()) {
-            // Вчора: показуємо "Вчора"
-            timeText = 'Вчора';
-        } else {
-            // Інші дні: показуємо дату
-            timeText = messageDate.toLocaleDateString();
-        }
-
-        chatTime.textContent = timeText;
-    }
-
-    chatItemHeader.appendChild(chatName);
-    chatItemHeader.appendChild(chatTime);
-
-    // Останнє повідомлення
-    const chatLastMessage = document.createElement('div');
-    chatLastMessage.className = 'chat-last-message';
-
-    if (room.is_typing) {
-        chatLastMessage.textContent = 'набирає повідомлення...';
-        chatLastMessage.style.fontStyle = 'italic';
-        chatLastMessage.style.color = '#4568dc';
-    } else {
-        chatLastMessage.textContent = room.last_message || 'Немає повідомлень';
-    }
-
-    chatItemLeft.appendChild(chatItemHeader);
-    chatItemLeft.appendChild(chatLastMessage);
-
-    // Права частина (індикатори)
-    const chatItemRight = document.createElement('div');
-    chatItemRight.className = 'chat-item-right';
-
-    // Статус онлайн/офлайн
-    const statusIndicator = document.createElement('div');
-    statusIndicator.className = `status ${room.is_online ? 'online' : 'offline'}`;
-    statusIndicator.textContent = room.is_online ? 'онлайн' : 'офлайн';
-
-    // Кількість непрочитаних повідомлень
-    if (room.unread_count > 0) {
-        const unreadBadge = document.createElement('div');
-        unreadBadge.className = 'unread-badge';
-        unreadBadge.textContent = room.unread_count > 99 ? '99+' : room.unread_count;
-        chatItemRight.appendChild(unreadBadge);
-    }
-
-    chatItemRight.appendChild(statusIndicator);
-
-    // Додаємо всі частини в елемент чату
-    chatItem.appendChild(chatItemLeft);
-    chatItem.appendChild(chatItemRight);
-
-    // Додаємо елемент чату в список
-    chatList.appendChild(chatItem);
-}
-
-/**
- * Фільтруємо список чатів за іменем користувача
- */
-function filterChatList(query) {
-    const chatItems = document.querySelectorAll('.chat-item');
-    query = query.toLowerCase();
-
-    chatItems.forEach(item => {
-        const username = item.getAttribute('data-username').toLowerCase();
-
-        if (username.includes(query)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-}
-
-/**
- * Позначаємо повідомлення як прочитані через API
- */
-function markMessagesAsRead(roomId) {
-    fetch(`/api/mark_read/${roomId}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success' && chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-            // Відправляємо повідомлення про прочитання через WebSocket
+        typingTimeout = setTimeout(() => {
             chatSocket.send(JSON.stringify({
-                'type': 'read_messages'
+                'type': 'typing',
+                'sender': username,
+                'stop': true
             }));
-        }
-    })
-    .catch(error => {
-        console.error('Помилка при позначенні повідомлень як прочитаних:', error);
+        }, 3000);
     });
-}
 
-/**
- * Оновлюємо статус користувача (онлайн/офлайн)
- */
-function updateUserStatus() {
-    const otherUserStatus = document.getElementById('otherUserStatus');
+    // Відправка повідомлення
+    const submitButton = document.getElementById('chat-message-submit');
+    submitButton.onclick = function() {
+        sendMessage(chatId, username);
+    };
 
-    if (otherUserStatus) {
-        fetch(`/api/chat_rooms/`)
-            .then(response => response.json())
-            .then(rooms => {
-                if (typeof otherUserId !== 'undefined') {
-                    const room = rooms.find(r => r.other_user_id === otherUserId);
+    // Відправка повідомлення по натисканню Enter
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            submitButton.click();
+        }
+    });
 
-                    if (room) {
-                        if (room.is_online) {
-                            otherUserStatus.textContent = 'онлайн';
-                            otherUserStatus.className = 'status online';
-                        } else {
-                            otherUserStatus.textContent = 'офлайн';
-                            otherUserStatus.className = 'status offline';
-                        }
+    // Ініціалізація слухачів для кнопок редагування
+    document.querySelectorAll('.edit-message-btn').forEach(button => {
+        addEditMessageListener(button, chatId, username);
+    });
 
-                        // Перевіряємо, чи користувач набирає повідомлення
-                        const typingIndicator = document.getElementById('typingIndicator');
+    // Функція для додавання нового повідомлення
+    function appendMessage(data, username) {
+        const messagesDiv = document.getElementById('chat-messages');
+        const messageDate = new Date(data.timestamp).toISOString().split('T')[0];
+        let dateDivider = messagesDiv.querySelector(`.date-divider[data-date="${messageDate}"]`);
 
-                        if (room.is_typing) {
-                            typingIndicator.style.display = 'flex';
-                        } else {
-                            typingIndicator.style.display = 'none';
-                        }
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Помилка при оновленні статусу користувача:', error);
-            });
-    }
-}
+        if (!dateDivider) {
+            dateDivider = document.createElement('div');
+            dateDivider.classList.add('date-divider');
+            dateDivider.setAttribute('data-date', messageDate);
+            dateDivider.innerHTML = `<span>${new Date(data.timestamp).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`;
+            messagesDiv.appendChild(dateDivider);
+        }
 
-/**
- * Перевіряємо, чи прокручений контейнер до кінця
- */
-function isScrolledToBottom(element) {
-    return element.scrollHeight - element.clientHeight <= element.scrollTop + 1;
-}
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', data.sender === username ? 'sent' : 'received');
+        messageDiv.setAttribute('data-message-id', data.message_id);
 
-/**
- * Прокручуємо контейнер до кінця
- */
-function scrollToBottom(element) {
-    element.scrollTop = element.scrollHeight;
-}
+        if (data.sender !== username) {
+            const senderSpan = document.createElement('span');
+            senderSpan.classList.add('message-sender');
+            senderSpan.textContent = data.sender;
+            messageDiv.appendChild(senderSpan);
+        }
 
-/**
- * Отримуємо значення cookie за іменем
- */
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+        if (data.image) {
+            const img = document.createElement('img');
+            img.src = data.image;
+            img.alt = 'Фото';
+            img.classList.add('message-image');
+            messageDiv.appendChild(img);
+        }
+
+        if (data.message) {
+            const contentP = document.createElement('p');
+            contentP.classList.add('message-content');
+            contentP.textContent = data.message;
+            messageDiv.appendChild(contentP);
+        }
+
+        const metaDiv = document.createElement('div');
+        metaDiv.classList.add('message-meta');
+
+        const timestampSpan = document.createElement('span');
+        timestampSpan.classList.add('message-timestamp');
+        timestampSpan.textContent = new Date(data.timestamp).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
+        metaDiv.appendChild(timestampSpan);
+
+        if (data.sender === username) {
+            const actionsSpan = document.createElement('span');
+            actionsSpan.classList.add('message-actions');
+            const editButton = document.createElement('button');
+            editButton.classList.add('edit-message-btn');
+            editButton.setAttribute('data-message-id', data.message_id);
+            editButton.textContent = 'Редагувати';
+            actionsSpan.appendChild(editButton);
+            metaDiv.appendChild(actionsSpan);
+
+            const statusSpan = document.createElement('span');
+            statusSpan.classList.add('message-status');
+            const ticksSpan = document.createElement('span');
+            ticksSpan.classList.add(data.is_read ? 'read-ticks' : 'unread-ticks');
+            ticksSpan.textContent = '✔✔';
+            statusSpan.appendChild(ticksSpan);
+
+            if (data.is_read && data.read_at) {
+                const readAtSpan = document.createElement('span');
+                readAtSpan.classList.add('message-read-at');
+                readAtSpan.textContent = `(Прочитано ${new Date(data.read_at).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })})`;
+                statusSpan.appendChild(readAtSpan);
             }
+
+            metaDiv.appendChild(statusSpan);
+
+            addEditMessageListener(editButton, chatId, username);
+        }
+
+        messageDiv.appendChild(metaDiv);
+        messagesDiv.appendChild(messageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    // Обробка індикатора набору тексту
+    function handleTypingIndicator(data, username) {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (data.sender !== username && !data.stop) {
+            typingIndicator.style.display = 'inline';
+            setTimeout(() => {
+                typingIndicator.style.display = 'none';
+            }, 3000);
+        } else {
+            typingIndicator.style.display = 'none';
         }
     }
-    return cookieValue;
+
+    // Оновлення статусу користувача
+    function updateUserStatus(data) {
+        const statusElements = document.querySelectorAll(`.chat-item-status[data-username="${data.username}"]`);
+        statusElements.forEach(element => {
+            element.textContent = data.is_online ? 'Онлайн' : 'Офлайн';
+            element.classList.toggle('online', data.is_online);
+        });
+    }
+
+    // Оновлення відредагованого повідомлення
+    function updateEditedMessage(data) {
+        const messageDiv = document.querySelector(`.message[data-message-id="${data.message_id}"]`);
+        if (messageDiv) {
+            let contentP = messageDiv.querySelector('.message-content');
+            if (!contentP && data.content) {
+                contentP = document.createElement('p');
+                contentP.classList.add('message-content');
+                messageDiv.insertBefore(contentP, messageDiv.querySelector('.message-meta'));
+            }
+            if (contentP) {
+                contentP.textContent = data.content;
+            }
+
+            let editedSpan = messageDiv.querySelector('.message-edited');
+            if (!editedSpan) {
+                editedSpan = document.createElement('span');
+                editedSpan.classList.add('message-edited');
+                messageDiv.querySelector('.message-meta').insertBefore(editedSpan, messageDiv.querySelector('.message-timestamp').nextSibling);
+            }
+            editedSpan.textContent = `(редаговано ${new Date(data.edited_at).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}))`;
+        }
+    }
+
+    // Відправка повідомлення
+    function sendMessage(chatId, username) {
+        const messageInput = document.getElementById('chat-message-input');
+        const message = messageInput.value.trim();
+        const imageInput = document.getElementById('chat-image-input');
+        const imageFile = imageInput.files[0];
+
+        if (!message && !imageFile) {
+            alert('Повідомлення не може бути порожнім');
+            return;
+        }
+
+        if (imageFile && imageFile.size > 5 * 1024 * 1024) {
+            alert('Зображення занадто велике (максимум 5 МБ)');
+            return;
+        }
+
+        if (chatSocket.readyState !== WebSocket.OPEN) {
+            alert('З’єднання з чатом втрачено. Спробуйте оновити сторінку.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('chat_id', chatId);
+        formData.append('content', message);
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
+        fetch('/chat/send_message/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                chatSocket.send(JSON.stringify({
+                    'type': 'message',
+                    'message': data.content || '',
+                    'image': data.image_url || null,
+                    'sender': username,
+                    'timestamp': new Date().toISOString(),
+                    'message_id': data.message_id,
+                    'is_read': false
+                }));
+                messageInput.value = '';
+                imageInput.value = '';
+            } else {
+                alert('Помилка при відправці повідомлення: ' + (data.error || 'Невідома помилка'));
+            }
+        })
+        .catch(error => {
+            console.error('Помилка:', error);
+            alert('Помилка при відправці повідомлення');
+        });
+    }
+
+    // Обробка редагування повідомлення
+    function addEditMessageListener(button, chatId, username) {
+        if (!button) return;
+
+        button.addEventListener('click', function() {
+            const messageId = this.getAttribute('data-message-id');
+            console.log('Натиснуто "Редагувати" для messageId:', messageId);
+            const messageDiv = document.querySelector(`.message[data-message-id="${messageId}"]`);
+            const contentP = messageDiv.querySelector('.message-content');
+            const content = contentP ? contentP.textContent : '';
+
+            const modal = document.getElementById('edit-message-modal');
+            const input = document.getElementById('edit-message-input');
+            input.value = content;
+            modal.style.display = 'flex';
+
+            const saveButton = document.getElementById('save-edit-message');
+            const closeButton = document.getElementById('close-edit-modal');
+
+            saveButton.onclick = function() {
+                const newContent = input.value.trim();
+                if (!newContent) {
+                    alert('Повідомлення не може бути порожнім');
+                    return;
+                }
+
+                if (chatSocket.readyState !== WebSocket.OPEN) {
+                    alert('З’єднання з чатом втрачено. Спробуйте оновити сторінку.');
+                    return;
+                }
+
+                if (!messageId) {
+                    console.error('Невірний messageId:', messageId);
+                    alert('Помилка: некоректний ідентифікатор повідомлення');
+                    return;
+                }
+
+                const editedAt = new Date().toISOString();
+                const message = {
+                    'type': 'edit_message',
+                    'message_id': messageId,
+                    'content': newContent,
+                    'edited_at': editedAt
+                };
+                console.log('Відправляємо WebSocket-повідомлення для редагування:', message);
+                chatSocket.send(JSON.stringify(message));
+                modal.style.display = 'none';
+            };
+
+            closeButton.onclick = function() {
+                modal.style.display = 'none';
+            };
+        });
+    }
 }

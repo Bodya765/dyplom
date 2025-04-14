@@ -6,7 +6,6 @@
 <div class="profile-edit-container">
     <div class="profile-edit-form">
         <h2>Редагувати профіль</h2>
-
         {% if form.errors %}
         <div class="form-errors">
             <p>Будь ласка, виправте помилки:</p>
@@ -22,10 +21,31 @@
 
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form.as_p }}
+            {% for field in form %}
+                {% if field.name == 'avatar' or field.name == 'photo' %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">Фото профілю</label>
+                        <div class="custom-file-upload">
+                            <input type="file" id="{{ field.id_for_label }}" name="{{ field.name }}" class="file-input" accept="image/*" hidden>
+
+                            <div class="image-preview" style="display: none;">
+                                <img src="" alt="Прев’ю фото" class="preview-img">
+                            </div>
+                        </div>
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p>{{ field.label_tag }} {{ field }}</p>
+                {% endif %}
+            {% endfor %}
             <button type="submit" class="btn btn-primary">Зберегти зміни</button>
             <a href="{% url 'announcements:profile_edit' %}" class="btn btn-secondary">Скасувати</a>
         </form>
     </div>
 </div>
+
 {% endblock %}
