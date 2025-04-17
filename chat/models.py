@@ -116,9 +116,6 @@ class Message(models.Model):
     )
 
     def set_content(self, content):
-        """
-        Шифрує і зберігає вміст повідомлення.
-        """
         try:
             if content:
                 self.encrypted_content = cipher.encrypt(content.encode()).decode()

@@ -308,3 +308,6 @@ def add_review(request, announcement_id):
         return redirect(reverse("announcements:announcement-detail", kwargs={"pk": announcement.id}))
 
     return redirect(reverse("announcements:announcement-detail", kwargs={"pk": announcement.id}))
+def get_subcategories(request, category_id):
+    subcategories = Category.objects.filter(parent_id=category_id).values('id', 'name')
+    return JsonResponse(list(subcategories), safe=False)

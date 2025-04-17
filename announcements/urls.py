@@ -27,4 +27,5 @@ urlpatterns = [
     path('<int:pk>/delete/', views.delete_announcement, name='delete_announcement'),
     path('api/announcement/<int:announcement_id>/add_review/', views.add_review, name='add_review'),
     path('api/announcement/autocomplete/', views.announcement_autocomplete, name='announcement_autocomplete'),
+    path('api/categories/<int:category_id>/subcategories/', views.get_subcategories, name='get_subcategories'),
 ]

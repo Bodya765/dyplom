@@ -10,7 +10,6 @@
 {% block content %}
 <main class="main-content">
     <div class="container">
-        <!-- Додаємо поле пошуку з автодоповненням -->
         <div class="search-container">
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Введіть запит, наприклад: Продам будинок..." autocomplete="off">
@@ -70,11 +69,9 @@
         <h3 class="recent-title">Останні переглянуті оголошення</h3>
         <div class="recent-announcements">
             {% for recent in recent_announcements %}
-                <div class="announcement">
                     <img src="{{ recent.image.url }}" alt="{{ recent.title }}" class="announcement-image">
                     <p class="announcement-title">{{ recent.title }}</p>
                     <p class="announcement-price">{{ recent.price }} грн</p>
-                    <a href="{% url 'announcements:announcement_detail' recent.id %}" class="announcement-link">Детальніше</a>
                 </div>
             {% empty %}
                 <p class="no-announcements">Ви ще не переглядали оголошення.</p>
@@ -99,7 +96,7 @@
                 return;
             }
 
-            console.log("Запит автодоповнення для:", query);  // Дебагінг
+            console.log("Запит автодоповнення для:", query);
             fetch(`/api/api/announcement/autocomplete/?query=${encodeURIComponent(query)}`)
                 .then(response => {
                     console.log("Статус відповіді:", response.status);  // Дебагінг
@@ -145,7 +142,7 @@
         searchButton.addEventListener("click", () => {
             const query = searchInput.value.trim();
             if (query) {
-                console.log("Перенаправлення на пошук:", query);  // Дебагінг
+                console.log("Перенаправлення на пошук:", query);
                 window.location.href = `/api/search_results/?search=${encodeURIComponent(query)}`;
             }
         });
@@ -155,6 +152,16 @@
             if (e.key === "Enter") {
                 searchButton.click();
             }
+        });
+
+        // Додаємо обробку кліку на оголошення
+        document.querySelectorAll('.announcement').forEach(announcement => {
+            announcement.addEventListener('click', () => {
+                const url = announcement.getAttribute('data-url');
+                if (url) {
+                    window.location.href = url;
+                }
+            });
         });
     });
 </script>

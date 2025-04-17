@@ -7,7 +7,6 @@
 <main class="announcement-detail-page">
     <div class="announcement-detail-container">
         <div class="announcement-main">
-            <!-- Основний вміст -->
             <div class="announcement-content">
                 <div class="left-column">
                     {% if announcement.image %}
@@ -274,8 +273,6 @@
                 }
             });
         }
-
-        // Обробка видалення оголошення
         const openDeleteModalButton = document.getElementById("open-delete-modal");
         const deleteModal = document.getElementById("delete-modal");
         const closeModalButton = document.getElementById("close-modal");
@@ -306,7 +303,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    window.location.href = '/'; // Перенаправлення на головну сторінку
+                    window.location.href = '/';
                 } else {
                     alert('Помилка при видаленні оголошення: ' + (data.error || 'Невідома помилка'));
                 }
