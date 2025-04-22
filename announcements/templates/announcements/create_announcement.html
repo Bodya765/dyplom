@@ -29,8 +29,11 @@
             <!-- Правий стовпчик: Категорія, Місцезнаходження, Зображення -->
             <div class="form-column right-column">
                 <div class="form-field">
-                    <label for="{{ form.category.id_for_label }}" class="form-label">Категорія:</label>
-                    {{ form.category }}
+                    <label for="category-display" class="form-label">Категорія:</label>
+                    <input type="text" id="category-display" class="form-input category-input" readonly placeholder="Оберіть категорію" />
+                    <input type="hidden" id="id_category" name="category" value="" />
+                    <input type="hidden" id="subcategory" name="subcategory" value="" />
+                    <input type="hidden" id="deal_type" name="deal_type" value="" />
                 </div>
                 <div class="form-field location-field">
                     <label for="id_location" class="form-label">Місцезнаходження:</label>
@@ -51,81 +54,283 @@
 
         <button type="submit" class="btn btn-primary">Створити оголошення</button>
     </form>
+
+    <!-- Модальне вікно для вибору категорії -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">×</span>
+            <h2>Оберіть категорію</h2>
+            <div class="category-modal-grid">
+                <div class="category-list">
+                    {% for category in categories %}
+                        <button class="category-option" data-category="{{ category.name }}">{{ category.name }}</button>
+                    {% endfor %}
+                </div>
+                <div class="subcategory-deal-section">
+                    <div id="subcategory-options" class="subcategory-options" style="display: none;">
+                        <div id="subcategory-list" class="option-block"></div>
+                    </div>
+                    <div id="deal-type-options" class="deal-type-options" style="display: none;">
+                        <div class="deal-type-list option-block">
+                            <button class="deal-type-option" data-deal-type="Оренда">Оренда</button>
+                            <button class="deal-type-option" data-deal-type="Продаж">Продаж</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="confirm-category" class="confirm-btn" disabled>Підтвердити</button>
+        </div>
+    </div>
 </main>
+
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Модальне вікно
+        const modal = document.getElementById("category-modal");
+        const modalContent = document.querySelector(".modal-content");
+        const categoryDisplay = document.getElementById("category-display");
+        const closeModalBtn = document.querySelector(".close");
+        const categoryInput = document.getElementById("id_category");
+        const subcategoryInput = document.getElementById("subcategory");
+        const dealTypeInput = document.getElementById("deal_type");
+        const confirmBtn = document.getElementById("confirm-category");
+        const categoryOptions = document.querySelectorAll(".category-option");
+        const subcategoryOptionsDiv = document.getElementById("subcategory-options");
+        const subcategoryList = document.getElementById("subcategory-list");
+        const dealTypeOptionsDiv = document.getElementById("deal-type-options");
+        const dealTypeOptions = document.querySelectorAll(".deal-type-option");
+
+        let selectedCategory = null;
+        let selectedSubcategory = null;
+        let selectedDealType = null;
+
+        // Відкриття модального вікна при кліку на поле
+        categoryDisplay.addEventListener("click", () => {
+            modal.style.display = "flex";
+            setTimeout(() => {
+                modalContent.classList.add("show");
+                // Поступова поява категорій
+                categoryOptions.forEach((option, index) => {
+                    setTimeout(() => {
+                        option.classList.add("show");
+                    }, index * 50);
+                });
+                setTimeout(() => {
+                    confirmBtn.classList.add("show");
+                }, categoryOptions.length * 50 + 100);
+            }, 10);
+            resetSelections();
+        });
+
+        closeModalBtn.addEventListener("click", () => {
+            modalContent.classList.remove("show");
+            setTimeout(() => {
+                modal.style.display = "none";
+                resetSelections();
+            }, 300);
+        });
+
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modalContent.classList.remove("show");
+                setTimeout(() => {
+                    modal.style.display = "none";
+                    resetSelections();
+                }, 300);
+            }
+        });
+
+        // Логіка вибору категорії
+        categoryOptions.forEach(option => {
+            option.addEventListener("click", () => {
+                categoryOptions.forEach(opt => opt.classList.remove("selected"));
+                option.classList.add("selected");
+                selectedCategory = option.dataset.category;
+
+                subcategoryOptionsDiv.style.display = "none";
+                dealTypeOptionsDiv.style.display = "none";
+                subcategoryList.innerHTML = "";
+                selectedSubcategory = null;
+                selectedDealType = null;
+
+                if (selectedCategory === "Нерухомість") {
+                    subcategoryOptionsDiv.style.display = "block";
+                    const subcategories = ["Будинок", "Квартира"];
+                    subcategories.forEach((sub, index) => {
+                        const subItem = document.createElement("button");
+                        subItem.classList.add("subcategory-option");
+                        subItem.textContent = sub;
+                        subItem.dataset.subcategory = sub;
+                        subItem.addEventListener("click", () => {
+                            document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
+                            subItem.classList.add("selected");
+                            selectedSubcategory = sub;
+                            dealTypeOptionsDiv.style.display = "block";
+                            dealTypeOptions.forEach((dealOption, dealIndex) => {
+                                setTimeout(() => {
+                                    dealOption.classList.add("show");
+                                }, dealIndex * 50);
+                            });
+                            updateConfirmButton();
+                        });
+                        subcategoryList.appendChild(subItem);
+                        setTimeout(() => {
+                            subItem.classList.add("show");
+                        }, index * 50);
+                    });
+                } else if (selectedCategory === "Транспорт") {
+                    subcategoryOptionsDiv.style.display = "block";
+                    dealTypeOptionsDiv.style.display = "none";
+                    const subcategories = ["Легкові", "Вантажні", "Мотоцикли"];
+                    subcategories.forEach((sub, index) => {
+                        const subItem = document.createElement("button");
+                        subItem.classList.add("subcategory-option");
+                        subItem.textContent = sub;
+                        subItem.dataset.subcategory = sub;
+                        subItem.addEventListener("click", () => {
+                            document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
+                            subItem.classList.add("selected");
+                            selectedSubcategory = sub;
+                            updateConfirmButton();
+                        });
+                        subcategoryList.appendChild(subItem);
+                        setTimeout(() => {
+                            subItem.classList.add("show");
+                        }, index * 50);
+                    });
+                }
+
+                updateConfirmButton();
+            });
+        });
+
+        // Логіка вибору типу угоди (Оренда/Продаж)
+        dealTypeOptions.forEach(option => {
+            option.addEventListener("click", () => {
+                dealTypeOptions.forEach(opt => opt.classList.remove("selected"));
+                option.classList.add("selected");
+                selectedDealType = option.dataset.dealType;
+                updateConfirmButton();
+            });
+        });
+
+        // Оновлення стану кнопки "Підтвердити"
+        function updateConfirmButton() {
+            if (selectedCategory === "Нерухомість") {
+                confirmBtn.disabled = !(selectedCategory && selectedSubcategory && selectedDealType);
+            } else if (selectedCategory === "Транспорт") {
+                confirmBtn.disabled = !(selectedCategory && selectedSubcategory);
+            } else {
+                confirmBtn.disabled = !selectedCategory;
+            }
+        }
+
+        // Підтвердження вибору
+        confirmBtn.addEventListener("click", () => {
+            if (!confirmBtn.disabled) {
+                categoryDisplay.value = selectedCategory;
+                categoryInput.value = selectedCategory;
+                subcategoryInput.value = selectedSubcategory || "";
+                dealTypeInput.value = selectedDealType || "";
+                modalContent.classList.remove("show");
+                setTimeout(() => {
+                    modal.style.display = "none";
+                }, 300);
+            }
+        });
+
+        // Скидання вибору
+        function resetSelections() {
+            categoryOptions.forEach(opt => opt.classList.remove("selected"));
+            document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
+            dealTypeOptions.forEach(opt => opt.classList.remove("selected"));
+            subcategoryOptionsDiv.style.display = "none";
+            dealTypeOptionsDiv.style.display = "none";
+            subcategoryList.innerHTML = "";
+            selectedCategory = null;
+            selectedSubcategory = null;
+            selectedDealType = null;
+            confirmBtn.disabled = true;
+        }
+
+        // Логіка для автозаповнення місцезнаходження (залишено без змін, але виправлено ID)
         const locationInput = document.getElementById("location");
         const suggestionsBox = document.getElementById("location-suggestions");
         let isFetching = false;
 
-        function updateSuggestions(cities) {
-            suggestionsBox.innerHTML = "";
-            if (cities && cities.length > 0) {
-                const uniqueCities = new Set();
-                cities.forEach(city => {
-                    const displayText = city.district ? `${city.name}, ${city.district}` : city.name;
-                    if (!uniqueCities.has(displayText)) {
-                        uniqueCities.add(displayText);
-                        const item = document.createElement("div");
-                        item.classList.add("suggestion-item");
-                        item.textContent = displayText;
-                        item.addEventListener("click", function () {
-                            locationInput.value = displayText;
-                            suggestionsBox.style.display = "none";
-                        });
-                        suggestionsBox.appendChild(item);
-                    }
-                });
-                suggestionsBox.style.display = "block";
-            } else {
-                suggestionsBox.style.display = "none";
+        if (!locationInput) {
+            console.error("Елемент із ID 'id_location' не знайдено в DOM");
+        } else {
+            locationInput.addEventListener("input", function () {
+                const query = locationInput.value.trim();
+                if (query.length >= 2) {
+                    fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
+                } else {
+                    suggestionsBox.style.display = "none";
+                }
+            });
+
+            locationInput.addEventListener("focus", function () {
+                const query = locationInput.value.trim();
+                if (query.length >= 2) {
+                    fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
+                } else if (!suggestionsBox.children.length) {
+                    fetchLocations('/api/locations/?random=10');
+                } else {
+                    suggestionsBox.style.display = "block";
+                }
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                    suggestionsBox.style.display = "none";
+                }
+            });
+
+            function updateSuggestions(cities) {
+                suggestionsBox.innerHTML = "";
+                if (cities && cities.length > 0) {
+                    const uniqueCities = new Set();
+                    cities.forEach(city => {
+                        const displayText = city.district ? `${city.name}, ${city.district}` : city.name;
+                        if (!uniqueCities.has(displayText)) {
+                            uniqueCities.add(displayText);
+                            const item = document.createElement("div");
+                            item.classList.add("suggestion-item");
+                            item.textContent = displayText;
+                            item.addEventListener("click", function () {
+                                locationInput.value = displayText;
+                                suggestionsBox.style.display = "none";
+                            });
+                            suggestionsBox.appendChild(item);
+                        }
+                    });
+                    suggestionsBox.style.display = "block";
+                } else {
+                    suggestionsBox.style.display = "none";
+                }
+            }
+
+            function fetchLocations(url) {
+                if (isFetching) return;
+                isFetching = true;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        updateSuggestions(data);
+                        isFetching = false;
+                    })
+                    .catch(error => {
+                        console.error("Помилка:", error);
+                        isFetching = false;
+                    });
             }
         }
-
-        function fetchLocations(url) {
-            if (isFetching) return;
-            isFetching = true;
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    updateSuggestions(data);
-                    isFetching = false;
-                })
-                .catch(error => {
-                    console.error("Помилка:", error);
-                    isFetching = false;
-                });
-        }
-
-        locationInput.addEventListener("input", function () {
-            const query = locationInput.value.trim();
-            if (query.length >= 2) {
-                fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
-            } else {
-                suggestionsBox.style.display = "none";
-            }
-        });
-
-        locationInput.addEventListener("focus", function () {
-            const query = locationInput.value.trim();
-            if (query.length >= 2) {
-                fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
-            } else if (!suggestionsBox.children.length) {
-                fetchLocations('/api/locations/?random=10');
-            } else {
-                suggestionsBox.style.display = "block";
-            }
-        });
-
-        document.addEventListener("click", function (e) {
-            if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                suggestionsBox.style.display = "none";
-            }
-        });
 
         const fileInput = document.querySelector(".file-input");
         const fileNameDisplay = document.getElementById("file-name");

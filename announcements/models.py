@@ -1,3 +1,4 @@
+# models.py
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
@@ -7,8 +8,6 @@ from django.db.models import Avg
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.timezone import now
-
-
 
 class City(models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name="Місто")
@@ -38,11 +37,8 @@ class Category(models.Model):
 
     @receiver(pre_save, sender='announcements.Category')
     def set_category_slug(sender, instance, **kwargs):
-        # Генеруємо slug, якщо він порожній або об’єкт новий
         if not instance.slug:
             instance.slug = slugify(instance.name, allow_unicode=True)
-
-        # Перевіряємо унікальність slug
         counter = 1
         unique_slug = instance.slug
         while Category.objects.filter(slug=unique_slug).exclude(pk=instance.pk).exists():
@@ -59,19 +55,20 @@ class Announcement(models.Model):
                                  verbose_name="Місцезнаходження")
     category = models.ForeignKey('Category', on_delete=models.SET_NULL, null=True, verbose_name="Категорія",
                                  related_name="announcements")
+    subcategory = models.CharField(max_length=100, null=True, blank=True, verbose_name="Підкатегорія")  # Нове поле
+    deal_type = models.CharField(max_length=50, null=True, blank=True, verbose_name="Тип угоди")       # Нове поле
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Автор")
     rating = models.FloatField(default=0, verbose_name="Рейтинг")
     image = models.ImageField(upload_to='announcement_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
     updated_at = models.DateTimeField(auto_now=True)
+
     def save(self, *args, **kwargs):
         if not self.pk and not self.author:
-            self.author = None  # Allow admin to manually set the author
-
+            self.author = None
         if self.pk:
             old_instance = Announcement.objects.filter(pk=self.pk).first()
             self.delete_old_image_if_needed(old_instance)
-
         super().save(*args, **kwargs)
 
     def delete_old_image_if_needed(self, old_instance):
@@ -90,6 +87,9 @@ class Announcement(models.Model):
         if self.price is not None and self.price < 0:
             raise ValidationError("Ціна не може бути від’ємною.")
 
+    def get_absolute_url(self):
+        return reverse('announcements:announcement_detail', args=[self.id])
+
     class Meta:
         verbose_name = "Оголошення"
         verbose_name_plural = "Оголошення"
@@ -100,7 +100,6 @@ class Announcement(models.Model):
 def delete_announcement_image(sender, instance, **kwargs):
     if instance.image:
         instance.image.delete(save=False)
-
 
 
 class Review(models.Model):
@@ -126,4 +125,3 @@ class Review(models.Model):
 @receiver(post_save, sender=Review)
 def update_announcement_avg_rating(sender, instance, created, **kwargs):
     instance.announcement.update_rating()
-
