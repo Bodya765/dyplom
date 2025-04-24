@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
       preloader.classList.add('hidden');
       // Видаляємо прелоадер із DOM після завершення анімації
       setTimeout(() => preloader.remove(), 500);
-    }, 500); // Затримка перед зникненням (0.5 секунди)
+    }, 500); 
   });
 
   // Альтернатива: ховаємо через 2 секунди, якщо завантаження швидке

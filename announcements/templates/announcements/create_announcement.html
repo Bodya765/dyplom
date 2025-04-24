@@ -31,7 +31,7 @@
                 <div class="form-field">
                     <label for="category-display" class="form-label">Категорія:</label>
                     <input type="text" id="category-display" class="form-input category-input" readonly placeholder="Оберіть категорію" />
-                    <input type="hidden" id="id_category" name="category" value="" />
+                    <input type="hidden" id="id_category" name="category" value="1" />
                     <input type="hidden" id="subcategory" name="subcategory" value="" />
                     <input type="hidden" id="deal_type" name="deal_type" value="" />
                 </div>
@@ -51,7 +51,15 @@
                 </div>
             </div>
         </div>
-
+        {{ form.non_field_errors }}
+    {% for field in form %}
+        <div>
+            {{ field.label_tag }}
+            {% if field.errors %}
+                <div class="error">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
         <button type="submit" class="btn btn-primary">Створити оголошення</button>
     </form>
 
@@ -63,7 +71,7 @@
             <div class="category-modal-grid">
                 <div class="category-list">
                     {% for category in categories %}
-                        <button class="category-option" data-category="{{ category.name }}">{{ category.name }}</button>
+                        <button class="category-option" data-category="{{ category.name }}" data-category_id="{{ category.id }}">{{ category.name }}</button>
                     {% endfor %}
                 </div>
                 <div class="subcategory-deal-section">
@@ -103,6 +111,7 @@
         const dealTypeOptions = document.querySelectorAll(".deal-type-option");
 
         let selectedCategory = null;
+        let selectedCategoryID = null;
         let selectedSubcategory = null;
         let selectedDealType = null;
 
@@ -148,6 +157,7 @@
                 categoryOptions.forEach(opt => opt.classList.remove("selected"));
                 option.classList.add("selected");
                 selectedCategory = option.dataset.category;
+                selectedCategoryID = option.dataset.category_id;
 
                 subcategoryOptionsDiv.style.display = "none";
                 dealTypeOptionsDiv.style.display = "none";
@@ -222,7 +232,7 @@
                 confirmBtn.disabled = !(selectedCategory && selectedSubcategory && selectedDealType);
             } else if (selectedCategory === "Транспорт") {
                 confirmBtn.disabled = !(selectedCategory && selectedSubcategory);
-            } else {
+            } else {R
                 confirmBtn.disabled = !selectedCategory;
             }
         }
@@ -231,7 +241,7 @@
         confirmBtn.addEventListener("click", () => {
             if (!confirmBtn.disabled) {
                 categoryDisplay.value = selectedCategory;
-                categoryInput.value = selectedCategory;
+                categoryInput.value = selectedCategoryID ;
                 subcategoryInput.value = selectedSubcategory || "";
                 dealTypeInput.value = selectedDealType || "";
                 modalContent.classList.remove("show");
@@ -261,7 +271,6 @@
         let isFetching = false;
 
         if (!locationInput) {
-            console.error("Елемент із ID 'id_location' не знайдено в DOM");
         } else {
             locationInput.addEventListener("input", function () {
                 const query = locationInput.value.trim();

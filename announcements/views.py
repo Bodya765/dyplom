@@ -14,7 +14,7 @@ from .models import Announcement, Category, Location, Review
 from .forms import AnnouncementForm, ProfileForm
 from .serializers import AnnouncementSerializer
 from django.http import HttpResponseRedirect
-
+import  json
 
 class AnnouncementViewSet(viewsets.ModelViewSet):
     queryset = Announcement.objects.select_related('category').prefetch_related('reviews').all()
@@ -144,6 +144,10 @@ def create_announcement(request):
             announcement.author = request.user
             announcement.save()
             return redirect('announcements:category_products', announcement.category.id)
+        else:
+
+            print(json.loads(form.errors.as_json()))
+
     else:
         form = AnnouncementForm()
 
