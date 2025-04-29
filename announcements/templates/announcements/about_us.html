@@ -1,32 +1,133 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Про нас{% endblock %}
 
 {% block content %}
 <section class="about-us">
-    <div class="container">
-        <h1 class="section-title">Про нас</h1>
-        <p class="intro">
-            Ласкаво просимо на <strong>VseOgolosha</strong>! Ми – сучасна платформа для оголошень, яка об'єднує людей та бізнес.
+    <h1 class="section-title">Про нас</h1>
+    <p class="intro">
+        Ласкаво просимо на <strong>VseOgolosha</strong>! Ми – сучасна платформа для оголошень, яка об'єднує людей та бізнес.
+    </p>
+    <div class="content">
+        <h2 class="content-title">Наша місія</h2>
+        <p class="content-text">
+            Ми прагнемо створити зручне, безпечне і ефективне середовище, де користувачі можуть легко знаходити, купувати чи продавати товари та послуги.
         </p>
-        <div class="content">
-            <h2 class="content-title">Наша місія</h2>
-            <p class="content-text">
-                Ми прагнемо створити зручне, безпечне і ефективне середовище, де користувачі можуть легко знаходити, купувати чи продавати товари та послуги.
-            </p>
 
-            <h2 class="content-title">Наші цінності</h2>
-            <ul class="values-list">
-                <li class="values-item"><strong>Прозорість:</strong> Ми забезпечуємо чесність та відкритість у всіх наших процесах.</li>
-                <li class="values-item"><strong>Інновації:</strong> Ми постійно вдосконалюємо нашу платформу, щоб зробити її ще зручнішою для вас.</li>
-                <li class="values-item"><strong>Довіра:</strong> Безпека ваших даних та угод – наш головний пріоритет.</li>
-            </ul>
+        <h2 class="content-title">Наші цінності</h2>
+        <ul class="values-list">
+            <li class="values-item"><strong>Прозорість:</strong> Ми забезпечуємо чесність та відкритість у всіх наших процесах.</li>
+            <li class="values-item"><strong>Інновації:</strong> Ми постійно вдосконалюємо нашу платформу, щоб зробити її ще зручнішою для вас.</li>
+            <li class="values-item"><strong>Довіра:</strong> Безпека ваших даних та угод – наш головний пріоритет.</li>
+        </ul>
 
-            <h2 class="content-title">Як ми працюємо</h2>
-            <p class="content-text">
-                Користувачі можуть створювати оголошення за кілька простих кроків, переглядати пропозиції інших людей або використовувати наші фільтри для швидкого пошуку потрібних товарів чи послуг.
-            </p>
-        </div>
+        <h2 class="content-title">Як ми працюємо</h2>
+        <p class="content-text">
+            Користувачі можуть створювати оголошення за кілька простих кроків, переглядати пропозиції інших людей або використовувати наші фільтри для швидкого пошуку потрібних товарів чи послуг.
+        </p>
     </div>
 </section>
+
+<style>
+    .about-us {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px;
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        background-color: #fff; /* Перенесено з .container */
+        border-radius: 10px; /* Перенесено з .container */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Перенесено з .container */
+    }
+
+    .section-title {
+        text-align: center;
+        font-size: 2.2rem;
+        margin-bottom: 30px;
+        color: #1a3c34;
+        font-weight: 700;
+    }
+
+    .intro {
+        font-size: 1.2rem;
+        text-align: center;
+        color: #34495e;
+        margin-bottom: 40px;
+        line-height: 1.6;
+    }
+
+    .intro strong {
+        color: #2ecc71;
+    }
+
+    .content {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .content-title {
+        font-size: 1.6rem;
+        color: #1a3c34;
+        margin-bottom: 15px;
+        font-weight: 600;
+        border-bottom: 2px solid #2ecc71;
+        padding-bottom: 5px;
+    }
+
+    .content-text {
+        font-size: 1rem;
+        color: #34495e;
+        line-height: 1.8;
+    }
+
+    .values-list {
+        list-style: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .values-item {
+        font-size: 1rem;
+        color: #34495e;
+        line-height: 1.6;
+        padding-left: 25px;
+        position: relative;
+    }
+
+    .values-item::before {
+        content: "✔";
+        position: absolute;
+        left: 0;
+        color: #2ecc71;
+        font-size: 1.2rem;
+    }
+
+    .values-item strong {
+        color: #1a3c34;
+    }
+
+    @media (max-width: 768px) {
+        .about-us {
+            padding: 20px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+        }
+
+        .content-title {
+            font-size: 1.4rem;
+        }
+
+        .intro,
+        .content-text,
+        .values-item {
+            font-size: 0.95rem;
+        }
+    }
+</style>
 {% endblock %}

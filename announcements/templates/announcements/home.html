@@ -2,9 +2,8 @@
 {% load static %}
 
 {% block extra_head %}
-    <link rel="stylesheet" href="{% static 'css/search.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main-page.css' %}">
 {% endblock %}
-
 {% block title %}VseOgolosha{% endblock %}
 
 {% block content %}
@@ -69,9 +68,14 @@
         <h3 class="recent-title">Останні переглянуті оголошення</h3>
         <div class="recent-announcements">
             {% for recent in recent_announcements %}
-                    <img src="{{ recent.image.url }}" alt="{{ recent.title }}" class="announcement-image">
-                    <p class="announcement-title">{{ recent.title }}</p>
-                    <p class="announcement-price">{{ recent.price }} грн</p>
+                <div class="announcement-item">
+                    <a href="{% url 'announcements:announcement-detail' pk=recent.pk %}">
+                        {% if recent.image %}
+                            <img src="{{ recent.image.url }}" alt="{{ recent.title }}" class="announcement-image">
+                        {% endif %}
+                        <p class="announcement-title">{{ recent.title }}</p>
+                        <p class="announcement-price">{{ recent.price }} грн</p>
+                    </a>
                 </div>
             {% empty %}
                 <p class="no-announcements">Ви ще не переглядали оголошення.</p>

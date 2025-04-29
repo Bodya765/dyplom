@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def start_chat(request, announcement_id):
     announcement = get_object_or_404(Announcement, id=announcement_id)
     buyer = request.user
-    seller = announcement.author
+    seller = announcement.owner
 
     if buyer == seller:
         logger.warning(f"Користувач {buyer.username} намагався створити чат із самим собою для оголошення {announcement_id}")

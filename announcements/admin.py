@@ -1,40 +1,35 @@
 from django.contrib import admin
-from .models import Announcement, Review, Location, Category
+from .models import Location, Category, Announcement, ApartmentDetails, Review
 
-class AnnouncementAdmin(admin.ModelAdmin):
-    list_display = ('title', 'formatted_price', 'category', 'location', 'author', 'created_at', 'price')
-    search_fields = ('title', 'description')
-    list_filter = ('category', 'location', 'author', 'price')
-    list_editable = ('price',)  # Allows editing 'price' directly in the list
-    ordering = ('-created_at',)
-    readonly_fields = ('created_at',)
-    fields = ('title', 'description', 'price', 'category', 'location', 'author', 'image')
-
-    def formatted_price(self, obj):
-        return f"{obj.price} грн"  # Formats the price for display
-    formatted_price.short_description = 'Ціна'
-
-    def save_model(self, request, obj, form, change):
-        if not obj.author:
-            obj.author = request.user  # Use the currently logged-in user as the author
-        super().save_model(request, obj, form, change)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-class ReviewAdmin(admin.ModelAdmin):
-    list_display = ('announcement', 'user', 'rating', 'text', 'created_at')
-    search_fields = ('text', 'user__username', 'announcement__title')  # Searching by review text, user username, and announcement title
-    list_filter = ('rating', 'announcement', 'created_at')
-
+@admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'district', 'city')  # Adding city to the Location list display
+    list_display = ['name', 'district']
+    search_fields = ['name', 'district']
 
+@admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description')  # Display name and description for Category
-    search_fields = ('name',)  # Add search functionality by category name
+    list_display = ['name', 'slug']
+    search_fields = ['name']
+    prepopulated_fields = {'slug': ('name',)}
 
-admin.site.register(Location, LocationAdmin)
-admin.site.register(Announcement, AnnouncementAdmin)
-admin.site.register(Category, CategoryAdmin)  # Register Category with custom admin
-admin.site.register(Review, ReviewAdmin)
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ['title', 'category', 'price', 'created_at', 'get_owner_username']
+    list_filter = ['category', 'created_at', 'owner']
+    search_fields = ['title', 'description', 'location']
+
+    def get_owner_username(self, obj):
+        return obj.owner.username
+    get_owner_username.short_description = 'Власник'
+    get_owner_username.admin_order_field = 'owner__username'
+
+@admin.register(ApartmentDetails)
+class ApartmentDetailsAdmin(admin.ModelAdmin):
+    list_display = ['announcement', 'seller_type', 'total_area']
+    search_fields = ['announcement__title']
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ['announcement', 'user', 'rating', 'created_at']
+    list_filter = ['rating', 'created_at']
+    search_fields = ['announcement__title', 'user__username', 'text']

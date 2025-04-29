@@ -14,7 +14,93 @@
                             <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="announcement-img">
                         </div>
                     {% endif %}
-                    <span class="detail-desc"><span>Опис:</span>{{ announcement.description }}</span>
+                    {% if announcement.subcategory == "Квартира" %}
+                        {% if announcement.apartment_details %}
+                            <div class="additional-info">
+                                <h3 class="additional-info-title">Додаткова інформація</h3>
+                                <!-- Дебаг для перевірки даних -->
+                                <p><strong>Дебаг apartment_details:</strong></p>
+                                <p>appliances: {{ announcement.apartment_details.appliances }}</p>
+                                <p>multimedia: {{ announcement.apartment_details.multimedia }}</p>
+                                <p>comfort: {{ announcement.apartment_details.comfort }}</p>
+                                <p>communications: {{ announcement.apartment_details.communications }}</p>
+                                <p>infrastructure: {{ announcement.apartment_details.infrastructure }}</p>
+                                <p>landscape: {{ announcement.apartment_details.landscape }}</p>
+                                <!-- Основний вивід -->
+                                {% if announcement.apartment_details.seller_type %}
+                                    <p class="detail-desc"><span>Тип продавця:</span> {{ announcement.apartment_details.seller_type }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.building_type %}
+                                    <p class="detail-desc"><span>Тип будинку:</span> {{ announcement.apartment_details.building_type }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.residential_complex %}
+                                    <p class="detail-desc"><span>Назва ЖК:</span> {{ announcement.apartment_details.residential_complex }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.floor %}
+                                    <p class="detail-desc"><span>Поверх:</span> {{ announcement.apartment_details.floor }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.total_area %}
+                                    <p class="detail-desc"><span>Загальна площа:</span> {{ announcement.apartment_details.total_area }} м²</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.kitchen_area %}
+                                    <p class="detail-desc"><span>Площа кухні:</span> {{ announcement.apartment_details.kitchen_area }} м²</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.wall_type %}
+                                    <p class="detail-desc"><span>Тип стін:</span> {{ announcement.apartment_details.wall_type }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.housing_type %}
+                                    <p class="detail-desc"><span>Тип житла:</span> {{ announcement.apartment_details.housing_type }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.rooms %}
+                                    <p class="detail-desc"><span>Кількість кімнат:</span> {{ announcement.apartment_details.rooms }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.layout %}
+                                    <p class="detail-desc"><span>Планування:</span> {{ announcement.apartment_details.layout }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.bathroom %}
+                                    <p class="detail-desc"><span>Санвузол:</span> {{ announcement.apartment_details.bathroom }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.heating %}
+                                    <p class="detail-desc"><span>Опалення:</span> {{ announcement.apartment_details.heating }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.renovation %}
+                                    <p class="detail-desc"><span>Ремонт:</span> {{ announcement.apartment_details.renovation }}</p>
+                                {% endif %}
+                                {% if announcement.apartment_details.furnishing %}
+                                    <p class="detail-desc"><span>Меблювання:</span> {{ announcement.apartment_details.furnishing }}</p>
+                                {% endif %}
+                                <p class="detail-desc">
+                                    <span>Побутова техніка:</span>
+                                    {{ announcement.apartment_details.appliances|join:", " }}
+                                </p>
+                                <p class="detail-desc">
+                                    <span>Мультимедіа:</span>
+                                    {{ announcement.apartment_details.multimedia|join:", " }}
+                                </p>
+                                <p class="detail-desc">
+                                    <span>Комфорт:</span>
+                                    {{ announcement.apartment_details.comfort|join:", " }}
+                                </p>
+                                <p class="detail-desc">
+                                    <span>Комунікації:</span>
+                                    {{ announcement.apartment_details.communications|join:", " }}
+                                </p>
+                                <p class="detail-desc">
+                                    <span>Інфраструктура:</span>
+                                    {{ announcement.apartment_details.infrastructure|join:", " }}
+                                </p>
+                                <p class="detail-desc">
+                                    <span>Ландшафт:</span>
+                                    {{ announcement.apartment_details.landscape|join:", " }}
+                                </p>
+                            </div>
+                        {% else %}
+                            <p>Додаткової інформації немає (apartment_details не створено)</p>
+                        {% endif %}
+                    {% else %}
+                        <p>Додаткової інформації немає (subcategory: {{ announcement.subcategory }})</p>
+                    {% endif %}
+                    <span class="detail-desc"><span>Опис:</span> {{ announcement.description }}</span>
                 </div>
 
                 <div class="right-column">
@@ -27,7 +113,7 @@
                         {% endif %}
                     </p>
                     <div class="detail-author">
-                        <span class="author-name"><span>Автор:</span> {{ announcement.author.username }}</span>
+                        <span class="author-name"><span>Автор:</span> {{ announcement.owner.username }}</span>
                         <span class="author-date">
                             <span>Створено:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}
                         </span>
@@ -40,16 +126,16 @@
                     <div class="location-map">
                         <p class="detail-location">
                             <span>Місцезнаходження:</span>
-                            {{ announcement.location|default:"Невідомо" }}{% if announcement.district %}, {{ announcement.district }}{% endif %}
+                            {{ announcement.location|default:"Невідомо" }}
                         </p>
                         <div id="map" class="map-container"></div>
                     </div>
-                    {% if user.is_authenticated and user != announcement.author %}
+                    {% if user.is_authenticated and user != announcement.user %}
                         <div class="chat-action">
                             <a href="{% url 'chat:start_chat' announcement.id %}" class="btn btn-primary">Зв’язатися з продавцем</a>
                         </div>
                     {% endif %}
-                    {% if user.is_authenticated and user == announcement.author %}
+                    {% if user.is_authenticated and user == announcement.user %}
                         <div class="actions">
                             <div class="menu">
                                 <button class="menu-button" aria-expanded="false">
@@ -104,7 +190,7 @@
         </div>
     </div>
 
-    <!-- Модальне вікно для карти -->
+    <!-- Модальні вікна без змін -->
     <div id="map-modal" class="map-modal">
         <div class="map-modal-content">
             <button class="map-close-btn" aria-label="Закрити карту">✔</button>
@@ -112,7 +198,6 @@
         </div>
     </div>
 
-    <!-- Модальне вікно для підтвердження видалення -->
     <div id="delete-modal" class="delete-confirm-modal">
         <div class="delete-confirm-modal-content">
             <span class="btn-cancel" id="close-modal">✖</span>
@@ -126,285 +211,269 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const location = "{{ announcement.location|escapejs }}";
-        const district = "{{ announcement.district|escapejs }}";
-        let lat, lon, smallMap, expandedMap;
+document.addEventListener("DOMContentLoaded", function () {
+    const location = "{{ announcement.location|escapejs }}";
+    let lat, lon, smallMap, expandedMap;
 
-        function getCsrfToken() {
-            const token = document.querySelector('[name=csrfmiddlewaretoken]');
-            if (!token) {
-                console.error('CSRF-токен не знайдено');
-                return '';
-            }
-            return token.value;
+    function getCsrfToken() {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!token) {
+            console.error('CSRF-токен не знайдено');
+            return '';
         }
+        return token.value;
+    }
 
-        function initMap(containerId, height, zoom) {
-            if (location) {
-                const searchQuery = district ? `${location}, ${district}, Україна` : `${location}, Україна`;
-                console.log("Шукаємо місце:", searchQuery);
+    function initMap(containerId, height, zoom) {
+        if (location) {
+            const searchQuery = `${location}, Україна`;
+            console.log("Шукаємо місце:", searchQuery);
 
-                const cachedCoords = localStorage.getItem(`coords_${searchQuery}`);
-                if (cachedCoords) {
-                    const { lat, lon } = JSON.parse(cachedCoords);
-                    if (!isNaN(lat) && !isNaN(lon)) {
-                        console.log("Використовуємо кешовані координати:", lat, lon);
-                        const map = L.map(containerId, {
-                            zoomControl: false
-                        }).setView([lat, lon], zoom);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                        }).addTo(map);
-                        L.marker([lat, lon]).addTo(map)
-                            .bindPopup("{{ announcement.location|escapejs }}").openPopup();
-                        return map;
+            const cachedCoords = localStorage.getItem(`coords_${searchQuery}`);
+            if (cachedCoords) {
+                const { lat, lon } = JSON.parse(cachedCoords);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    console.log("Використовуємо кешовані координати:", lat, lon);
+                    const map = L.map(containerId, {
+                        zoomControl: false
+                    }).setView([lat, lon], zoom);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                    L.marker([lat, lon]).addTo(map)
+                        .bindPopup("{{ announcement.location|escapejs }}").openPopup();
+                    return map;
+                }
+            }
+
+            const apiKey = "7d958339ccd968afdbacf3e6ef50174a";
+            const geocodeUrl = `http://api.positionstack.com/v1/forward?access_key=${apiKey}&query=${encodeURIComponent(searchQuery)}&country=UA&limit=1`;
+            return fetch(geocodeUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Результат від PositionStack:", data);
+                    if (data.data && data.data.length > 0) {
+                        lat = parseFloat(data.data[0].latitude);
+                        lon = parseFloat(data.data[0].longitude);
+                        if (!isNaN(lat) && !isNaN(lon)) {
+                            localStorage.setItem(`coords_${searchQuery}`, JSON.stringify({ lat, lon }));
+                            const map = L.map(containerId, {
+                                zoomControl: false
+                            }).setView([lat, lon], zoom);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                            }).addTo(map);
+                            L.marker([lat, lon]).addTo(map)
+                                .bindPopup("{{ announcement.location|escapejs }}").openPopup();
+                            return map;
+                        }
                     }
-                }
-
-                const apiKey = "7d958339ccd968afdbacf3e6ef50174a";
-                const geocodeUrl = `http://api.positionstack.com/v1/forward?access_key=${apiKey}&query=${encodeURIComponent(searchQuery)}&country=UA&limit=1`;
-                return fetch(geocodeUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log("Результат від PositionStack:", data);
-                        if (data.data && data.data.length > 0) {
-                            lat = parseFloat(data.data[0].latitude);
-                            lon = parseFloat(data.data[0].longitude);
-                            if (!isNaN(lat) && !isNaN(lon)) {
-                                localStorage.setItem(`coords_${searchQuery}`, JSON.stringify({ lat, lon }));
-                                const map = L.map(containerId, {
-                                    zoomControl: false
-                                }).setView([lat, lon], zoom);
-                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                }).addTo(map);
-                                L.marker([lat, lon]).addTo(map)
-                                    .bindPopup("{{ announcement.location|escapejs }}").openPopup();
-                                return map;
-                            }
-                        }
-
-                        if (district) {
-                            const fallbackQuery = `${district}, Україна`;
-                            console.log("Спроба другого запиту (лише область):", fallbackQuery);
-                            const fallbackUrl = `http://api.positionstack.com/v1/forward?access_key=${apiKey}&query=${encodeURIComponent(fallbackQuery)}&country=UA&limit=1`;
-                            return fetch(fallbackUrl)
-                                .then(response => response.json())
-                                .then(fallbackData => {
-                                    console.log("Результат від PositionStack (другий запит):", fallbackData);
-                                    if (fallbackData.data && fallbackData.data.length > 0) {
-                                        lat = parseFloat(fallbackData.data[0].latitude);
-                                        lon = parseFloat(fallbackData.data[0].longitude);
-                                        if (!isNaN(lat) && !isNaN(lon)) {
-                                            localStorage.setItem(`coords_${searchQuery}`, JSON.stringify({ lat, lon }));
-                                            const map = L.map(containerId, {
-                                                zoomControl: false
-                                            }).setView([lat, lon], zoom);
-                                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                            }).addTo(map);
-                                            L.marker([lat, lon]).addTo(map)
-                                                .bindPopup("{{ announcement.location|escapejs }}").openPopup();
-                                            return map;
-                                        }
-                                    }
-                                    document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не знайдено</p>';
-                                });
-                        } else {
-                            document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не знайдено</p>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Помилка запиту до PositionStack:", error);
-                        document.getElementById(containerId).innerHTML = '<p>Помилка завантаження карти</p>';
-                    });
-            } else {
-                document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не вказано</p>';
-            }
-        }
-
-        smallMap = initMap('map', 150, 14);
-
-        const mapContainer = document.getElementById('map');
-        const modal = document.getElementById('map-modal');
-        const closeBtn = document.querySelector('.map-close-btn');
-        mapContainer.addEventListener('click', () => {
-            modal.style.display = 'flex';
-            if (!expandedMap) {
-                expandedMap = initMap('map-expanded', 500, 13);
-            }
-        });
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.style.display === 'flex') {
-                modal.style.display = 'none';
-            }
-        });
-
-        const stars = document.querySelectorAll(".star");
-        const ratingInput = document.getElementById("rating-value");
-        stars.forEach(star => {
-            star.addEventListener("click", function () {
-                const value = this.getAttribute("data-value");
-                ratingInput.value = value;
-                stars.forEach(s => {
-                    s.classList.toggle("selected", s.getAttribute("data-value") <= value);
+                    document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не знайдено</p>';
+                })
+                .catch(error => {
+                    console.error("Помилка запиту до PositionStack:", error);
+                    document.getElementById(containerId).innerHTML = '<p>Помилка завантаження карти</p>';
                 });
-            });
-        });
-
-        const menuButton = document.querySelector(".menu-button");
-        const menuDropdown = document.querySelector(".menu-dropdown");
-        if (menuButton) {
-            menuButton.addEventListener("click", () => {
-                const expanded = menuButton.getAttribute("aria-expanded") === "true";
-                menuButton.setAttribute("aria-expanded", !expanded);
-                menuDropdown.style.display = expanded ? "none" : "block";
-            });
-            document.addEventListener("click", (e) => {
-                if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
-                    menuDropdown.style.display = "none";
-                    menuButton.setAttribute("aria-expanded", "false");
-                }
-            });
+        } else {
+            document.getElementById(containerId).innerHTML = '<p>Місцезнаходження не вказано</p>';
         }
+    }
 
-        const openDeleteModalButton = document.getElementById("open-delete-modal");
-        const deleteModal = document.getElementById("delete-modal");
-        const closeModalButton = document.getElementById("close-modal");
-        const confirmDeleteButton = document.getElementById("confirm-delete-btn");
+    smallMap = initMap('map', 150, 14);
 
-        openDeleteModalButton.addEventListener("click", () => {
-            deleteModal.style.display = "block";
-        });
+    const mapContainer = document.getElementById('map');
+    const modal = document.getElementById('map-modal');
+    const closeBtn = document.querySelector('.map-close-btn');
+    mapContainer.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        if (!expandedMap) {
+            expandedMap = initMap('map-expanded', 500, 13);
+        }
+    });
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        }
+    });
 
-        closeModalButton.addEventListener("click", () => {
-            deleteModal.style.display = "none";
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!deleteModal.contains(e.target) && !openDeleteModalButton.contains(e.target)) {
-                deleteModal.style.display = "none";
-            }
-        });
-
-        confirmDeleteButton.addEventListener("click", () => {
-            const deleteUrl = confirmDeleteButton.getAttribute("data-delete-url");
-            fetch(deleteUrl, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCsrfToken(),
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    window.location.href = '/';
-                } else {
-                    alert('Помилка при видаленні оголошення: ' + (data.error || 'Невідома помилка'));
-                }
-            })
-            .catch(error => {
-                console.error('Помилка:', error);
-                alert('Помилка при видаленні оголошення');
+    const stars = document.querySelectorAll(".star");
+    const ratingInput = document.getElementById("rating-value");
+    stars.forEach(star => {
+        star.addEventListener("click", function () {
+            const value = this.getAttribute("data-value");
+            ratingInput.value = value;
+            stars.forEach(s => {
+                s.classList.toggle("selected", s.getAttribute("data-value") <= value);
             });
         });
     });
+
+    const menuButton = document.querySelector(".menu-button");
+    const menuDropdown = document.querySelector(".menu-dropdown");
+    if (menuButton) {
+        menuButton.addEventListener("click", () => {
+            const expanded = menuButton.getAttribute("aria-expanded") === "true";
+            menuButton.setAttribute("aria-expanded", !expanded);
+            menuDropdown.style.display = expanded ? "none" : "block";
+        });
+        document.addEventListener("click", (e) => {
+            if (!menuButton.contains(e.target) && !menuDropdown.contains(e.target)) {
+                menuDropdown.style.display = "none";
+                menuButton.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
+    const openDeleteModalButton = document.getElementById("open-delete-modal");
+    const deleteModal = document.getElementById("delete-modal");
+    const closeModalButton = document.getElementById("close-modal");
+    const confirmDeleteButton = document.getElementById("confirm-delete-btn");
+
+    openDeleteModalButton.addEventListener("click", () => {
+        deleteModal.style.display = "block";
+    });
+
+    closeModalButton.addEventListener("click", () => {
+        deleteModal.style.display = "none";
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!deleteModal.contains(e.target) && !openDeleteModalButton.contains(e.target)) {
+            deleteModal.style.display = "none";
+        }
+    });
+
+    confirmDeleteButton.addEventListener("click", () => {
+        const deleteUrl = confirmDeleteButton.getAttribute("data-delete-url");
+        fetch(deleteUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfToken(),
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = '/';
+            } else {
+                alert('Помилка при видаленні оголошення: ' + (data.error || 'Невідома помилка'));
+            }
+        })
+        .catch(error => {
+            console.error('Помилка:', error);
+            alert('Помилка при видаленні оголошення');
+        });
+    });
+});
 </script>
 
 <style>
-    /* Стилі для модального вікна підтвердження видалення */
-    .delete-confirm-modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-    }
+.delete-confirm-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
 
+.delete-confirm-modal-content {
+    background: linear-gradient(145deg, #ffffff, #f0f4f8);
+    padding: 25px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+.delete-confirm-modal-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 15px;
+}
+
+.delete-confirm-modal-content p {
+    font-size: 1rem;
+    color: #4a5568;
+    margin-bottom: 20px;
+}
+
+.btn-cancel {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    font-size: 26px;
+    color: #718096;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.btn-cancel:hover {
+    color: #e53e3e;
+}
+
+.btn-danger {
+    background: linear-gradient(90deg, #e53e3e, #c53030);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(90deg, #c53030, #9b2c2c);
+    transform: translateY(-1px);
+}
+
+.additional-info {
+    margin-top: 20px;
+}
+
+.additional-info-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
     .delete-confirm-modal-content {
-        background: linear-gradient(145deg, #ffffff, #f0f4f8);
-        padding: 25px;
-        border-radius: 12px;
-        width: 400px;
-        max-width: 90%;
-        position: relative;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        text-align: center;
+        width: 90%;
+        padding: 20px;
     }
 
     .delete-confirm-modal-content h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #2d3748;
-        margin-bottom: 15px;
+        font-size: 1.3rem;
     }
 
     .delete-confirm-modal-content p {
-        font-size: 1rem;
-        color: #4a5568;
-        margin-bottom: 20px;
-    }
-
-    .btn-cancel {
-        position: absolute;
-        top: 12px;
-        right: 15px;
-        font-size: 26px;
-        color: #718096;
-        cursor: pointer;
-        transition: color 0.2s ease;
-    }
-
-    .btn-cancel:hover {
-        color: #e53e3e;
+        font-size: 0.9rem;
     }
 
     .btn-danger {
-        background: linear-gradient(90deg, #e53e3e, #c53030);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 15px;
-        font-weight: 600;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        transition: background-color 0.2s ease, transform 0.2s ease;
+        padding: 8px 16px;
+        font-size: 14px;
     }
 
-    .btn-danger:hover {
-        background: linear-gradient(90deg, #c53030, #9b2c2c);
-        transform: translateY(-1px);
+    .additional-info-title {
+        font-size: 1.1rem;
     }
-
-    @media (max-width: 768px) {
-        .delete-confirm-modal-content {
-            width: 90%;
-            padding: 20px;
-        }
-
-        .delete-confirm-modal-content h3 {
-            font-size: 1.3rem;
-        }
-
-        .delete-confirm-modal-content p {
-            font-size: 0.9rem;
-        }
-
-        .btn-danger {
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-    }
+}
 </style>
 {% endblock %}

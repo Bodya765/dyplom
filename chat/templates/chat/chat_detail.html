@@ -6,10 +6,13 @@
 {% block content %}
 <div class="chat-page">
     <div class="chat-sidebar">
-        <h3>Ваші чати</h3>
+        <h3 class="sidebar-title">Ваші чати</h3>
         <div class="chat-list">
             {% for user_chat in user_chats %}
                 <a href="{% url 'chat:chat_detail' user_chat.id %}" class="chat-item {% if user_chat.id == chat.id %}active{% endif %}">
+                    <div class="chat-item-avatar">
+                        <img src="{% static 'images/default_avatar.png' %}" alt="Avatar">
+                    </div>
                     <div class="chat-item-info">
                         <span class="chat-item-name">
                             {% if user_chat.buyer == request.user %}
@@ -18,7 +21,8 @@
                                 {{ user_chat.buyer.username }}
                             {% endif %}
                         </span>
-                        <span class="chat-item-status" data-username="{% if user_chat.buyer == request.user %}{{ user_chat.seller.username }}{% else %}{{ user_chat.buyer.username }}{% endif %}">
+                        <span class="chat-item-status" data-status="{% if user_chat.buyer == request.user %}{% if user_chat.seller.status.is_online %}online{% else %}offline{% endif %}{% else %}{% if user_chat.buyer.status.is_online %}online{% else %}offline{% endif %}{% endif %}">
+                            <span class="status-dot"></span>
                             {% if user_chat.buyer == request.user %}
                                 {% if user_chat.seller.status.is_online %}
                                     Онлайн
@@ -36,14 +40,14 @@
                     </div>
                 </a>
             {% empty %}
-                <p>У вас ще немає чатів.</p>
+                <p class="empty-message">У вас ще немає чатів.</p>
             {% endfor %}
         </div>
     </div>
 
     <div class="chat-main">
         <div class="chat-header">
-            <h2>
+            <h2 class="chat-title">
                 Чат з {% if chat.buyer == request.user %}{{ chat.seller.username }}{% else %}{{ chat.buyer.username }}{% endif %}
                 <span id="typing-indicator" style="display: none;"> пише...</span>
             </h2>
@@ -85,7 +89,7 @@
             {% endfor %}
         </div>
         <div class="chat-input">
-            <textarea id="chat-message-input" rows="3" placeholder="Введіть повідомлення..."></textarea>
+            <textarea id="chat-message-input" rows="2" placeholder="Введіть повідомлення..."></textarea>
             <div class="chat-actions">
                 <label for="chat-image-input" class="image-upload-btn">
                     <i class="fas fa-image"></i>
@@ -105,7 +109,7 @@
         <button id="save-edit-message" class="btn btn-primary">Зберегти</button>
     </div>
 </div>
-{% endblock %}
+
 
 {% block extra_scripts %}
     <script src="{% static 'js/chat.js' %}"></script>

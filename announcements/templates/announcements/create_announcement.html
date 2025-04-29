@@ -31,7 +31,7 @@
                 <div class="form-field">
                     <label for="category-display" class="form-label">Категорія:</label>
                     <input type="text" id="category-display" class="form-input category-input" readonly placeholder="Оберіть категорію" />
-                    <input type="hidden" id="id_category" name="category" value="1" />
+                    <input type="hidden" id="id_category" name="category" value="" />
                     <input type="hidden" id="subcategory" name="subcategory" value="" />
                     <input type="hidden" id="deal_type" name="deal_type" value="" />
                 </div>
@@ -42,24 +42,355 @@
                 </div>
                 <div class="form-field custom-file-upload">
                     <label for="{{ form.image.id_for_label }}" class="form-label">Зображення:</label>
-                    <input type="file" id="{{ form.image.id_for_label }}" name="image" class="file-input" />
-                    <label for="{{ form.image.id_for_label }}" class="file-label">
+                    <input type="file" id="{{ form.image.id_for_label }}" name="image" class="file-input" accept="image/*" />
+                    <label for="{{ form.image.id_for_label }}" class="file-button">
                         <span class="file-label-text">Виберіть зображення</span>
                         <span class="file-icon"><i class="fas fa-cloud-upload-alt"></i></span>
                     </label>
                     <span id="file-name" class="file-name"></span>
+                    {% if form.image.errors %}
+                        <div class="error">{{ form.image.errors }}</div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+
+        <!-- Додаткова інформація для Квартири або Будинку (Продаж/Оренда) -->
+        <div id="apartment-details" class="form-section" style="display: none;">
+            <h2 class="section-title">Додаткова інформація</h2>
+
+            <!-- Контейнер: Основні характеристики -->
+            <div class="info-container">
+                <h3 class="container-title">Основні характеристики</h3>
+                <div class="info-grid">
+                    <div class="form-field">
+                        <label class="form-label">Тип продавця:</label>
+                        <button type="button" class="seller-type-option" data-seller-type="Приватна особа">Приватна особа</button>
+                        <button type="button" class="seller-type-option" data-seller-type="Бізнес">Бізнес</button>
+                        <input type="hidden" id="id_seller_type" name="seller_type" value="" />
+                    </div>
+                    <div class="form-field">
+                        <label for="id_building_type" class="form-label">Тип будинку:</label>
+                        <select id="id_building_type" name="building_type" class="form-input">
+                            <option value="">Оберіть тип будинку</option>
+                            <option value="Царський">Царський</option>
+                            <option value="Сталінка">Сталінка</option>
+                            <option value="Хрущовка">Хрущовка</option>
+                            <option value="Чешка">Чешка</option>
+                            <option value="Гостинка">Гостинка</option>
+                            <option value="Гуртожиток">Гуртожиток</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_residential_complex" class="form-label">Назва ЖК:</label>
+                        <input type="text" id="id_residential_complex" name="residential_complex" class="form-input" maxlength="100" />
+                    </div>
+                    <div class="form-field">
+                        <label for="id_floor" class="form-label">Поверх:</label>
+                        <input type="number" id="id_floor" name="floor" class="form-input" min="1" max="100" />
+                    </div>
+                    <div class="form-field">
+                        <label for="id_total_area" class="form-label">Загальна площа (м²):</label>
+                        <input type="number" id="id_total_area" name="total_area" class="form-input" min="10" step="0.1" />
+                    </div>
+                    <div class="form-field">
+                        <label for="id_kitchen_area" class="form-label">Площа кухні (м²):</label>
+                        <input type="number" id="id_kitchen_area" name="kitchen_area" class="form-input" min="5" step="0.1" />
+                    </div>
+                    <div class="form-field">
+                        <label for="id_wall_type" class="form-label">Тип стін:</label>
+                        <select id="id_wall_type" name="wall_type" class="form-input">
+                            <option value="">Оберіть тип стін</option>
+                            <option value="Цегла">Цегла</option>
+                            <option value="Панельний">Панельний</option>
+                            <option value="Шпакоблочний">Шпакоблочний</option>
+                            <option value="Газоблок">Газоблок</option>
+                            <option value="СІП панель">СІП панель</option>
+                            <option value="Інше">Інше</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_housing_type" class="form-label">Тип житла:</label>
+                        <select id="id_housing_type" name="housing_type" class="form-input">
+                            <option value="">Оберіть тип житла</option>
+                            <option value="Новобудова">Новобудова</option>
+                            <option value="Вторинне">Вторинне</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_rooms" class="form-label">Кількість кімнат:</label>
+                        <select id="id_rooms" name="rooms" class="form-input">
+                            <option value="">Оберіть кількість</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4+">4+</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_layout" class="form-label">Планування:</label>
+                        <select id="id_layout" name="layout" class="form-input">
+                            <option value="">Оберіть планування</option>
+                            <option value="Студія">Студія</option>
+                            <option value="Розділені">Розділені</option>
+                            <option value="Суміжна,прохідна">Суміжна,прохідна</option>
+                            <option value="Пентхаус">Пентхаус</option>
+                            <option value="Багаторівнева">Багаторівнева</option>
+                            <option value="Малосімейка">Малосімейка</option>
+                            <option value="Смарт-квартира">Смарт-квартира</option>
+                            <option value="Вільне планування">Вільне планування</option>
+                            <option value="Двохстороння">Двохстороння</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_bathroom" class="form-label">Санвузол:</label>
+                        <select id="id_bathroom" name="bathroom" class="form-input">
+                            <option value="">Оберіть санвузол</option>
+                            <option value="Суміжний">Суміжний</option>
+                            <option value="Розділений">Розділений</option>
+                            <option value="2+">2+</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_heating" class="form-label">Опалення:</label>
+                        <select id="id_heating" name="heating" class="form-input">
+                            <option value="">Оберіть опалення</option>
+                            <option value="Центральне">Центральне</option>
+                            <option value="Індивідуальне">Індивідуальне</option>
+                            <option value="Газове">Газове</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="id_renovation" class="form-label">Ремонт:</label>
+                        <select id="id_renovation" name="renovation" class="form-input">
+                            <option value="">Оберіть стан</option>
+                            <option value="Євроремонт">Євроремонт</option>
+                            <option value="Косметичний">Косметичний</option>
+                            <option value="Без ремонту">Без ремонту</option>
+                            <option value="Житловий стан">Житловий стан</option>
+                            <option value="Авторський проект">Авторський проект</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Контейнер: Меблі та зручності -->
+            <div class="info-container">
+                <h3 class="container-title">Меблі та зручності</h3>
+                <div class="info-grid">
+                    <div class="form-field">
+                        <label class="form-label">Меблювання:</label>
+                        <button type="button" class="furnishing-option" data-furnishing="Так">Так</button>
+                        <button type="button" class="furnishing-option" data-furnishing="Ні">Ні</button>
+                        <input type="hidden" id="id_furnishing" name="furnishing" value="" />
+                    </div>
+                    <div class="form-field checkbox-group">
+                        <label class="form-label">Побутова техніка:</label>
+                        <div class="checkbox-list">
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="appliance-refrigerator" name="appliances[]" value="Холодильник" />
+                                <label for="appliance-refrigerator">Холодильник</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="appliance-washing-machine" name="appliances[]" value="Пральна машина" />
+                                <label for="appliance-washing-machine">Пральна машина</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="appliance-dishwasher" name="appliances[]" value="Посудомийна машина" />
+                                <label for="appliance-dishwasher">Посудомийна машина</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="appliance-microwave" name="appliances[]" value="Мікрохвильовка" />
+                                <label for="appliance-microwave">Мікрохвильовка</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="appliance-tv" name="appliances[]" value="Телевізор" />
+                                <label for="appliance-tv">Телевізор</label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-field checkbox-group">
+                        <label class="form-label">Мультимедіа:</label>
+                        <div class="checkbox-list">
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="multimedia-wifi" name="multimedia[]" value="Wi-Fi" />
+                                <label for="multimedia-wifi">Wi-Fi</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="multimedia-tv" name="multimedia[]" value="Телевізор" />
+                                <label for="multimedia-tv">Телевізор</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="multimedia-cable-tv" name="multimedia[]" value="Кабельне ТБ" />
+                                <label for="multimedia-cable-tv">Кабельне ТБ</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="multimedia-satellite-tv" name="multimedia[]" value="Супутникове ТБ" />
+                                <label for="multimedia-satellite-tv">Супутникове ТБ</label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-field checkbox-group">
+                        <label class="form-label">Комфорт:</label>
+                        <div class="checkbox-list">
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-balcony" name="comfort[]" value="Балкон" />
+                                <label for="comfort-balcony">Балкон</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-ac" name="comfort[]" value="Кондиціонер" />
+                                <label for="comfort-ac">Кондиціонер</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-elevator" name="comfort[]" value="Ліфт" />
+                                <label for="comfort-elevator">Ліфт</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-garage" name="comfort[]" value="Гараж" />
+                                <label for="comfort-garage">Гараж</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-security" name="comfort[]" value="Охорона" />
+                                <label for="comfort-security">Охорона</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-cctv" name="comfort[]" value="Відеоспостереження" />
+                                <label for="comfort-cctv">Відеоспостереження</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-concierge" name="comfort[]" value="Конс’єрж" />
+                                <label for="comfort-concierge">Конс’єрж</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-parking" name="comfort[]" value="Парковка" />
+                                <label for="comfort-parking">Парковка</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-terrace" name="comfort[]" value="Тераса" />
+                                <label for="comfort-terrace">Тераса</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="comfort-playground" name="comfort[]" value="Дитячий майданчик" />
+                                <label for="comfort-playground">Дитячий майданчик</label>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Контейнер: Інфраструктура та комунікації -->
+            <div class="info-container">
+                <h3 class="container-title">Інфраструктура та комунікації</h3>
+                <div class="info-grid">
+                    <div class="form-field checkbox-group">
+                        <label class="form-label">Комунікації:</label>
+                        <div class="checkbox-list">
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="communication-gas" name="communications[]" value="Газ" />
+                                <label for="communication-gas">Газ</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="communication-water" name="communications[]" value="Центральний водопровід" />
+                                <label for="communication-water">Центральний водопровід</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="communication-electricity" name="communications[]" value="Електрика" />
+                                <label for="communication-electricity">Електрика</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="communication-sewerage" name="communications[]" value="Каналізація" />
+                                <label for="communication-sewerage">Каналізація</label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-field checkbox-group">
+                        <label class="form-label">Інфраструктура (до 800м):</label>
+                        <div class="checkbox-list">
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-school" name="infrastructure[]" value="Школа" />
+                                <label for="infrastructure-school">Школа</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-supermarket" name="infrastructure[]" value="Супермаркет" />
+                                <label for="infrastructure-supermarket">Супермаркет</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-hospital" name="infrastructure[]" value="Лікарня" />
+                                <label for="infrastructure-hospital">Лікарня</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-pharmacy" name="infrastructure[]" value="Аптека" />
+                                <label for="infrastructure-pharmacy">Аптека</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-bus-stop" name="infrastructure[]" value="Транспортна зупинка" />
+                                <label for="infrastructure-bus-stop">Транспортна зупинка</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-train-station" name="infrastructure[]" value="Залізнична станція" />
+                                <label for="infrastructure-train-station">Залізнична станція</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-bus-station" name="infrastructure[]" value="Автовокзал" />
+                                <label for="infrastructure-bus-station">Автовокзал</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-bank" name="infrastructure[]" value="Банк,банкомат" />
+                                <label for="infrastructure-bank">Банк,банкомат</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-post-office" name="infrastructure[]" value="Відділення пошти" />
+                                <label for="infrastructure-post-office">Відділення пошти</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="infrastructure-cinema" name="infrastructure[]" value="Кінотеатр,театр" />
+                                <label for="infrastructure-cinema">Кінотеатр,театр</label>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-field checkbox-group">
+                        <label class="form-label">Ландшафт (до 1км):</label>
+                        <div class="checkbox-list">
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-park" name="landscape[]" value="Парк" />
+                                <label for="landscape-park">Парк</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-lake" name="landscape[]" value="Озеро" />
+                                <label for="landscape-lake">Озеро</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-river" name="landscape[]" value="Річка" />
+                                <label for="landscape-river">Річка</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-forest" name="landscape[]" value="Ліс" />
+                                <label for="landscape-forest">Ліс</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-beach" name="landscape[]" value="Пляж" />
+                                <label for="landscape-beach">Пляж</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-mountain" name="landscape[]" value="Гора" />
+                                <label for="landscape-mountain">Гора</label>
+                            </span>
+                            <span class="checkbox-item">
+                                <input type="checkbox" id="landscape-square" name="landscape[]" value="Сквер" />
+                                <label for="landscape-square">Сквер</label>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{ form.non_field_errors }}
-    {% for field in form %}
-        <div>
-            {{ field.label_tag }}
-            {% if field.errors %}
+        {% for field in form %}
+            {% if field.errors and field.name != 'image' %}
                 <div class="error">{{ field.errors }}</div>
             {% endif %}
-        </div>
-    {% endfor %}
+        {% endfor %}
         <button type="submit" class="btn btn-primary">Створити оголошення</button>
     </form>
 
@@ -67,22 +398,25 @@
     <div id="category-modal" class="modal">
         <div class="modal-content">
             <span class="close">×</span>
-            <h2>Оберіть категорію</h2>
+            <h2 class="modal-title">Оберіть категорію</h2>
             <div class="category-modal-grid">
                 <div class="category-list">
-                    {% for category in categories %}
-                        <button class="category-option" data-category="{{ category.name }}" data-category_id="{{ category.id }}">{{ category.name }}</button>
-                    {% endfor %}
-                </div>
-                <div class="subcategory-deal-section">
-                    <div id="subcategory-options" class="subcategory-options" style="display: none;">
-                        <div id="subcategory-list" class="option-block"></div>
+                    <h3 class="section-title">Категорія</h3>
+                    <div class="option-block">
+                        {% for category in categories %}
+                            <button class="category-option" data-category="{{ category.name }}" data-category_id="{{ category.id }}">{{ category.name }}</button>
+                        {% endfor %}
                     </div>
-                    <div id="deal-type-options" class="deal-type-options" style="display: none;">
-                        <div class="deal-type-list option-block">
-                            <button class="deal-type-option" data-deal-type="Оренда">Оренда</button>
-                            <button class="deal-type-option" data-deal-type="Продаж">Продаж</button>
-                        </div>
+                </div>
+                <div id="subcategory-options" class="subcategory-options" style="display: none;">
+                    <h3 class="section-title">Підкатегорія</h3>
+                    <div id="subcategory-list" class="option-block"></div>
+                </div>
+                <div id="deal-type-options" class="deal-type-section" style="display: none;">
+                    <h3 class="section-title">Тип угоди</h3>
+                    <div class="deal-type-list option-block">
+                        <button class="deal-type-option" data-deal-type="Оренда">Оренда</button>
+                        <button class="deal-type-option" data-deal-type="Продаж">Продаж</button>
                     </div>
                 </div>
             </div>
@@ -91,263 +425,297 @@
     </div>
 </main>
 
-
-
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Модальне вікно
-        const modal = document.getElementById("category-modal");
-        const modalContent = document.querySelector(".modal-content");
-        const categoryDisplay = document.getElementById("category-display");
-        const closeModalBtn = document.querySelector(".close");
-        const categoryInput = document.getElementById("id_category");
-        const subcategoryInput = document.getElementById("subcategory");
-        const dealTypeInput = document.getElementById("deal_type");
-        const confirmBtn = document.getElementById("confirm-category");
-        const categoryOptions = document.querySelectorAll(".category-option");
-        const subcategoryOptionsDiv = document.getElementById("subcategory-options");
-        const subcategoryList = document.getElementById("subcategory-list");
-        const dealTypeOptionsDiv = document.getElementById("deal-type-options");
-        const dealTypeOptions = document.querySelectorAll(".deal-type-option");
+document.addEventListener("DOMContentLoaded", function () {
+    const modal = document.getElementById("category-modal");
+    const modalContent = document.querySelector(".modal-content");
+    const categoryDisplay = document.getElementById("category-display");
+    const closeModalBtn = document.querySelector(".close");
+    const categoryInput = document.getElementById("id_category");
+    const subcategoryInput = document.getElementById("subcategory");
+    const dealTypeInput = document.getElementById("deal_type");
+    const confirmBtn = document.getElementById("confirm-category");
+    const categoryOptions = document.querySelectorAll(".category-option");
+    const subcategoryOptionsDiv = document.getElementById("subcategory-options");
+    const subcategoryList = document.getElementById("subcategory-list");
+    const dealTypeOptionsDiv = document.getElementById("deal-type-options");
+    const dealTypeOptions = document.querySelectorAll(".deal-type-option");
+    const apartmentDetails = document.getElementById("apartment-details");
 
-        let selectedCategory = null;
-        let selectedCategoryID = null;
-        let selectedSubcategory = null;
-        let selectedDealType = null;
+    let selectedCategory = null;
+    let selectedCategoryID = null;
+    let selectedSubcategory = null;
+    let selectedDealType = null;
 
-        // Відкриття модального вікна при кліку на поле
-        categoryDisplay.addEventListener("click", () => {
-            modal.style.display = "flex";
-            setTimeout(() => {
-                modalContent.classList.add("show");
-                // Поступова поява категорій
-                categoryOptions.forEach((option, index) => {
-                    setTimeout(() => {
-                        option.classList.add("show");
-                    }, index * 50);
-                });
-                setTimeout(() => {
-                    confirmBtn.classList.add("show");
-                }, categoryOptions.length * 50 + 100);
-            }, 10);
+    categoryDisplay.addEventListener("click", () => {
+        modal.style.display = "flex";
+        setTimeout(() => {
+            modalContent.classList.add("show");
+            categoryOptions.forEach((option, index) => {
+                setTimeout(() => option.classList.add("show"), index * 50);
+            });
+            setTimeout(() => confirmBtn.classList.add("show"), categoryOptions.length * 50 + 100);
+        }, 10);
+        resetSelections();
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+        modalContent.classList.remove("show");
+        setTimeout(() => {
+            modal.style.display = "none";
             resetSelections();
-        });
+        }, 300);
+    });
 
-        closeModalBtn.addEventListener("click", () => {
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) {
             modalContent.classList.remove("show");
             setTimeout(() => {
                 modal.style.display = "none";
                 resetSelections();
             }, 300);
-        });
-
-        window.addEventListener("click", (e) => {
-            if (e.target === modal) {
-                modalContent.classList.remove("show");
-                setTimeout(() => {
-                    modal.style.display = "none";
-                    resetSelections();
-                }, 300);
-            }
-        });
-
-        // Логіка вибору категорії
-        categoryOptions.forEach(option => {
-            option.addEventListener("click", () => {
-                categoryOptions.forEach(opt => opt.classList.remove("selected"));
-                option.classList.add("selected");
-                selectedCategory = option.dataset.category;
-                selectedCategoryID = option.dataset.category_id;
-
-                subcategoryOptionsDiv.style.display = "none";
-                dealTypeOptionsDiv.style.display = "none";
-                subcategoryList.innerHTML = "";
-                selectedSubcategory = null;
-                selectedDealType = null;
-
-                if (selectedCategory === "Нерухомість") {
-                    subcategoryOptionsDiv.style.display = "block";
-                    const subcategories = ["Будинок", "Квартира"];
-                    subcategories.forEach((sub, index) => {
-                        const subItem = document.createElement("button");
-                        subItem.classList.add("subcategory-option");
-                        subItem.textContent = sub;
-                        subItem.dataset.subcategory = sub;
-                        subItem.addEventListener("click", () => {
-                            document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
-                            subItem.classList.add("selected");
-                            selectedSubcategory = sub;
-                            dealTypeOptionsDiv.style.display = "block";
-                            dealTypeOptions.forEach((dealOption, dealIndex) => {
-                                setTimeout(() => {
-                                    dealOption.classList.add("show");
-                                }, dealIndex * 50);
-                            });
-                            updateConfirmButton();
-                        });
-                        subcategoryList.appendChild(subItem);
-                        setTimeout(() => {
-                            subItem.classList.add("show");
-                        }, index * 50);
-                    });
-                } else if (selectedCategory === "Транспорт") {
-                    subcategoryOptionsDiv.style.display = "block";
-                    dealTypeOptionsDiv.style.display = "none";
-                    const subcategories = ["Легкові", "Вантажні", "Мотоцикли"];
-                    subcategories.forEach((sub, index) => {
-                        const subItem = document.createElement("button");
-                        subItem.classList.add("subcategory-option");
-                        subItem.textContent = sub;
-                        subItem.dataset.subcategory = sub;
-                        subItem.addEventListener("click", () => {
-                            document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
-                            subItem.classList.add("selected");
-                            selectedSubcategory = sub;
-                            updateConfirmButton();
-                        });
-                        subcategoryList.appendChild(subItem);
-                        setTimeout(() => {
-                            subItem.classList.add("show");
-                        }, index * 50);
-                    });
-                }
-
-                updateConfirmButton();
-            });
-        });
-
-        // Логіка вибору типу угоди (Оренда/Продаж)
-        dealTypeOptions.forEach(option => {
-            option.addEventListener("click", () => {
-                dealTypeOptions.forEach(opt => opt.classList.remove("selected"));
-                option.classList.add("selected");
-                selectedDealType = option.dataset.dealType;
-                updateConfirmButton();
-            });
-        });
-
-        // Оновлення стану кнопки "Підтвердити"
-        function updateConfirmButton() {
-            if (selectedCategory === "Нерухомість") {
-                confirmBtn.disabled = !(selectedCategory && selectedSubcategory && selectedDealType);
-            } else if (selectedCategory === "Транспорт") {
-                confirmBtn.disabled = !(selectedCategory && selectedSubcategory);
-            } else {R
-                confirmBtn.disabled = !selectedCategory;
-            }
         }
+    });
 
-        // Підтвердження вибору
-        confirmBtn.addEventListener("click", () => {
-            if (!confirmBtn.disabled) {
-                categoryDisplay.value = selectedCategory;
-                categoryInput.value = selectedCategoryID ;
-                subcategoryInput.value = selectedSubcategory || "";
-                dealTypeInput.value = selectedDealType || "";
-                modalContent.classList.remove("show");
-                setTimeout(() => {
-                    modal.style.display = "none";
-                }, 300);
-            }
-        });
-
-        // Скидання вибору
-        function resetSelections() {
+    categoryOptions.forEach(option => {
+        option.addEventListener("click", () => {
             categoryOptions.forEach(opt => opt.classList.remove("selected"));
-            document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
-            dealTypeOptions.forEach(opt => opt.classList.remove("selected"));
+            option.classList.add("selected");
+            selectedCategory = option.dataset.category;
+            selectedCategoryID = option.dataset.category_id;
+
             subcategoryOptionsDiv.style.display = "none";
             dealTypeOptionsDiv.style.display = "none";
             subcategoryList.innerHTML = "";
-            selectedCategory = null;
             selectedSubcategory = null;
             selectedDealType = null;
-            confirmBtn.disabled = true;
-        }
 
-        // Логіка для автозаповнення місцезнаходження (залишено без змін, але виправлено ID)
-        const locationInput = document.getElementById("location");
-        const suggestionsBox = document.getElementById("location-suggestions");
-        let isFetching = false;
-
-        if (!locationInput) {
-        } else {
-            locationInput.addEventListener("input", function () {
-                const query = locationInput.value.trim();
-                if (query.length >= 2) {
-                    fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
-                } else {
-                    suggestionsBox.style.display = "none";
-                }
-            });
-
-            locationInput.addEventListener("focus", function () {
-                const query = locationInput.value.trim();
-                if (query.length >= 2) {
-                    fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
-                } else if (!suggestionsBox.children.length) {
-                    fetchLocations('/api/locations/?random=10');
-                } else {
-                    suggestionsBox.style.display = "block";
-                }
-            });
-
-            document.addEventListener("click", function (e) {
-                if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                    suggestionsBox.style.display = "none";
-                }
-            });
-
-            function updateSuggestions(cities) {
-                suggestionsBox.innerHTML = "";
-                if (cities && cities.length > 0) {
-                    const uniqueCities = new Set();
-                    cities.forEach(city => {
-                        const displayText = city.district ? `${city.name}, ${city.district}` : city.name;
-                        if (!uniqueCities.has(displayText)) {
-                            uniqueCities.add(displayText);
-                            const item = document.createElement("div");
-                            item.classList.add("suggestion-item");
-                            item.textContent = displayText;
-                            item.addEventListener("click", function () {
-                                locationInput.value = displayText;
-                                suggestionsBox.style.display = "none";
-                            });
-                            suggestionsBox.appendChild(item);
-                        }
+            if (selectedCategory === "Нерухомість") {
+                subcategoryOptionsDiv.style.display = "block";
+                const subcategories = ["Будинок", "Квартира"];
+                subcategories.forEach((sub, index) => {
+                    const subItem = document.createElement("button");
+                    subItem.classList.add("subcategory-option");
+                    subItem.textContent = sub;
+                    subItem.dataset.subcategory = sub;
+                    subItem.addEventListener("click", () => {
+                        document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
+                        subItem.classList.add("selected");
+                        selectedSubcategory = sub;
+                        dealTypeOptionsDiv.style.display = "block";
+                        dealTypeOptions.forEach((dealOption, dealIndex) => {
+                            setTimeout(() => dealOption.classList.add("show"), dealIndex * 50);
+                        });
+                        updateConfirmButton();
                     });
-                    suggestionsBox.style.display = "block";
-                } else {
-                    suggestionsBox.style.display = "none";
-                }
+                    subcategoryList.appendChild(subItem);
+                    setTimeout(() => subItem.classList.add("show"), index * 50);
+                });
+            } else if (selectedCategory === "Транспорт") {
+                subcategoryOptionsDiv.style.display = "block";
+                dealTypeOptionsDiv.style.display = "none";
+                const subcategories = ["Легкові", "Вантажні", "Мотоцикли"];
+                subcategories.forEach((sub, index) => {
+                    const subItem = document.createElement("button");
+                    subItem.classList.add("subcategory-option");
+                    subItem.textContent = sub;
+                    subItem.dataset.subcategory = sub;
+                    subItem.addEventListener("click", () => {
+                        document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
+                        subItem.classList.add("selected");
+                        selectedSubcategory = sub;
+                        dealTypeOptionsDiv.style.display = "none";
+                        updateConfirmButton();
+                    });
+                    subcategoryList.appendChild(subItem);
+                    setTimeout(() => subItem.classList.add("show"), index * 50);
+                });
             }
 
-            function fetchLocations(url) {
-                if (isFetching) return;
-                isFetching = true;
-                fetch(url)
-                    .then(response => {
-                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                        return response.json();
-                    })
-                    .then(data => {
-                        updateSuggestions(data);
-                        isFetching = false;
-                    })
-                    .catch(error => {
-                        console.error("Помилка:", error);
-                        isFetching = false;
-                    });
-            }
-        }
-
-        const fileInput = document.querySelector(".file-input");
-        const fileNameDisplay = document.getElementById("file-name");
-
-        fileInput.addEventListener("change", function () {
-            const fileName = fileInput.files[0] ? fileInput.files[0].name : '';
-            fileNameDisplay.textContent = fileName ? `Обрано: ${fileName}` : '';
+            updateConfirmButton();
         });
     });
+
+    dealTypeOptions.forEach(option => {
+        option.addEventListener("click", () => {
+            dealTypeOptions.forEach(opt => opt.classList.remove("selected"));
+            option.classList.add("selected");
+            selectedDealType = option.dataset.dealType;
+            updateConfirmButton();
+        });
+    });
+
+    function updateConfirmButton() {
+        if (selectedCategory === "Нерухомість") {
+            confirmBtn.disabled = !(selectedCategory && selectedSubcategory && selectedDealType);
+        } else if (selectedCategory === "Транспорт") {
+            confirmBtn.disabled = !(selectedCategory && selectedSubcategory);
+        } else {
+            confirmBtn.disabled = !selectedCategory;
+        }
+    }
+
+    confirmBtn.addEventListener("click", () => {
+        if (!confirmBtn.disabled) {
+            let displayValue = selectedCategory;
+            if (selectedSubcategory) {
+                displayValue += `-${selectedSubcategory}`;
+            }
+            if (selectedDealType) {
+                displayValue += `-${selectedDealType}`;
+            }
+            categoryDisplay.value = displayValue;
+            categoryInput.value = selectedCategoryID;
+            subcategoryInput.value = selectedSubcategory || "";
+            dealTypeInput.value = selectedDealType || "";
+            modalContent.classList.remove("show");
+            setTimeout(() => {
+                modal.style.display = "none";
+                apartmentDetails.style.display = (selectedSubcategory === "Квартира" || selectedSubcategory === "Будинок") && selectedDealType ? "block" : "none";
+            }, 300);
+        }
+    });
+
+    function resetSelections() {
+        categoryOptions.forEach(opt => opt.classList.remove("selected"));
+        document.querySelectorAll(".subcategory-option").forEach(opt => opt.classList.remove("selected"));
+        dealTypeOptions.forEach(opt => opt.classList.remove("selected"));
+        subcategoryOptionsDiv.style.display = "none";
+        dealTypeOptionsDiv.style.display = "none";
+        subcategoryList.innerHTML = "";
+        selectedCategory = null;
+        selectedCategoryID = null;
+        selectedSubcategory = null;
+        selectedDealType = null;
+        confirmBtn.disabled = true;
+        apartmentDetails.style.display = "none";
+        categoryDisplay.value = "";
+    }
+
+    const sellerTypeButtons = document.querySelectorAll(".seller-type-option");
+    const sellerTypeInput = document.getElementById("id_seller_type");
+    sellerTypeButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            sellerTypeButtons.forEach(btn => btn.classList.remove("selected"));
+            button.classList.add("selected");
+            sellerTypeInput.value = button.dataset.sellerType;
+        });
+    });
+
+    const furnishingButtons = document.querySelectorAll(".furnishing-option");
+    const furnishingInput = document.getElementById("id_furnishing");
+    furnishingButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            furnishingButtons.forEach(btn => btn.classList.remove("selected"));
+            button.classList.add("selected");
+            furnishingInput.value = button.dataset.furnishing;
+        });
+    });
+
+    const locationInput = document.getElementById("id_location");
+    const suggestionsBox = document.getElementById("location-suggestions");
+    let isFetching = false;
+
+    if (locationInput) {
+        locationInput.addEventListener("input", function () {
+            const query = locationInput.value.trim();
+            if (query.length >= 2) {
+                fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
+            } else {
+                suggestionsBox.style.display = "none";
+            }
+        });
+
+        locationInput.addEventListener("focus", function () {
+            const query = locationInput.value.trim();
+            if (query.length >= 2) {
+                fetchLocations(`/api/locations/?search=${encodeURIComponent(query)}`);
+            } else if (!suggestionsBox.children.length) {
+                fetchLocations('/api/locations/?random=10');
+            } else {
+                suggestionsBox.style.display = "block";
+            }
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!locationInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+
+        function updateSuggestions(cities) {
+            suggestionsBox.innerHTML = "";
+            if (cities && cities.length > 0) {
+                const uniqueCities = new Set();
+                cities.forEach(city => {
+                    const displayText = city.district ? `${city.name}, ${city.district}` : city.name;
+                    if (!uniqueCities.has(displayText)) {
+                        uniqueCities.add(displayText);
+                        const item = document.createElement("div");
+                        item.classList.add("suggestion-item");
+                        item.textContent = displayText;
+                        item.addEventListener("click", function () {
+                            locationInput.value = displayText;
+                            suggestionsBox.style.display = "none";
+                        });
+                        suggestionsBox.appendChild(item);
+                    }
+                });
+                suggestionsBox.style.display = "block";
+            } else {
+                suggestionsBox.style.display = "none";
+            }
+        }
+
+        function fetchLocations(url) {
+            if (isFetching) return;
+            isFetching = true;
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    updateSuggestions(data);
+                    isFetching = false;
+                })
+                .catch(error => {
+                    console.error("Помилка:", error);
+                    isFetching = false;
+                });
+        }
+    }
+
+    const fileInput = document.querySelector(".file-input");
+    const fileNameDisplay = document.getElementById("file-name");
+
+    if (fileInput) {
+        fileInput.addEventListener("change", () => {
+            console.log("Файл вибрано:", fileInput.files);
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "";
+            fileNameDisplay.textContent = fileName ? `Обрано: ${fileName}` : "";
+        });
+    } else {
+        console.error("Елемент .file-input не знайдено");
+    }
+
+    const form = document.querySelector(".announcement-form");
+    form.addEventListener("submit", (e) => {
+        // Логуємо дані форми перед відправкою
+        const formData = new FormData(form);
+        console.log("Form data before submission:");
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+        document.querySelector(".preloader").style.display = "block";
+    });
+
+    // Додаємо обробку кліків на чекбокси
+    document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            console.log(`${checkbox.value} is now ${checkbox.checked ? 'checked' : 'unchecked'}`);
+        });
+    });
+});
 </script>
 {% endblock %}

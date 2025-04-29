@@ -1,43 +1,63 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Результати пошуку{% endblock %}
 
 {% block content %}
-<div class="container search-results">
-    <h2>Результати пошуку</h2>
+<main class="search-results-page">
+    <div class="search-results-container">
+        <header class="search-results-header">
+            <h1 class="search-results-title">Результати пошуку</h1>
+            {% if query %}
+                <p class="search-results-query">Ви шукали: <strong>{{ query }}</strong></p>
+            {% endif %}
+        </header>
 
-    {% if query %}
-        <p>Ви шукали: <strong>{{ query }}</strong></p>
-    {% endif %}
+        {% if results %}
+            <div class="results-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                {% for result in results %}
+                    <a href="{% url 'announcements:detail' result.pk %}" class="result-card" style="text-decoration: none; color: inherit;">
+                        <div class="result-image-wrapper">
+                            <img src="{% if result.image %}{{ result.image.url }}{% else %}{% static 'default-image.png' %}{% endif %}" alt="{{ result.title }}" class="result-image" style="width: 100%; height: 150px; object-fit: cover; border-radius: 5px;">
+                        </div>
+                        <div class="result-info" style="padding: 10px;">
+                            <h2 class="result-title" style="font-size: 1.2em; margin: 10px 0;">{{ result.title|escape }}</h2>
+                            <p class="result-price" style="font-weight: bold;">
+                                {% if result.price %}
+                                    {{ result.price }} грн
+                                {% else %}
+                                    Не вказано
+                                {% endif %}
+                            </p>
+                            <p class="result-location">
+                                {% if result.location %}
+                                    {{ result.location }}
+                                {% else %}
+                                    Невідомо
+                                {% endif %}
+                            </p>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
 
-    {% if results %}
-        <div class="results-list">
-            {% for result in results %}
-                <div class="result-item">
-                    <h3><a href="{% url 'announcements:detail' result.pk %}">{{ result.title }}</a></h3>
-                    <p>{{ result.description|slice:":150" }}...</p>
-                    <p><strong>Ціна:</strong> {{ result.price }} грн</p>
-                    <p><strong>Локація:</strong> {{ result.location }}</p>
-                    <a href="{% url 'announcements:detail' result.pk %}" class="btn btn-primary">Детальніше</a>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>Нічого не знайдено за вашим запитом.</p>
-    {% endif %}
-
-    <div class="pagination">
-        {% if results.has_previous %}
-            <a href="?page=1&query={{ query }}" class="btn btn-secondary">Перша сторінка</a>
-            <a href="?page={{ results.previous_page_number }}&query={{ query }}" class="btn btn-secondary">Попередня</a>
-        {% endif %}
-
-        <span>Сторінка {{ results.number }} з {{ results.paginator.num_pages }}</span>
-
-        {% if results.has_next %}
-            <a href="?page={{ results.next_page_number }}&query={{ query }}" class="btn btn-secondary">Наступна</a>
-            <a href="?page={{ results.paginator.num_pages }}&query={{ query }}" class="btn btn-secondary">Остання сторінка</a>
+            <!-- Пагінація -->
+            <nav class="pagination" role="navigation" aria-label="Пагінація" style="margin-top: 20px; text-align: center;">
+                <ul class="pagination-list" style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 10px;">
+                    {% if results.has_previous %}
+                        <li><a href="?page=1&query={{ query }}" class="pagination-link" aria-label="Перша сторінка" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none;">«</a></li>
+                        <li><a href="?page={{ results.previous_page_number }}&query={{ query }}" class="pagination-link" aria-label="Попередня сторінка" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none;">‹</a></li>
+                    {% endif %}
+                    <li><span class="pagination-current" style="padding: 8px 12px;">Сторінка {{ results.number }} із {{ results.paginator.num_pages }}</span></li>
+                    {% if results.has_next %}
+                        <li><a href="?page={{ results.next_page_number }}&query={{ query }}" class="pagination-link" aria-label="Наступна сторінка" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none;">›</a></li>
+                        <li><a href="?page={{ results.paginator.num_pages }}&query={{ query }}" class="pagination-link" aria-label="Остання сторінка" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; text-decoration: none;">»</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <p class="no-results" style="text-align: center; margin-top: 20px;">Нічого не знайдено за вашим запитом.</p>
         {% endif %}
     </div>
-</div>
+</main>
 {% endblock %}

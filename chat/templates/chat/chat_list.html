@@ -3,41 +3,94 @@
 
 {% block title %}Мої чати{% endblock %}
 
-
 {% block content %}
 <div class="chat-list-page">
-    <h2>Мої чати</h2>
-    <div class="chat-list">
-        {% for chat in user_chats %}
-            <a href="{% url 'chat:chat_detail' chat.id %}" class="chat-item">
-                <div class="chat-item-info">
-                    <span class="chat-item-name">
-                        {% if chat.buyer == request.user %}
-                            {{ chat.seller.username }}
-                        {% else %}
-                            {{ chat.buyer.username }}
-                        {% endif %}
-                    </span>
-                    <span class="chat-item-status" data-username="{% if chat.buyer == request.user %}{{ chat.seller.username }}{% else %}{{ chat.buyer.username }}{% endif %}">
-                        {% if chat.buyer == request.user %}
-                            {% if chat.seller.status.is_online %}
-                                Онлайн
-                            {% else %}
-                                Офлайн
-                            {% endif %}
-                        {% else %}
-                            {% if chat.buyer.status.is_online %}
-                                Онлайн
-                            {% else %}
-                                Офлайн
-                            {% endif %}
-                        {% endif %}
-                    </span>
-                </div>
-            </a>
-        {% empty %}
-            <p>У вас ще немає чатів.</p>
-        {% endfor %}
+    <h1 class="page-title">Мої чати</h1>
+
+    <!-- Кнопки для перемикання -->
+    <div class="chat-tabs">
+        <button class="tab-button active" data-tab="buying">
+            <span class="tab-icon"><i class="fas fa-shopping-cart"></i></span> Купую
+        </button>
+        <button class="tab-button" data-tab="selling">
+            <span class="tab-icon"><i class="fas fa-store"></i></span> Продаю
+        </button>
+    </div>
+
+    <!-- Контейнер для списків чатів -->
+    <div class="chat-content">
+        <!-- Розділ "Купую" -->
+        <div class="chat-tab active" id="buying">
+            <div class="chat-list">
+                {% for chat in user_chats %}
+                    {% if chat.buyer == request.user %}
+                        <a href="{% url 'chat:chat_detail' chat.id %}" class="chat-item">
+                            <div class="chat-item-avatar">
+                                <img src="{% static 'images/default_avatar.png' %}" alt="Avatar">
+                            </div>
+                            <div class="chat-item-info">
+                                <span class="chat-item-name">{{ chat.seller.username }}</span>
+                                <span class="chat-item-status" data-status="{% if chat.seller.status.is_online %}online{% else %}offline{% endif %}">
+                                    <span class="status-dot"></span>
+                                    {% if chat.seller.status.is_online %}
+                                        Онлайн
+                                    {% else %}
+                                        Офлайн
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </a>
+                    {% endif %}
+                {% empty %}
+                    <p class="empty-message">У вас ще немає чатів як покупця.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Розділ "Продаю" -->
+        <div class="chat-tab" id="selling">
+            <div class="chat-list">
+                {% for chat in user_chats %}
+                    {% if chat.seller == request.user %}
+                        <a href="{% url 'chat:chat_detail' chat.id %}" class="chat-item">
+                            <div class="chat-item-info">
+                                <span class="chat-item-name">{{ chat.buyer.username }}</span>
+                                <span class="chat-item-status" data-status="{% if chat.buyer.status.is_online %}online{% else %}offline{% endif %}">
+                                    <span class="status-dot"></span>
+                                    {% if chat.buyer.status.is_online %}
+                                        Онлайн
+                                    {% else %}
+                                        Офлайн
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </a>
+                    {% endif %}
+                {% empty %}
+                    <p class="empty-message">У вас ще немає чатів як продавця.</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.chat-tab');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Видаляємо клас active з усіх кнопок і вкладок
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Додаємо клас active до натиснутої кнопки та відповідної вкладки
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
 {% endblock %}
