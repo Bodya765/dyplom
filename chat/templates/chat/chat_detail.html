@@ -109,14 +109,13 @@
         <button id="save-edit-message" class="btn btn-primary">Зберегти</button>
     </div>
 </div>
-
+{% endblock %}
 
 {% block extra_scripts %}
     <script src="{% static 'js/chat.js' %}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             initializeChat({{ chat.id }}, '{{ request.user.username }}');
-            // Оновлюємо кількість непрочитаних повідомлень після завантаження сторінки
             setTimeout(() => {
                 if (typeof updateUnreadMessagesCount === 'function') {
                     updateUnreadMessagesCount();

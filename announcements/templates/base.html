@@ -62,7 +62,7 @@
                             <img src="{% static 'images/profile-icon.png' %}" alt="Профіль" class="profile-photo authenticated" id="profilePhoto" aria-expanded="false">
                             <div class="dropdown-menu" id="dropdownMenu">
                                 <a href="{% url 'announcements:profile_edit' %}" class="dropdown-link">
-                                    <i class="bi bi-pencil-square"></i> Редагувати профіль
+                                    <i class="bi bi-pencil-square"></i> Мій профіль
                                 </a>
                                 <form method="POST" action="{% url 'announcements:logout' %}">
                                     {% csrf_token %}

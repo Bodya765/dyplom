@@ -1,51 +1,506 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Редагування профілю{% endblock %}
+{% block title %}Редагувати профіль{% endblock %}
 
 {% block content %}
-<div class="profile-edit-container">
-    <div class="profile-edit-form">
-        <h2>Редагувати профіль</h2>
-        {% if form.errors %}
-        <div class="form-errors">
-            <p>Будь ласка, виправте помилки:</p>
-            <ul>
-                {% for field in form %}
-                    {% for error in field.errors %}
-                        <li>{{ error }}</li>
-                    {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
+<main class="profile-page">
+    <div class="profile-container">
+        <!-- Інформація профілю -->
+        <section class="profile-header">
+            <h1 class="section-title">Мій профіль</h1>
+            <div class="profile-details">
+                <div class="profile-avatar">
+                    <img id="avatar-preview" src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="Avatar">
+                    <label for="avatar-upload" class="avatar-upload-btn">
+                        <i class="fas fa-camera"></i> Змінити фото
+                    </label>
+                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                </div>
+                <form id="profile-form" class="profile-form" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-field">
+                        <label for="username" class="form-label">Ім'я:</label>
+                        <input type="text" id="username" name="username" value="{{ user.username }}" class="form-input" readonly>
+                    </div>
+                    <div class="form-field">
+                        <label for="phone" class="form-label">Телефон:</label>
+                        <input type="text" id="phone" name="phone" value="{% if user.profile.phone %}{{ user.profile.phone }}{% endif %}" class="form-input" placeholder="Введіть номер телефону">
+                    </div>
+                    <div class="form-field">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" id="email" name="email" value="{{ user.email }}" class="form-input" placeholder="Введіть email">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+                </form>
+            </div>
+        </section>
 
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            {% for field in form %}
-                {% if field.name == 'avatar' or field.name == 'photo' %}
-                    <div class="form-group">
-                        <label for="{{ field.id_for_label }}">Фото профілю</label>
-                        <div class="custom-file-upload">
-                            <input type="file" id="{{ field.id_for_label }}" name="{{ field.name }}" class="file-input" accept="image/*" hidden>
-
-                            <div class="image-preview" style="display: none;">
-                                <img src="" alt="Прев’ю фото" class="preview-img">
+        <!-- Список оголошень -->
+        <section class="announcements-section">
+            <h2 class="section-title">Мої оголошення</h2>
+            {% if announcements %}
+                <div class="announcements-grid">
+                    {% for announcement in announcements %}
+                        <div class="announcement-card">
+                            <div class="announcement-image">
+                                <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" alt="{{ announcement.title }}">
+                            </div>
+                            <div class="announcement-details">
+                                <h3 class="announcement-title">
+                                    <a href="{% url 'announcements:announcement-detail' announcement.id %}">{{ announcement.title }}</a>
+                                </h3>
+                                <p class="announcement-price">{{ announcement.price }} грн</p>
+                                <p class="announcement-location"><i class="fas fa-map-marker-alt"></i> {{ announcement.location }}</p>
                             </div>
                         </div>
-                        {% if field.errors %}
-                            {% for error in field.errors %}
-                                <div class="invalid-feedback">{{ error }}</div>
-                            {% endfor %}
+                    {% endfor %}
+                </div>
+
+                <!-- Пагінація -->
+                {% if page_obj.has_other_pages %}
+                    <div class="pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1" class="pagination-btn">Перша</a>
+                            <a href="?page={{ page_obj.previous_page_number }}" class="pagination-btn">Попередня</a>
+                        {% endif %}
+
+                        <span class="pagination-current">
+                            Сторінка {{ page_obj.number }} з {{ page_obj.paginator.num_pages }}
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}" class="pagination-btn">Наступна</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}" class="pagination-btn">Остання</a>
                         {% endif %}
                     </div>
-                {% else %}
-                    <p>{{ field.label_tag }} {{ field }}</p>
                 {% endif %}
-            {% endfor %}
-            <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-            <a href="{% url 'announcements:profile_edit' %}" class="btn btn-secondary">Скасувати</a>
-        </form>
+            {% else %}
+                <p class="empty-message">Ви ще не створили жодного оголошення.</p>
+            {% endif %}
+        </section>
     </div>
-</div>
+</main>
 
+<style>
+    .profile-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px 15px;
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f7fa;
+        border-radius: 10px;
+        min-height: calc(100vh - 100px);
+    }
+
+    .profile-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Профіль */
+    .profile-header {
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        color: #1a3c34;
+        font-weight: 600;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 5px;
+    }
+
+    .profile-details {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 1px solid #e0e0e0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-upload-btn {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        font-size: 0.8rem;
+        text-align: center;
+        padding: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .avatar-upload-btn:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .profile-form {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-label {
+        font-size: 0.95rem;
+        color: #34495e;
+        font-weight: 500;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-family: 'Roboto', sans-serif;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #2ecc71;
+        box-shadow: 0 0 5px rgba(46, 204, 113, 0.2);
+    }
+
+    .form-input[readonly] {
+        background-color: #f9f9f9;
+        cursor: not-allowed;
+    }
+
+    .btn.btn-primary {
+        width: 100%;
+        max-width: 200px;
+        padding: 8px 15px;
+        background-color: #2ecc71;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn.btn-primary:hover {
+        background-color: #27ae60;
+    }
+
+    /* Оголошення */
+    .announcements-section {
+        margin-top: 20px;
+    }
+
+    .announcements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .announcement-card {
+        background-color: #fafafa;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .announcement-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .announcement-image {
+        width: 100%;
+        height: 150px;
+        overflow: hidden;
+    }
+
+    .announcement-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .announcement-card:hover .announcement-image img {
+        transform: scale(1.05);
+    }
+
+    .announcement-details {
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .announcement-title {
+        font-size: 1rem;
+        color: #1a3c34;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .announcement-title a {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.3s ease;
+    }
+
+    .announcement-title a:hover {
+        color: #2ecc71;
+    }
+
+    .announcement-price {
+        font-size: 0.95rem;
+        color: #2ecc71;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .announcement-location {
+        font-size: 0.85rem;
+        color: #7f8c8d;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .announcement-location i {
+        color: #34495e;
+    }
+
+    .empty-message {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        text-align: center;
+        font-style: italic;
+        margin-top: 15px;
+    }
+
+    /* Пагінація */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .pagination-btn {
+        padding: 6px 12px;
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #34495e;
+        text-decoration: none;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .pagination-btn:hover {
+        background-color: #f0f0f0;
+        border-color: #2ecc71;
+    }
+
+    .pagination-current {
+        font-size: 0.9rem;
+        color: #34495e;
+    }
+
+    /* Адаптивність */
+    @media (max-width: 768px) {
+        .profile-details {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+        }
+
+        .profile-form {
+            width: 100%;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+        }
+
+        .announcements-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .announcement-card {
+            display: flex;
+            gap: 10px;
+        }
+
+        .announcement-image {
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+        }
+
+        .announcement-details {
+            flex: 1;
+        }
+
+        .announcement-title {
+            font-size: 0.95rem;
+        }
+
+        .announcement-price {
+            font-size: 0.9rem;
+        }
+
+        .announcement-location {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-page {
+            padding: 15px 10px;
+        }
+
+        .profile-container {
+            padding: 15px;
+        }
+
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+        }
+
+        .form-input {
+            font-size: 0.8rem;
+            padding: 6px 8px;
+        }
+
+        .announcement-card {
+            flex-direction: column;
+        }
+
+        .announcement-image {
+            width: 100%;
+            height: 150px;
+        }
+
+        .announcement-title {
+            font-size: 0.9rem;
+        }
+
+        .pagination-btn {
+            font-size: 0.85rem;
+            padding: 5px 10px;
+        }
+
+        .pagination-current {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Оновлення аватара
+    const avatarUpload = document.getElementById("avatar-upload");
+    const avatarPreview = document.getElementById("avatar-preview");
+
+    avatarUpload.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                avatarPreview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Відправка аватара через AJAX
+            const formData = new FormData();
+            formData.append("avatar", file);
+            formData.append("csrfmiddlewaretoken", document.querySelector("[name=csrfmiddlewaretoken]").value);
+
+            fetch("{% url 'announcements:update_avatar' %}", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Аватар успішно оновлено!");
+                } else {
+                    console.error("Помилка оновлення аватара:", data.error);
+                }
+            })
+            .catch(error => console.error("Помилка:", error));
+        }
+    });
+
+    // Оновлення інформації профілю
+    const profileForm = document.getElementById("profile-form");
+    profileForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(profileForm);
+        fetch("{% url 'announcements:update_profile' %}", {
+            method: "POST",
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("Профіль успішно оновлено!");
+                document.getElementById("phone").value = data.phone || "";
+                document.getElementById("email").value = data.email;
+            } else {
+                console.error("Помилка оновлення профілю:", data.error);
+            }
+        })
+        .catch(error => console.error("Помилка:", error));
+    });
+});
+</script>
 {% endblock %}

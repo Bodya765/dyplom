@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Адмін-панель{% endblock %}
+
+{% block content %}
+<main class="admin-panel">
+    <h2 class="admin-panel__title">Оголошення на модерації</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="admin-panel__alert admin-panel__alert--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% if announcements %}
+        <ul class="admin-panel__list">
+            {% for announcement in announcements %}
+                <li class="admin-panel__item">
+                    <h3 class="admin-panel__item-title">{{ announcement.title }}</h3>
+                    <p class="admin-panel__item-detail"><span class="admin-panel__label">Автор:</span> {{ announcement.owner.username }}</p>
+                    <p class="admin-panel__item-detail"><span class="admin-panel__label">Ціна:</span> {{ announcement.price|default:"Не вказано" }} грн</p>
+                    <p class="admin-panel__item-detail"><span class="admin-panel__label">Дата створення:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+                    <a href="{% url 'announcements:moderate_announcement' announcement.pk %}" class="admin-panel__button">Модерувати</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="admin-panel__empty">Немає оголошень на модерації.</p>
+    {% endif %}
+</main>
+{% endblock %}

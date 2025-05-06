@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        """Обробляє підключення користувача до WebSocket чату."""
         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
         self.chat_group_name = f'chat_{self.chat_id}'
         self.user = self.scope['user']

@@ -22,50 +22,34 @@
                 </ul>
             {% endif %}
 
-            <!-- Відображення помилок форми -->
-            {% if form.errors %}
-                <div class="form-errors">
-                    <p>Будь ласка, виправте помилки:</p>
-                    <ul>
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-
             <form method="post" enctype="multipart/form-data" class="registration-form">
                 {% csrf_token %}
-
-                <div class="form-group {% if form.username.errors %}is-invalid{% endif %}">
-                    <label for="id_username">Ім'я користувача</label>
-                    {{ form.username }}
-                    {% for error in form.username.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                </div>
-
-                <div class="form-group {% if form.password1.errors %}is-invalid{% endif %}">
-                    <label for="id_password1">Пароль</label>
-                    {{ form.password1 }}
-                    {% for error in form.password1.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                </div>
-
-                <div class="form-group {% if form.password2.errors %}is-invalid{% endif %}">
-                    <label for="id_password2">Підтвердьте пароль</label>
-                    {{ form.password2 }}
-                    {% for error in form.password2.errors %}
-                        <div class="invalid-feedback">{{ error }}</div>
-                    {% endfor %}
-                </div>
-
+                <!-- Відображаємо поля форми вручну для кращого контролю -->
+                {% for field in form %}
+                    <div class="form-group {% if field.errors %}is-invalid{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in field.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <!-- Некритичні помилки форми (наприклад, загальні помилки) -->
+                {% if form.non_field_errors %}
+                    <div class="form-errors">
+                        <ul class="errorlist">
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
                 <!-- Додаємо reCAPTCHA -->
                 <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}" aria-label="Перевірка reCAPTCHA"></div>
-
                 <button type="submit" class="btn btn-primary">Зареєструватися</button>
             </form>
 

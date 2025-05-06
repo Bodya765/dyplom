@@ -7,14 +7,13 @@ from django.conf import settings
 urlpatterns = [
     # Панель адміністратора
     path('admin/', admin.site.urls),
+    path('', include('announcements.urls', namespace='announcements')),
 
-    # Головна сторінка
+                  # Головна сторінка
     path('', views.home, name='home'),
 
     # Аутентифікація та авторизація
     path('auth/', include('social_django.urls', namespace='social')),
     path('chat/', include('chat.urls')),
-    path('assistant-bot/', include('assistant_bot.urls')),
-    # API для оголошень
-    path('api/', include('announcements.urls')),
+    path('support/', include('support.urls', namespace='support')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

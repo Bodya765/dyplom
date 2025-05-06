@@ -1,15 +1,21 @@
 from django import forms
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, AuthenticationForm
 from django.contrib.auth.models import User
 from allauth.account.forms import SignupForm
-from .models import Announcement, Review, Category, ApartmentDetails
+from .models import Announcement, Review, Category, ApartmentDetails, UserProfile
 import re
+from django.core.exceptions import ValidationError
 
 class CustomSignupForm(SignupForm):
     first_name = forms.CharField(
         max_length=30,
         label="Ім'я",
         widget=forms.TextInput(attrs={'placeholder': "Введіть ваше ім'я", 'aria-label': "Ваше ім'я"})
+    )
+    email_or_phone = forms.CharField(
+        max_length=100,
+        label="Email або номер телефону",
+        widget=forms.TextInput(attrs={'placeholder': "Введіть email або номер телефону", 'aria-label': "Email або номер телефону"})
     )
 
     def clean_first_name(self):
@@ -22,11 +28,79 @@ class CustomSignupForm(SignupForm):
             raise forms.ValidationError("Ім'я може містити лише літери, цифри, пробіли або дефіси.")
         return first_name
 
+    def clean_email_or_phone(self):
+        email_or_phone = self.cleaned_data.get('email_or_phone').strip()
+        if not email_or_phone:
+            raise forms.ValidationError("Email або номер телефону не може бути порожнім.")
+
+        # Перевірка формату email
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        # Перевірка формату номера телефону (наприклад, +380123456789 або 0123456789)
+        phone_regex = r'^\+?\d{10,15}$'
+
+        is_email = bool(re.match(email_regex, email_or_phone))
+        is_phone = bool(re.match(phone_regex, email_or_phone))
+
+        if not (is_email or is_phone):
+            raise forms.ValidationError("Введіть коректний email (наприклад, example@domain.com) або номер телефону (наприклад, +380123456789).")
+        if is_email and is_phone:
+            raise forms.ValidationError("Введіть лише один тип даних: email або номер телефону.")
+
+        self.cleaned_data['is_email'] = is_email  # Зберігаємо, що було введено (email чи телефон)
+        return email_or_phone
+
     def save(self, request):
         user = super().save(request)
         user.first_name = self.cleaned_data['first_name']
+        email_or_phone = self.cleaned_data['email_or_phone']
+        # Генеруємо username на основі email_or_phone
+        if self.cleaned_data.get('is_email'):
+            user.username = email_or_phone.split('@')[0] + str(user.id)  # Наприклад, "example" з "example@domain.com"
+            user.email = email_or_phone
+        else:
+            user.username = email_or_phone.replace('+', '') + str(user.id)  # Наприклад, "380123456789"
+            user.profile.phone = email_or_phone
+            user.profile.save()
         user.save()
         return user
+
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        label="Email або номер телефону",
+        widget=forms.TextInput(attrs={'placeholder': "Введіть email або номер телефону", 'aria-label': "Email або номер телефону"})
+    )
+
+    def clean_username(self):
+        email_or_phone = self.cleaned_data.get('username').strip()
+        if not email_or_phone:
+            raise forms.ValidationError("Email або номер телефону не може бути порожнім.")
+
+        email_regex = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        phone_regex = r'^\+?\d{10,15}$'
+
+        is_email = bool(re.match(email_regex, email_or_phone))
+        is_phone = bool(re.match(phone_regex, email_or_phone))
+
+        if not (is_email or is_phone):
+            raise forms.ValidationError("Введіть коректний email (наприклад, example@domain.com) або номер телефону (наприклад, +380123456789).")
+
+        # Шукаємо користувача за email або телефоном
+        if is_email:
+            try:
+                user = User.objects.get(email=email_or_phone)
+                return user.username
+            except User.DoesNotExist:
+                raise forms.ValidationError("Користувач з таким email не знайдений.")
+        else:
+            try:
+                profile = UserProfile.objects.get(phone=email_or_phone)
+                return profile.user.username
+            except UserProfile.DoesNotExist:
+                raise forms.ValidationError("Користувач з таким номером телефону не знайдений.")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
 
 class ReviewForm(forms.ModelForm):
     class Meta:
@@ -71,7 +145,7 @@ class ReviewForm(forms.ModelForm):
         return review
 
 class AnnouncementForm(forms.ModelForm):
-    image = forms.ImageField(  # Змінено з images на image, використано ImageField
+    image = forms.ImageField(
         widget=forms.FileInput(attrs={'aria-label': 'Зображення', 'class': 'form-control'}),
         required=False,
         label="Зображення"
@@ -261,7 +335,7 @@ class AnnouncementForm(forms.ModelForm):
         model = Announcement
         fields = [
             'title', 'description', 'price', 'location', 'category',
-            'subcategory', 'deal_type', 'image'  # Додано image до fields
+            'subcategory', 'deal_type', 'image'
         ]
         widgets = {
             'title': forms.TextInput(
@@ -312,7 +386,7 @@ class AnnouncementForm(forms.ModelForm):
             raise forms.ValidationError("Ціна не може бути від'ємною.")
         return price
 
-    def clean_image(self):  # Змінено з clean_images на clean_image
+    def clean_image(self):
         image = self.cleaned_data.get('image')
         if image:
             if not image.name.lower().endswith(('jpg', 'jpeg', 'png')):
@@ -332,41 +406,64 @@ class AnnouncementForm(forms.ModelForm):
                 raise forms.ValidationError("Для квартир необхідно вказати загальну площу.")
         return cleaned_data
 
-class ProfileForm(UserChangeForm):
-    profile_picture = forms.ImageField(
-        required=False,
-        widget=forms.FileInput(attrs={'class': 'form-control'}),
-        label="Фото профілю"
-    )
-
+class ProfileForm(forms.ModelForm):
     class Meta:
-        model = User
-        fields = ['username', 'first_name', 'email', 'profile_picture']
+        model = UserProfile
+        fields = ['phone', 'avatar']
         widgets = {
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
-            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введіть номер телефону'}),
+            'avatar': forms.FileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'phone': 'Телефон',
+            'avatar': 'Фото профілю',
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields.pop('password')  # Remove password field
 
-    def clean_profile_picture(self):
-        profile_picture = self.cleaned_data.get('profile_picture')
-        if profile_picture:
-            if not profile_picture.name.lower().endswith(('jpg', 'jpeg', 'png')):
+    def clean_avatar(self):
+        avatar = self.cleaned_data.get('avatar')
+        if avatar:
+            if not avatar.name.lower().endswith(('jpg', 'jpeg', 'png')):
                 raise forms.ValidationError("Дозволено лише зображення у форматах JPG, JPEG або PNG.")
-            if profile_picture.size > 2 * 1024 * 1024:  # 2MB limit
+            if avatar.size > 2 * 1024 * 1024:  # 2MB limit
                 raise forms.ValidationError("Розмір зображення не може перевищувати 2 МБ.")
-        return profile_picture
+        return avatar
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        profile_picture = self.cleaned_data.get('profile_picture')
-        if profile_picture:
-            # Assuming a Profile model or custom storage logic is implemented
-            user.profile_picture = profile_picture  # Adjust based on actual implementation
-        if commit:
-            user.save()
-        return user
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if phone:
+            phone = phone.strip()
+            phone_regex = r'^\+?\d{10,15}$'
+            if not re.match(phone_regex, phone):
+                raise forms.ValidationError("Введіть коректний номер телефону (наприклад, +380123456789).")
+        return phone
+
+class UserProfileForm(forms.ModelForm):
+    first_name = forms.CharField(
+        max_length=30,
+        label="Ім'я",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'email']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name').strip()
+        if not first_name:
+            raise forms.ValidationError("Ім'я не може бути порожнім.")
+        if len(first_name) < 2:
+            raise forms.ValidationError("Ім'я має містити принаймні 2 символи.")
+        if not re.match(r'^[\w\s-]+$', first_name, re.UNICODE):
+            raise forms.ValidationError("Ім'я може містити лише літери, цифри, пробіли або дефіси.")
+        return first_name

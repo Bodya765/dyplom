@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
 from django.db.models import Avg
+from django.contrib.auth.models import User
 
 class Location(models.Model):
     name = models.CharField(max_length=255, verbose_name="Назва")
@@ -41,6 +42,12 @@ def set_category_slug(sender, instance, **kwargs):
             instance.slug = f"{instance.slug}-{instance.pk or Category.objects.count() + 1}"
 
 class Announcement(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'На модерації'),
+        ('approved', 'Схвалено'),
+        ('rejected', 'Відхилено'),
+    ]
+
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     description = models.TextField(verbose_name="Опис")
     price = models.DecimalField(
@@ -66,6 +73,12 @@ class Announcement(models.Model):
     rating = models.FloatField(default=0, verbose_name="Рейтинг")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата оновлення")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="Статус"
+    )
 
     def __str__(self):
         return self.title
@@ -85,6 +98,7 @@ class Announcement(models.Model):
         indexes = [
             models.Index(fields=['category', 'subcategory', 'deal_type']),
             models.Index(fields=['owner']),
+            models.Index(fields=['status']),
         ]
 
 class ApartmentDetails(models.Model):
@@ -201,3 +215,40 @@ class Review(models.Model):
 @receiver(post_delete, sender=Review)
 def update_announcement_avg_rating(sender, instance, **kwargs):
     instance.announcement.update_rating()
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile',
+        verbose_name="Користувач"
+    )
+    avatar = models.ImageField(
+        upload_to='avatars/',
+        null=True,
+        blank=True,
+        verbose_name="Аватар"
+    )
+    phone = models.CharField(
+        max_length=15,
+        null=True,
+        blank=True,
+        verbose_name="Телефон"
+    )
+
+    def __str__(self):
+        return f"Профіль користувача {self.user.username}"
+
+    class Meta:
+        verbose_name = "Профіль користувача"
+        verbose_name_plural = "Профілі користувачів"
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def save_user_profile(sender, instance, **kwargs):
+    if hasattr(instance, 'profile'):
+        instance.profile.save()

@@ -5,19 +5,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse
 from django.db.models import Q
-from rest_framework import viewsets
 from .models import Announcement, Category, ApartmentDetails, Review, Location
 from .forms import AnnouncementForm, ProfileForm, ReviewForm
-from .serializers import AnnouncementSerializer
+import random
+import logging
 
-class AnnouncementViewSet(viewsets.ModelViewSet):
-    queryset = Announcement.objects.select_related('category', 'owner').prefetch_related('reviews').all()
-    serializer_class = AnnouncementSerializer
+logger = logging.getLogger(__name__)
 
 def paginate_queryset(queryset, request, per_page=10):
     paginator = Paginator(queryset, per_page)
@@ -27,7 +25,10 @@ def paginate_queryset(queryset, request, per_page=10):
     except PageNotAnInteger:
         return paginator.get_page(1)
     except EmptyPage:
-        return paginator.get_page(paginator.num_pages)
+        return paginate_queryset(paginator.num_pages)
+
+def is_admin(user):
+    return user.is_authenticated and user.is_superuser
 
 def profile(request):
     return render(request, 'announcements/profile.html')
@@ -35,8 +36,8 @@ def profile(request):
 def home(request):
     recent_ids = request.session.get('recent_announcements', [])
     try:
-        recent_ids = [int(id) for id in recent_ids]  # Ensure IDs are integers
-        recent_announcements = Announcement.objects.filter(id__in=recent_ids).select_related('category', 'owner')[:5]
+        recent_ids = [int(id) for id in recent_ids]
+        recent_announcements = Announcement.objects.filter(id__in=recent_ids, status='approved').select_related('category', 'owner')[:5]
     except (ValueError, TypeError):
         recent_announcements = []
     return render(request, 'announcements/home.html', {
@@ -48,16 +49,18 @@ def announcement_autocomplete(request):
     if len(query) < 2:
         return JsonResponse([], safe=False)
     announcements = Announcement.objects.filter(
-        Q(title__icontains=query) | Q(description__icontains=query)
+        Q(title__icontains=query) | Q(description__icontains=query),
+        status='approved'
     ).values_list('title', flat=True).distinct()[:10]
     return JsonResponse(list(announcements), safe=False)
 
 def search_results(request):
     search_query = request.GET.get('search', '').strip()
-    announcements = Announcement.objects.select_related('category', 'owner')
+    announcements = Announcement.objects.filter(status='approved').select_related('category', 'owner')
     if search_query:
         announcements = announcements.filter(
-            Q(title__icontains=search_query) | Q(description__icontains=search_query) | Q(location__icontains=search_query)
+            Q(title__icontains=search_query) | Q(description__icontains=search_query) | Q(
+                location__icontains=search_query)
         )
     page_obj = paginate_queryset(announcements, request)
     return render(request, 'announcements/search_results.html', {
@@ -66,11 +69,13 @@ def search_results(request):
     })
 
 def announcement_detail(request, pk):
-    announcement = get_object_or_404(Announcement.objects.select_related('category', 'owner').prefetch_related('reviews'), pk=pk)
+    announcement = get_object_or_404(
+        Announcement.objects.select_related('category', 'owner').prefetch_related('reviews').filter(status='approved'),
+        pk=pk
+    )
     reviews = announcement.reviews.all()
     review_form = ReviewForm(user=request.user, announcement=announcement) if request.user.is_authenticated else None
 
-    # Add to recent announcements
     if 'recent_announcements' not in request.session:
         request.session['recent_announcements'] = []
     recent = request.session['recent_announcements']
@@ -133,9 +138,9 @@ def create_announcement(request):
         if form.is_valid():
             announcement = form.save(commit=False)
             announcement.owner = request.user
+            announcement.status = 'pending'
             announcement.save()
 
-            # Save ApartmentDetails for apartments
             if announcement.subcategory == "Квартира":
                 apartment_details = ApartmentDetails(
                     announcement=announcement,
@@ -170,31 +175,8 @@ def create_announcement(request):
                         'categories': Category.objects.all(),
                     })
 
-            # Telegram bot notification
-            try:
-                bot_token = settings.TELEGRAM_BOT_TOKEN
-                chat_id = settings.TELEGRAM_CHAT_ID
-                message = (
-                    f"Нове оголошення: {announcement.title}\n"
-                    f"Ціна: {announcement.price or 'Не вказано'} грн\n"
-                    f"Місцезнаходження: {announcement.location or 'Не вказано'}\n"
-                    f"Категорія: {announcement.category.name if announcement.category else 'Не вказано'}\n"
-                )
-                if announcement.subcategory == "Квартира" and hasattr(announcement, 'apartment_details'):
-                    details = announcement.apartment_details
-                    if details.total_area:
-                        message += f"Площа: {details.total_area} м²\n"
-                    if details.seller_type:
-                        message += f"Тип продавця: {details.seller_type}\n"
-                requests.post(
-                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                    data={'chat_id': chat_id, 'text': message}
-                )
-            except Exception as e:
-                print(f"Помилка відправки в Telegram: {e}")
-
-            messages.success(request, "Оголошення успішно створено!")
-            return redirect('announcements:announcement-detail', pk=announcement.pk)
+            messages.success(request, "Оголошення створено та відправлено на модерацію!")
+            return redirect('home')
         else:
             messages.error(request, "Помилка у формі. Перевірте введені дані.")
     else:
@@ -207,7 +189,7 @@ def create_announcement(request):
 
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
-    announcements = Announcement.objects.filter(category=category).select_related('owner')
+    announcements = Announcement.objects.filter(category=category, status='approved').select_related('owner')
     page_obj = paginate_queryset(announcements, request)
     return render(request, 'announcements/category_announcement.html', {
         'category': category,
@@ -257,7 +239,7 @@ def signup_view(request):
 
 def category_announcements(request, category_id):
     category = get_object_or_404(Category, id=category_id)
-    announcements = Announcement.objects.filter(category=category).select_related('owner')
+    announcements = Announcement.objects.filter(category=category, status='approved').select_related('owner')
     page_obj = paginate_queryset(announcements, request)
     return render(request, 'announcements/category_announcement.html', {
         'category': category,
@@ -266,7 +248,6 @@ def category_announcements(request, category_id):
     })
 
 def chat_view(request):
-    # Placeholder for chat system integration
     return render(request, 'chat/room.html')
 
 def location_list(request):
@@ -284,28 +265,77 @@ def location_list(request):
     data = [{"name": loc.name, "district": loc.district} for loc in locations]
     return JsonResponse(data, safe=False)
 
+def location_api(request):
+    query = request.GET.get('search', '')
+    random_results = request.GET.get('random', '')
+    if random_results:
+        locations = Location.objects.all()
+        if locations.exists():
+            locations = random.sample(list(locations), min(int(random_results), locations.count()))
+        else:
+            locations = []
+    else:
+        locations = Location.objects.filter(
+            Q(name__icontains=query) | Q(district__icontains=query)
+        )[:10]
+    results = [
+        {
+            'name': location.name,
+            'district': location.district if location.district else ''
+        }
+        for location in locations
+    ]
+    return JsonResponse(results, safe=False)
+
 @login_required
 def profile_edit(request):
-    user = request.user
-    form = ProfileForm(request.POST or None, request.FILES or None, instance=user)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Профіль успішно оновлено!")
-        return redirect("announcements:profile_edit")
-    return render(request, "announcements/profile_edit.html", {"form": form})
+    announcements = Announcement.objects.filter(owner=request.user, status='approved').select_related('category', 'owner').order_by(
+        '-created_at')
+    page_obj = paginate_queryset(announcements, request, per_page=9)
+    return render(request, "announcements/profile_edit.html", {
+        "user": request.user,
+        "announcements": page_obj,
+        "page_obj": page_obj,
+    })
+
+@login_required
+def update_profile(request):
+    if request.method == "POST":
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        request.user.profile.phone = phone
+        request.user.profile.save()
+        request.user.email = email
+        request.user.save()
+        return JsonResponse({
+            'success': True,
+            'phone': phone,
+            'email': email,
+        })
+    return JsonResponse({'success': False, 'error': 'Невірний метод запиту'})
+
+@login_required
+def update_avatar(request):
+    if request.method == "POST" and request.FILES.get('avatar'):
+        avatar = request.FILES['avatar']
+        request.user.profile.avatar = avatar
+        request.user.profile.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Файл не завантажено'})
 
 @login_required
 def edit_announcement(request, pk):
     announcement = get_object_or_404(Announcement, pk=pk)
     if request.user != announcement.owner:
         messages.error(request, "Ви не маєте права редагувати це оголошення.")
-        return redirect('announcements:announcement-detail', pk=pk)
+        return redirect('announcements:announcement_detail', pk=pk)
 
     if request.method == "POST":
         form = AnnouncementForm(request.POST, request.FILES, instance=announcement)
         if form.is_valid():
             announcement = form.save()
-            # Update ApartmentDetails
+            announcement.status = 'pending'
+            announcement.save()
             if announcement.subcategory == "Квартира":
                 details, created = ApartmentDetails.objects.get_or_create(announcement=announcement)
                 details.seller_type = form.cleaned_data.get('seller_type', '')
@@ -337,8 +367,8 @@ def edit_announcement(request, pk):
                         'form': form,
                         'announcement': announcement,
                     })
-            messages.success(request, "Оголошення успішно оновлено!")
-            return redirect('announcements:announcement-detail', pk=pk)
+            messages.success(request, "Оголошення оновлено та відправлено на модерацію!")
+            return redirect('home')
         else:
             messages.error(request, "Помилка у формі. Перевірте введені дані.")
     else:
@@ -402,10 +432,34 @@ def add_review(request, announcement_id):
     return redirect('announcements:announcement-detail', pk=announcement.id)
 
 def get_subcategories(request, category_id):
-    # Fetch subcategories if Category model supports parent_id
     try:
         category = Category.objects.get(id=category_id)
         subcategories = Category.objects.filter(parent=category).values('id', 'name')
         return JsonResponse(list(subcategories), safe=False)
     except Category.DoesNotExist:
         return JsonResponse([], safe=False)
+
+@user_passes_test(is_admin)
+def admin_panel(request):
+    pending_announcements = Announcement.objects.filter(status='pending').select_related('owner', 'category').order_by('-created_at')
+    page_obj = paginate_queryset(pending_announcements, request, per_page=10)
+    return render(request, 'announcements/admin_panel.html', {
+        'announcements': page_obj,
+    })
+
+@user_passes_test(is_admin)
+def moderate_announcement(request, pk):
+    announcement = get_object_or_404(Announcement, pk=pk)
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'approve':
+            announcement.status = 'approved'
+            messages.success(request, f"Оголошення '{announcement.title}' схвалено.")
+        elif action == 'reject':
+            announcement.status = 'rejected'
+            messages.success(request, f"Оголошення '{announcement.title}' відхилено.")
+        announcement.save()
+        return redirect('announcements:admin_panel')
+    return render(request, 'announcements/moderate_announcement.html', {
+        'announcement': announcement,
+    })

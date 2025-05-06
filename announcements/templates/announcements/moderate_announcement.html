@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Модерація оголошення{% endblock %}
+
+{% block content %}
+<main class="moderate-panel">
+    <h2 class="moderate-panel__title">Модерація оголошення: {{ announcement.title }}</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="moderate-panel__alert moderate-panel__alert--{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    <section class="moderate-panel__details">
+        <p class="moderate-panel__detail"><span class="moderate-panel__label">Автор:</span> {{ announcement.owner.username }}</p>
+        <p class="moderate-panel__detail"><span class="moderate-panel__label">Ціна:</span> {{ announcement.price|default:"Не вказано" }} грн</p>
+        <p class="moderate-panel__detail"><span class="moderate-panel__label">Місцезнаходження:</span> {{ announcement.location|default:"Не вказано" }}</p>
+        <p class="moderate-panel__detail"><span class="moderate-panel__label">Опис:</span> {{ announcement.description }}</p>
+        {% if announcement.image %}
+            <div class="moderate-panel__image">
+                <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="moderate-panel__img">
+            </div>
+        {% endif %}
+        <p class="moderate-panel__detail"><span class="moderate-panel__label">Дата створення:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+    </section>
+    <form method="post" action="{% url 'announcements:moderate_announcement' announcement.pk %}" class="moderate-panel__form">
+        {% csrf_token %}
+        <button type="submit" name="action" value="approve" class="moderate-panel__button moderate-panel__button--success">Схвалити</button>
+        <button type="submit" name="action" value="reject" class="moderate-panel__button moderate-panel__button--danger">Відхилити</button>
+    </form>
+</main>
+{% endblock %}
