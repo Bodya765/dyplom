@@ -28,4 +28,6 @@ urlpatterns = [
     path('announcement/autocomplete/', views.announcement_autocomplete, name='announcement_autocomplete'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),
     path('admin-panel/moderate/<int:pk>/', views.moderate_announcement, name='moderate_announcement'),
+    path('admin-panel/get_requests/', views.get_requests, name='get_requests'),
+    path('admin-panel/update_response/', views.update_response, name='update_response'),
 ]

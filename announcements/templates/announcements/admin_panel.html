@@ -5,26 +5,178 @@
 
 {% block content %}
 <main class="admin-panel">
-    <h2 class="admin-panel__title">Оголошення на модерації</h2>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="admin-panel__alert admin-panel__alert--{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-    {% if announcements %}
-        <ul class="admin-panel__list">
-            {% for announcement in announcements %}
-                <li class="admin-panel__item">
-                    <h3 class="admin-panel__item-title">{{ announcement.title }}</h3>
-                    <p class="admin-panel__item-detail"><span class="admin-panel__label">Автор:</span> {{ announcement.owner.username }}</p>
-                    <p class="admin-panel__item-detail"><span class="admin-panel__label">Ціна:</span> {{ announcement.price|default:"Не вказано" }} грн</p>
-                    <p class="admin-panel__item-detail"><span class="admin-panel__label">Дата створення:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
-                    <a href="{% url 'announcements:moderate_announcement' announcement.pk %}" class="admin-panel__button">Модерувати</a>
-                </li>
+    <h2 class="admin-panel__title">Адмін-панель</h2>
+
+    <div class="admin-panel__tabs">
+        <button class="admin-panel__tab-button active" data-tab="moderation">Модерація</button>
+        <button class="admin-panel__tab-button" data-tab="support">Підтримка</button>
+    </div>
+
+    <div class="admin-panel__tab-content active" id="moderation">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="admin-panel__alert admin-panel__alert--{{ message.tags }}">{{ message }}</div>
             {% endfor %}
-        </ul>
-    {% else %}
-        <p class="admin-panel__empty">Немає оголошень на модерації.</p>
-    {% endif %}
+        {% endif %}
+        {% if announcements %}
+            <ul class="admin-panel__list">
+                {% for announcement in announcements %}
+                    <li class="admin-panel__item">
+                        <h3 class="admin-panel__item-title">{{ announcement.title }}</h3>
+                        <p class="admin-panel__item-detail"><span class="admin-panel__label">Автор:</span> {{ announcement.owner.username }}</p>
+                        <p class="admin-panel__item-detail"><span class="admin-panel__label">Ціна:</span> {{ announcement.price|default:"Не вказано" }} грн</p>
+                        <p class="admin-panel__item-detail"><span class="admin-panel__label">Дата створення:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}</p>
+                        <a href="{% url 'announcements:moderate_announcement' announcement.pk %}" class="admin-panel__button">Модерувати</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="admin-panel__empty">Немає оголошень на модерації.</p>
+        {% endif %}
+    </div>
+
+    <div class="admin-panel__tab-content" id="support">
+        <h3>Запитання користувачів</h3>
+        <table class="admin-panel__table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Користувач</th>
+                    <th>Запитання</th>
+                    <th>Відповідь</th>
+                    <th>Статус</th>
+                    <th>Дія</th>
+                </tr>
+            </thead>
+            <tbody id="supportRequests"></tbody>
+        </table>
+    </div>
 </main>
+
+<style>
+    .admin-panel__tabs { margin-bottom: 20px; }
+    .admin-panel__tab-button {
+        padding: 10px 20px;
+        border: none;
+        background-color: #f4f4f4;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .admin-panel__tab-button.active {
+        background-color: #2b6cb0;
+        color: white;
+    }
+    .admin-panel__tab-content {
+        display: none;
+    }
+    .admin-panel__tab-content.active {
+        display: block;
+    }
+    .admin-panel__table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: white;
+    }
+    .admin-panel__table th, .admin-panel__table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+    .admin-panel__table th {
+        background-color: #2b6cb0;
+        color: white;
+    }
+    .admin-panel__table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .admin-panel__table textarea {
+        width: 100%;
+        height: 60px;
+        margin-top: 5px;
+    }
+    .admin-panel__table button {
+        padding: 5px 10px;
+        background-color: #2b6cb0;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    .admin-panel__table button:hover {
+        background-color: #1e4976;
+    }
+</style>
+
+<script>
+    document.querySelectorAll('.admin-panel__tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.admin-panel__tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.admin-panel__tab-content').forEach(content => content.classList.remove('active'));
+
+            button.classList.add('active');
+            document.getElementById(button.dataset.tab).classList.add('active');
+
+            if (button.dataset.tab === 'support') {
+                loadSupportRequests();
+            }
+        });
+    });
+
+    async function loadSupportRequests() {
+        const response = await fetch('/admin-panel/get_requests/');
+        const requests = await response.json();
+        const tbody = document.querySelector('#supportRequests');
+        tbody.innerHTML = '';
+
+        requests.forEach(req => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${req.id}</td>
+                <td>@${req.username}</td>
+                <td>${req.question}</td>
+                <td>${req.response || '<i>Очікує відповіді</i>'}</td>
+                <td>${req.status}</td>
+                <td>
+                    ${req.status === 'Очікує' ? `
+                        <textarea id="response-${req.id}" placeholder="Введіть відповідь"></textarea>
+                        <button onclick="sendResponse(${req.id})">Відповісти</button>
+                    ` : ''}
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function sendResponse(requestId) {
+        const responseText = document.getElementById(`response-${requestId}`).value;
+
+        const response = await fetch('/admin-panel/update_response/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            body: JSON.stringify({ id: requestId, response: responseText })
+        });
+
+        if (response.ok) {
+            loadSupportRequests();
+        }
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    if (document.querySelector('[data-tab="support"]').classList.contains('active')) {
+        loadSupportRequests();
+    }
+</script>
 {% endblock %}

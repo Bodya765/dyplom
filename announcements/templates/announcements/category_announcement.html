@@ -11,6 +11,32 @@
             <p class="category-description">{{ category.description }}</p>
         </header>
 
+        <!-- Кнопка для показу фільтрів -->
+        <button class="filter-toggle" id="filter-toggle">
+            <i class="fas fa-filter"></i> Фільтри
+        </button>
+
+        <!-- Прихована форма фільтрування -->
+        <form method="GET" class="filter-form" id="filter-form" style="display: none;">
+            <div class="filter-group">
+                <label for="sort_by">Сортувати за часом:</label>
+                <select id="sort_by" name="sort_by">
+                    <option value="" {% if not request.GET.sort_by %}selected{% endif %}>За замовчуванням</option>
+                    <option value="oldest" {% if request.GET.sort_by == 'oldest' %}selected{% endif %}>Від найстарішого</option>
+                    <option value="newest" {% if request.GET.sort_by == 'newest' %}selected{% endif %}>Від новішого</option>
+                </select>
+
+                <label for="price_from">Ціна від:</label>
+                <input type="number" id="price_from" name="price_from" min="0" value="{{ request.GET.price_from|default:'' }}" placeholder="0">
+
+                <label for="price_to">Ціна до:</label>
+                <input type="number" id="price_to" name="price_to" min="0" value="{{ request.GET.price_to|default:'' }}" placeholder="">
+
+                <button type="submit" class="filter-submit">Застосувати</button>
+                <button type="button" class="filter-reset" id="filter-reset">Скинути</button>
+            </div>
+        </form>
+
         {% if announcements %}
             <div class="announcement-grid">
                 {% for announcement in announcements %}
@@ -21,25 +47,13 @@
                         <div class="announcement-info">
                             <h2 class="announcement-title">{{ announcement.title|escape }}</h2>
                             <p class="announcement-price">
-                                {% if announcement.price %}
-                                    {{ announcement.price }} грн
-                                {% else %}
-                                    Не вказано
-                                {% endif %}
+                                {{ announcement.price|default:"Не вказано" }} грн
                             </p>
                             <p class="announcement-description">
-                                {% if announcement.description %}
-                                    {{ announcement.description|truncatechars:80 }}
-                                {% else %}
-                                    Опис відсутній
-                                {% endif %}
+                                {{ announcement.description|truncatechars:80|default:"Опис відсутній" }}
                             </p>
                             <p class="announcement-location">
-                                {% if announcement.location %}
-                                    {{ announcement.location }}{% if announcement.district %}, {{ announcement.district }}{% endif %}
-                                {% else %}
-                                    Невідомо
-                                {% endif %}
+                                {{ announcement.location|default:"Невідомо" }}{% if announcement.district %}, {{ announcement.district }}{% endif %}
                             </p>
                         </div>
                     </a>
@@ -50,19 +64,110 @@
             <nav class="pagination" role="navigation" aria-label="Пагінація">
                 <ul class="pagination-list">
                     {% if announcements.has_previous %}
-                        <li><a href="?page=1" class="pagination-link" aria-label="Перша сторінка">«</a></li>
-                        <li><a href="?page={{ announcements.previous_page_number }}" class="pagination-link" aria-label="Попередня сторінка">‹</a></li>
+                        <li><a href="?page=1&sort_by={{ request.GET.sort_by|default:'' }}&price_from={{ request.GET.price_from|default:'' }}&price_to={{ request.GET.price_to|default:'' }}" class="pagination-link" aria-label="Перша сторінка">«</a></li>
+                        <li><a href="?page={{ announcements.previous_page_number }}&sort_by={{ request.GET.sort_by|default:'' }}&price_from={{ request.GET.price_from|default:'' }}&price_to={{ request.GET.price_to|default:'' }}" class="pagination-link" aria-label="Попередня сторінка">‹</a></li>
                     {% endif %}
                     <li><span class="pagination-current">Сторінка {{ announcements.number }} із {{ announcements.paginator.num_pages }}</span></li>
                     {% if announcements.has_next %}
-                        <li><a href="?page={{ announcements.next_page_number }}" class="pagination-link" aria-label="Наступна сторінка">›</a></li>
-                        <li><a href="?page={{ announcements.paginator.num_pages }}" class="pagination-link" aria-label="Остання сторінка">»</a></li>
+                        <li><a href="?page={{ announcements.next_page_number }}&sort_by={{ request.GET.sort_by|default:'' }}&price_from={{ request.GET.price_from|default:'' }}&price_to={{ request.GET.price_to|default:'' }}" class="pagination-link" aria-label="Наступна сторінка">›</a></li>
+                        <li><a href="?page={{ announcements.paginator.num_pages }}&sort_by={{ request.GET.sort_by|default:'' }}&price_from={{ request.GET.price_from|default:'' }}&price_to={{ request.GET.price_to|default:'' }}" class="pagination-link" aria-label="Остання сторінка">»</a></li>
                     {% endif %}
                 </ul>
             </nav>
         {% else %}
-            <p class="no-announcements">Оголошення в цій категорії відсутні.</p>
+            <p class="no-announcements">Оголошення в цій категорії відсутні або не відповідають фільтрам.</p>
         {% endif %}
     </div>
 </main>
+
+<style>
+    .filter-toggle {
+        padding: 10px 20px;
+        background: #3b5998;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .filter-toggle:hover {
+        background: #2a4373;
+    }
+
+    .filter-form {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #fff;
+        border-radius: 6px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .filter-group label {
+        font-size: 0.9rem;
+        color: #333;
+        margin-right: 5px;
+    }
+
+    .filter-group select, .filter-group input {
+        padding: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .filter-submit {
+        padding: 5px 15px;
+        background: #3b5998;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .filter-submit:hover {
+        background: #2a4373;
+    }
+
+    .filter-reset {
+        padding: 5px 15px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .filter-reset:hover {
+        background: #c82333;
+    }
+</style>
+
+<script>
+    document.getElementById('filter-toggle').addEventListener('click', function() {
+        const filterForm = document.getElementById('filter-form');
+        if (filterForm.style.display === 'none' || filterForm.style.display === '') {
+            filterForm.style.display = 'block';
+        } else {
+            filterForm.style.display = 'none';
+        }
+    });
+
+    document.getElementById('filter-reset').addEventListener('click', function() {
+        document.getElementById('sort_by').value = '';
+        document.getElementById('price_from').value = '';
+        document.getElementById('price_to').value = '';
+        document.getElementById('filter-form').submit();
+    });
+</script>
 {% endblock %}

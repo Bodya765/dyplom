@@ -10,10 +10,12 @@ from django.urls import reverse
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import JsonResponse
 from django.db.models import Q
-from .models import Announcement, Category, ApartmentDetails, Review, Location
+from .models import Announcement, Category, ApartmentDetails, Review, Location, SupportRequest
 from .forms import AnnouncementForm, ProfileForm, ReviewForm
 import random
 import logging
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,7 @@ def paginate_queryset(queryset, request, per_page=10):
     except PageNotAnInteger:
         return paginator.get_page(1)
     except EmptyPage:
-        return paginate_queryset(paginator.num_pages)
+        return paginator.get_page(paginator.num_pages)
 
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
@@ -190,6 +192,21 @@ def create_announcement(request):
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug)
     announcements = Announcement.objects.filter(category=category, status='approved').select_related('owner')
+
+    sort_by = request.GET.get('sort_by', '')
+    price_from = request.GET.get('price_from')
+    price_to = request.GET.get('price_to')
+
+    if sort_by == 'oldest':
+        announcements = announcements.order_by('created_at')
+    elif sort_by == 'newest':
+        announcements = announcements.order_by('-created_at')
+
+    if price_from:
+        announcements = announcements.filter(price__gte=price_from)
+    if price_to:
+        announcements = announcements.filter(price__lte=price_to)
+
     page_obj = paginate_queryset(announcements, request)
     return render(request, 'announcements/category_announcement.html', {
         'category': category,
@@ -463,3 +480,39 @@ def moderate_announcement(request, pk):
     return render(request, 'announcements/moderate_announcement.html', {
         'announcement': announcement,
     })
+
+@require_GET
+def get_requests(request):
+    requests = SupportRequest.objects.filter(status="pending", response__isnull=True).order_by('-created_at')
+    print(f"Отримано запити: {requests.count()} записів")  # Дебаг
+    data = [{
+        'id': req.id,
+        'user_id': req.user_id,
+        'username': req.username,
+        'question': req.question,
+        'response': req.response,
+        'status': 'Очікує',
+        'handled_by_admin': req.handled_by_admin
+    } for req in requests]
+    return JsonResponse(data, safe=False)
+
+@require_POST
+@csrf_exempt
+def update_response(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            request_id = data.get('id')
+            response_text = data.get('response')
+
+            req = SupportRequest.objects.get(id=request_id)
+            req.response = response_text
+            req.status = 'answered'
+            req.handled_by_admin = False
+            req.save()
+            return JsonResponse({'status': 'success'})
+        except SupportRequest.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Запит не знайдено'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Невірний метод'}, status=400)

@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'support.apps.SupportConfig',
 ]
 
 MIDDLEWARE = [
@@ -179,11 +178,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 RECAPTCHA_SITE_KEY = env('RECAPTCHA_SITE_KEY')
 RECAPTCHA_SECRET_KEY = env('RECAPTCHA_SECRET_KEY')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-TELEGRAM = {
-    'BOT_TOKEN': '8023794118:AAHi2jlrQOxCzahjBYPErtlKeWWdqETFi1E',
-}
 # URL вашого сайту для парсингу
 SITE_URL = 'http://127.0.0.1:8000/'
-LIQPAY_PUBLIC_KEY = 'sandbox_i48858023816y'
-LIQPAY_PRIVATE_KEY = 'sandbox_6czKZ8juBtgGamGFnO3Oshhqdw2QN2J5dXAmeWXI'
-NOVA_POSHTA_API_KEY = '446cdc21d1e2a2f4ab676c1abc7a6eb4'

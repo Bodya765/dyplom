@@ -9,6 +9,23 @@ from django.urls import reverse
 from django.db.models import Avg
 from django.contrib.auth.models import User
 
+from django.db import models
+
+class SupportRequest(models.Model):
+    user_id = models.CharField(max_length=50)
+    username = models.CharField(max_length=100)
+    question = models.TextField()
+    response = models.TextField(null=True, blank=True)
+    status = models.CharField(max_length=20, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+    handled_by_admin = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Запит від @{self.username}: {self.question[:50]}"
+
+    class Meta:
+        verbose_name = "Запит на підтримку"
+        verbose_name_plural = "Запити на підтримку"
 class Location(models.Model):
     name = models.CharField(max_length=255, verbose_name="Назва")
     district = models.CharField(max_length=255, blank=True, verbose_name="Район")
@@ -252,3 +269,4 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'profile'):
         instance.profile.save()
+

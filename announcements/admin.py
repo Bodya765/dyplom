@@ -5,14 +5,14 @@ from .models import Location, Category, Announcement, ApartmentDetails, Review, 
 class LocationAdmin(admin.ModelAdmin):
     list_display = ['name', 'district']
     search_fields = ['name', 'district']
-    list_filter = ['district']  # Додаємо фільтр за районом
+    list_filter = ['district']
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'slug', 'image']
     search_fields = ['name', 'description']
     prepopulated_fields = {'slug': ('name',)}
-    list_filter = ['name']  # Додаємо фільтр за назвою категорії
+    list_filter = ['name']
 
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
