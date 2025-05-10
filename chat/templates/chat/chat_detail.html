@@ -11,7 +11,7 @@
             {% for user_chat in user_chats %}
                 <a href="{% url 'chat:chat_detail' user_chat.id %}" class="chat-item {% if user_chat.id == chat.id %}active{% endif %}">
                     <div class="chat-item-avatar">
-                        <img src="{% static 'images/default_avatar.png' %}" alt="Avatar">
+                        <img src="{% if user_chat.buyer == request.user %}{% if user_chat.seller.profile.avatar %}{{ user_chat.seller.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}{% else %}{% if user_chat.buyer.profile.avatar %}{{ user_chat.buyer.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}{% endif %}" alt="Avatar">
                     </div>
                     <div class="chat-item-info">
                         <span class="chat-item-name">
@@ -72,9 +72,6 @@
                                 <span class="message-edited">(редаговано {{ message.edited_at|date:"H:i" }})</span>
                             {% endif %}
                             {% if message.sender == request.user %}
-                                <span class="message-actions">
-                                    <button class="edit-message-btn" data-message-id="{{ message.id }}">Редагувати</button>
-                                </span>
                                 <span class="message-status">
                                     {% if message.is_read %}
                                         <span class="read-ticks">✔✔</span>
@@ -101,13 +98,20 @@
     </div>
 </div>
 
-<div id="edit-message-modal" class="modal">
+<!-- Модальне вікно для редагування -->
+<div id="edit-message-modal" class="edit-modal">
     <div class="modal-content">
         <span class="btn-cancel" id="close-edit-modal">✖</span>
         <h3>Редагувати повідомлення</h3>
         <textarea id="edit-message-input" rows="3"></textarea>
         <button id="save-edit-message" class="btn btn-primary">Зберегти</button>
     </div>
+</div>
+
+<!-- Контекстне меню -->
+<div id="context-menu" class="context-menu" style="display: none;">
+    <div class="context-menu-item" id="context-edit">Редагувати</div>
+    <div class="context-menu-item" id="context-delete">Видалити</div>
 </div>
 {% endblock %}
 
@@ -121,6 +125,130 @@
                     updateUnreadMessagesCount();
                 }
             }, 1000);
+
+            const modal = document.getElementById('edit-message-modal');
+            const editInput = document.getElementById('edit-message-input');
+            const contextMenu = document.getElementById('context-menu');
+            let currentMessageId = null;
+
+            // Функція для приховування контекстного меню
+            function hideContextMenu() {
+                contextMenu.style.display = 'none';
+            }
+
+            // Обробка правої кнопки для контекстного меню
+            document.querySelectorAll('.message.sent').forEach(message => {
+                message.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    currentMessageId = this.getAttribute('data-message-id');
+                    const messageContent = this.querySelector('.message-content').textContent;
+                    contextMenu.style.display = 'block';
+                    contextMenu.style.left = `${e.pageX}px`;
+                    contextMenu.style.top = `${e.pageY}px`;
+                });
+            });
+
+            // Обробка кліку по пункту "Редагувати" у контекстному меню
+            document.getElementById('context-edit').addEventListener('click', function() {
+                const messageContent = document.querySelector(`.message[data-message-id="${currentMessageId}"] .message-content`).textContent;
+                editInput.value = messageContent;
+                modal.style.display = 'block';
+                hideContextMenu();
+            });
+
+            // Збереження відредагованого повідомлення
+            document.getElementById('save-edit-message').onclick = function() {
+                const newContent = editInput.value.trim();
+                if (newContent) {
+                    fetch(`/chat/edit_message/${currentMessageId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({ content: newContent })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            const messageElement = document.querySelector(`.message[data-message-id="${currentMessageId}"] .message-content`);
+                            messageElement.textContent = newContent;
+                            const metaElement = document.querySelector(`.message[data-message-id="${currentMessageId}"] .message-meta`);
+                            let editedSpan = metaElement.querySelector('.message-edited');
+                            if (!editedSpan) {
+                                editedSpan = document.createElement('span');
+                                editedSpan.className = 'message-edited';
+                                metaElement.insertBefore(editedSpan, metaElement.firstChild);
+                            }
+                            editedSpan.textContent = `(редаговано ${new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })})`;
+                            modal.style.display = 'none';
+                        } else {
+                            alert('Помилка при редагуванні повідомлення: ' + (data.error || 'Невідома помилка'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Помилка при редагуванні повідомлення: Перевірте консоль для деталей.');
+                    });
+                } else {
+                    alert('Повідомлення не може бути порожнім.');
+                }
+            };
+
+            // Закриття модального вікна
+            document.getElementById('close-edit-modal').onclick = function() {
+                modal.style.display = 'none';
+            };
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+                if (!event.target.closest('.context-menu') && !event.target.closest('.message.sent')) {
+                    hideContextMenu();
+                }
+            };
+
+            // Обробка кліку по пункту "Видалити" у контекстному меню
+            document.getElementById('context-delete').addEventListener('click', function() {
+                if (confirm('Ви впевнені, що хочете видалити це повідомлення?')) {
+                    fetch(`/chat/delete_message/${currentMessageId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            const messageElement = document.querySelector(`.message[data-message-id="${currentMessageId}"]`);
+                            if (messageElement) {
+                                messageElement.remove();
+                            }
+                        } else {
+                            alert('Помилка при видаленні повідомлення: ' + (data.error || 'Невідома помилка'));
+                        }
+                        hideContextMenu();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Помилка при видаленні повідомлення: Перевірте консоль для деталей.');
+                    });
+                } else {
+                    hideContextMenu();
+                }
+            });
         });
     </script>
 {% endblock %}

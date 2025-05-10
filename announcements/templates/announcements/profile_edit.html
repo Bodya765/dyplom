@@ -11,7 +11,7 @@
             <h1 class="section-title">Мій профіль</h1>
             <div class="profile-details">
                 <div class="profile-avatar">
-                    <img id="avatar-preview" src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="Avatar">
+                    <img id="avatar-preview" src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="Avatar" class="avatar-img">
                     <label for="avatar-upload" class="avatar-upload-btn">
                         <i class="fas fa-camera"></i> Змінити фото
                     </label>
@@ -21,7 +21,7 @@
                     {% csrf_token %}
                     <div class="form-field">
                         <label for="username" class="form-label">Ім'я:</label>
-                        <input type="text" id="username" name="username" value="{{ user.username }}" class="form-input" readonly>
+                        <input type="text" id="username" name="username" value="{{ user.username }}" class="form-input">
                     </div>
                     <div class="form-field">
                         <label for="phone" class="form-label">Телефон:</label>
@@ -44,7 +44,7 @@
                     {% for announcement in announcements %}
                         <div class="announcement-card">
                             <div class="announcement-image">
-                                <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" alt="{{ announcement.title }}">
+                                <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-img">
                             </div>
                             <div class="announcement-details">
                                 <h3 class="announcement-title">
@@ -88,53 +88,66 @@
         margin: 0 auto;
         padding: 20px 15px;
         font-family: 'Roboto', sans-serif;
-        background-color: #f5f7fa;
-        border-radius: 10px;
+        background-color: #f9fbfd;
+        border-radius: 12px;
         min-height: calc(100vh - 100px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     }
 
     .profile-container {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        background-color: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 
     /* Профіль */
     .profile-header {
-        padding-bottom: 20px;
-        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #e5e7eb;
     }
 
     .section-title {
-        font-size: 1.4rem;
-        color: #1a3c34;
-        font-weight: 600;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #e0e0e0;
-        padding-bottom: 5px;
+        font-size: 1.8rem;
+        color: #1e3a8a;
+        font-weight: 700;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #3b82f6;
+        padding-bottom: 8px;
+        position: relative;
     }
 
     .profile-details {
         display: flex;
-        gap: 20px;
+        gap: 30px;
         align-items: flex-start;
+        flex-wrap: wrap;
     }
 
     .profile-avatar {
         position: relative;
-        width: 100px;
-        height: 100px;
+        width: 180px;
+        height: 180px;
         border-radius: 50%;
         overflow: hidden;
         flex-shrink: 0;
-        border: 1px solid #e0e0e0;
+        border: 4px solid #e5e7eb;
+        transition: border-color 0.3s ease;
     }
 
-    .profile-avatar img {
+    .profile-avatar:hover {
+        border-color: #3b82f6;
+    }
+
+    .avatar-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .profile-avatar:hover .avatar-img {
+        transform: scale(1.1);
     }
 
     .avatar-upload-btn {
@@ -142,132 +155,141 @@
         bottom: 0;
         left: 0;
         right: 0;
-        background-color: rgba(0, 0, 0, 0.6);
-        color: #fff;
-        font-size: 0.8rem;
+        background-color: rgba(59, 130, 246, 0.8);
+        color: #ffffff;
+        font-size: 0.9rem;
         text-align: center;
-        padding: 5px;
+        padding: 8px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 5px;
+        gap: 6px;
         transition: background-color 0.3s ease;
     }
 
     .avatar-upload-btn:hover {
-        background-color: rgba(0, 0, 0, 0.8);
+        background-color: rgba(29, 78, 216, 0.9);
     }
 
     .profile-form {
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        gap: 20px;
+        max-width: 500px;
     }
 
     .form-field {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 6px;
     }
 
     .form-label {
-        font-size: 0.95rem;
-        color: #34495e;
-        font-weight: 500;
+        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 600;
     }
 
     .form-input {
         width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #e0e0e0;
+        padding: 10px 14px;
+        border: 2px solid #e5e7eb;
         border-radius: 8px;
-        font-size: 0.9rem;
+        font-size: 1rem;
         font-family: 'Roboto', sans-serif;
         transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: #f9fafb;
     }
 
     .form-input:focus {
         outline: none;
-        border-color: #2ecc71;
-        box-shadow: 0 0 5px rgba(46, 204, 113, 0.2);
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
     }
 
     .form-input[readonly] {
-        background-color: #f9f9f9;
+        background-color: #f3f4f6;
         cursor: not-allowed;
     }
 
     .btn.btn-primary {
         width: 100%;
-        max-width: 200px;
-        padding: 8px 15px;
-        background-color: #2ecc71;
-        color: #fff;
+        max-width: 250px;
+        padding: 12px 20px;
+        background-color: #3b82f6;
+        color: #ffffff;
         border: none;
         border-radius: 8px;
-        font-size: 0.95rem;
+        font-size: 1.1rem;
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.3s ease;
+        transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .btn.btn-primary:hover {
-        background-color: #27ae60;
+        background-color: #2563eb;
+        transform: translateY(-2px);
     }
 
     /* Оголошення */
     .announcements-section {
-        margin-top: 20px;
+        margin-top: 40px;
     }
 
     .announcements-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
     }
 
     .announcement-card {
-        background-color: #fafafa;
-        border-radius: 8px;
+        background-color: #ffffff;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
     }
 
     .announcement-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-4px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
     }
 
     .announcement-image {
         width: 100%;
-        height: 150px;
+        height: 200px;
         overflow: hidden;
+        position: relative;
     }
 
-    .announcement-image img {
+    .announcement-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         transition: transform 0.3s ease;
     }
 
-    .announcement-card:hover .announcement-image img {
+    .announcement-card:hover .announcement-img {
         transform: scale(1.05);
     }
 
     .announcement-details {
-        padding: 10px;
+        padding: 15px;
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        justify-content: space-between;
+        gap: 10px;
     }
 
     .announcement-title {
-        font-size: 1rem;
-        color: #1a3c34;
-        font-weight: 500;
+        font-size: 1.2rem;
+        color: #1e3a8a;
+        font-weight: 600;
         margin: 0;
     }
 
@@ -278,35 +300,38 @@
     }
 
     .announcement-title a:hover {
-        color: #2ecc71;
+        color: #3b82f6;
     }
 
     .announcement-price {
-        font-size: 0.95rem;
-        color: #2ecc71;
-        font-weight: 500;
+        font-size: 1.1rem;
+        color: #16a34a;
+        font-weight: 600;
         margin: 0;
     }
 
     .announcement-location {
-        font-size: 0.85rem;
-        color: #7f8c8d;
+        font-size: 0.95rem;
+        color: #64748b;
         margin: 0;
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 8px;
     }
 
     .announcement-location i {
-        color: #34495e;
+        color: #1e3a8a;
     }
 
     .empty-message {
-        font-size: 0.9rem;
-        color: #7f8c8d;
+        font-size: 1rem;
+        color: #64748b;
         text-align: center;
         font-style: italic;
-        margin-top: 15px;
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9fafb;
+        border-radius: 8px;
     }
 
     /* Пагінація */
@@ -314,29 +339,31 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 12px;
+        margin-top: 30px;
     }
 
     .pagination-btn {
-        padding: 6px 12px;
-        background-color: #f9f9f9;
-        border: 1px solid #e0e0e0;
+        padding: 8px 16px;
+        background-color: #f9fafb;
+        border: 2px solid #e5e7eb;
         border-radius: 8px;
-        font-size: 0.9rem;
-        color: #34495e;
+        font-size: 1rem;
+        color: #1e293b;
         text-decoration: none;
-        transition: background-color 0.3s ease, border-color 0.3s ease;
+        transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
     }
 
     .pagination-btn:hover {
-        background-color: #f0f0f0;
-        border-color: #2ecc71;
+        background-color: #f3f4f6;
+        border-color: #3b82f6;
+        transform: translateY(-2px);
     }
 
     .pagination-current {
-        font-size: 0.9rem;
-        color: #34495e;
+        font-size: 1rem;
+        color: #1e293b;
+        font-weight: 500;
     }
 
     /* Адаптивність */
@@ -348,47 +375,37 @@
         }
 
         .profile-avatar {
-            width: 80px;
-            height: 80px;
+            width: 150px;
+            height: 150px;
         }
 
         .profile-form {
             width: 100%;
+            margin-top: 20px;
         }
 
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.6rem;
         }
 
         .announcements-grid {
             grid-template-columns: 1fr;
         }
 
-        .announcement-card {
-            display: flex;
-            gap: 10px;
-        }
-
         .announcement-image {
-            width: 120px;
-            height: 120px;
-            flex-shrink: 0;
-        }
-
-        .announcement-details {
-            flex: 1;
+            height: 180px;
         }
 
         .announcement-title {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
         }
 
         .announcement-price {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .announcement-location {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
         }
     }
 
@@ -398,47 +415,42 @@
         }
 
         .profile-container {
-            padding: 15px;
+            padding: 20px;
         }
 
         .profile-avatar {
-            width: 70px;
-            height: 70px;
+            width: 120px;
+            height: 120px;
         }
 
         .section-title {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
         }
 
         .form-label {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
         }
 
         .form-input {
-            font-size: 0.8rem;
-            padding: 6px 8px;
-        }
-
-        .announcement-card {
-            flex-direction: column;
+            font-size: 0.9rem;
+            padding: 8px 12px;
         }
 
         .announcement-image {
-            width: 100%;
             height: 150px;
         }
 
         .announcement-title {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .pagination-btn {
-            font-size: 0.85rem;
-            padding: 5px 10px;
+            font-size: 0.9rem;
+            padding: 6px 12px;
         }
 
         .pagination-current {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
     }
 </style>
@@ -448,6 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Оновлення аватара
     const avatarUpload = document.getElementById("avatar-upload");
     const avatarPreview = document.getElementById("avatar-preview");
+    const profilePhotoHeader = document.getElementById("profilePhoto");
 
     avatarUpload.addEventListener("change", function (e) {
         const file = e.target.files[0];
@@ -455,10 +468,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const reader = new FileReader();
             reader.onload = function (e) {
                 avatarPreview.src = e.target.result;
+                if (profilePhotoHeader) {
+                    profilePhotoHeader.src = e.target.result;
+                }
             };
             reader.readAsDataURL(file);
 
-            // Відправка аватара через AJAX
             const formData = new FormData();
             formData.append("avatar", file);
             formData.append("csrfmiddlewaretoken", document.querySelector("[name=csrfmiddlewaretoken]").value);
@@ -469,13 +484,13 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    console.log("Аватар успішно оновлено!");
-                } else {
-                    console.error("Помилка оновлення аватара:", data.error);
+                if (data.success && data.avatar_url) {
+                    avatarPreview.src = data.avatar_url;
+                    if (profilePhotoHeader) {
+                        profilePhotoHeader.src = data.avatar_url;
+                    }
                 }
-            })
-            .catch(error => console.error("Помилка:", error));
+            });
         }
     });
 
@@ -492,14 +507,11 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log("Профіль успішно оновлено!");
+                document.getElementById("username").value = data.username || "{{ user.username }}";
                 document.getElementById("phone").value = data.phone || "";
                 document.getElementById("email").value = data.email;
-            } else {
-                console.error("Помилка оновлення профілю:", data.error);
             }
-        })
-        .catch(error => console.error("Помилка:", error));
+        });
     });
 });
 </script>

@@ -26,7 +26,7 @@
                     {% if chat.buyer == request.user %}
                         <a href="{% url 'chat:chat_detail' chat.id %}" class="chat-item">
                             <div class="chat-item-avatar">
-                                <img src="{% static 'images/default_avatar.png' %}" alt="Avatar">
+                                <img src="{% if chat.seller.profile.avatar %}{{ chat.seller.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="Avatar">
                             </div>
                             <div class="chat-item-info">
                                 <span class="chat-item-name">{{ chat.seller.username }}</span>
@@ -53,6 +53,9 @@
                 {% for chat in user_chats %}
                     {% if chat.seller == request.user %}
                         <a href="{% url 'chat:chat_detail' chat.id %}" class="chat-item">
+                            <div class="chat-item-avatar">
+                                <img src="{% if chat.buyer.profile.avatar %}{{ chat.buyer.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="Avatar">
+                            </div>
                             <div class="chat-item-info">
                                 <span class="chat-item-name">{{ chat.buyer.username }}</span>
                                 <span class="chat-item-status" data-status="{% if chat.buyer.status.is_online %}online{% else %}offline{% endif %}">

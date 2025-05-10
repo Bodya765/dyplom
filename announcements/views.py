@@ -318,14 +318,19 @@ def profile_edit(request):
 @login_required
 def update_profile(request):
     if request.method == "POST":
+        username = request.POST.get('username')
         phone = request.POST.get('phone')
         email = request.POST.get('email')
+        if username and username != request.user.username:
+            request.user.username = username
+            request.user.save()
         request.user.profile.phone = phone
         request.user.profile.save()
         request.user.email = email
         request.user.save()
         return JsonResponse({
             'success': True,
+            'username': username or request.user.username,
             'phone': phone,
             'email': email,
         })
@@ -337,7 +342,7 @@ def update_avatar(request):
         avatar = request.FILES['avatar']
         request.user.profile.avatar = avatar
         request.user.profile.save()
-        return JsonResponse({'success': True})
+        return JsonResponse({'success': True, 'avatar_url': request.user.profile.avatar.url})
     return JsonResponse({'success': False, 'error': 'Файл не завантажено'})
 
 @login_required
@@ -484,7 +489,6 @@ def moderate_announcement(request, pk):
 @require_GET
 def get_requests(request):
     requests = SupportRequest.objects.filter(status="pending", response__isnull=True).order_by('-created_at')
-    print(f"Отримано запити: {requests.count()} записів")  # Дебаг
     data = [{
         'id': req.id,
         'user_id': req.user_id,

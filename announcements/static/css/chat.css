@@ -1,0 +1,711 @@
+/*chat_detail.html*/
+/* Загальні стилі для сторінки чату */
+.chat-page {
+    display: flex;
+    height: 85vh;
+    max-width: 1400px;
+    margin: 20px auto;
+    background-color: #f5f7fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Стилі для бічної панелі */
+.chat-sidebar {
+    width: 300px;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.sidebar-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a3c34;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    margin: 0;
+}
+
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.chat-item:hover {
+    background-color: #f0f5ff;
+}
+
+.chat-item.active {
+    background-color: #e3f2fd;
+    border-left: 4px solid #42a5f5;
+}
+
+.chat-item-avatar {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+}
+
+.chat-item-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chat-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-item-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #1a3c34;
+}
+
+.chat-item-status {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.chat-item-status[data-status="online"] .status-dot {
+    background-color: #2ecc71;
+}
+
+.chat-item-status[data-status="offline"] .status-dot {
+    background-color: #95a5a6;
+}
+
+.empty-message {
+    padding: 20px;
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* Стилі для основної частини чату */
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #fafafa;
+}
+
+.chat-header {
+    padding: 20px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chat-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a3c34;
+    margin: 0;
+}
+
+#typing-indicator {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-style: italic;
+    margin-left: 10px;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #fafafa;
+}
+
+.date-divider {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin: 20px 0;
+    position: relative;
+}
+
+.date-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #e0e0e0;
+    z-index: 1;
+}
+
+.date-divider span {
+    background-color: #fafafa;
+    padding: 0 10px;
+    position: relative;
+    z-index: 2;
+}
+
+.message {
+    max-width: 70%;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 12px;
+    position: relative;
+}
+
+.message.sent {
+    background-color: #42a5f5;
+    color: #fff;
+    margin-left: auto;
+    border-bottom-right-radius: 0;
+}
+
+.message.received {
+    background-color: #ffffff;
+    color: #333;
+    border: 1px solid #e0e0e0;
+    margin-right: auto;
+    border-bottom-left-radius: 0;
+}
+
+.message-sender {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1a3c34;
+    margin-bottom: 5px;
+}
+
+.message-image {
+    max-width: 200px;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+
+.message-content {
+    margin: 5px 0;
+    font-size: 1rem;
+    word-wrap: break-word;
+}
+
+.message-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.message.sent .message-meta {
+    justify-content: flex-end;
+    color: #e0e0e0;
+}
+
+.message.received .message-meta {
+    color: #7f8c8d;
+}
+
+.message-timestamp {
+    flex-shrink: 0;
+}
+
+.message-edited {
+    font-style: italic;
+}
+
+.message-status {
+    display: flex;
+    align-items: center;
+}
+
+.read-ticks {
+    color: #2ecc71;
+}
+
+.unread-ticks {
+    color: #95a5a6;
+}
+
+.chat-input {
+    padding: 15px 20px;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#chat-message-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    resize: none;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+#chat-message-input:focus {
+    border-color: #42a5f5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.2);
+}
+
+.chat-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.image-upload-btn {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    transition: color 0.3s ease;
+}
+
+.image-upload-btn:hover {
+    color: #42a5f5;
+}
+
+#chat-message-submit {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #42a5f5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#chat-message-submit:hover {
+    background-color: #1976d2;
+}
+
+/* Стилі для модального вікна редагування */
+.edit-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    height: auto;
+    max-height: 80vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: scale(0.8);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.edit-modal[style*="block"] .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-content h3 {
+    font-size: 1.3rem;
+    color: #1a3c34;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+#edit-message-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    resize: none;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+}
+
+#edit-message-input:focus {
+    border-color: #42a5f5;
+    outline: none;
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.2);
+}
+
+#save-edit-message {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #42a5f5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#save-edit-message:hover {
+    background-color: #1976d2;
+}
+
+.btn-cancel {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #95a5a6;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-cancel:hover {
+    color: #e74c3c;
+}
+
+/* Стилі для контекстного меню */
+.context-menu {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 3000;
+    padding: 5px 0;
+}
+
+.context-menu-item {
+    padding: 6px 15px;
+    font-size: 0.85rem;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.context-menu-item:hover {
+    background-color: #f0f5ff;
+}
+
+/* Адаптивність */
+@media (max-width: 768px) {
+    .chat-page {
+        flex-direction: column;
+        height: auto;
+        margin: 10px;
+    }
+
+    .chat-sidebar {
+        width: 100%;
+        max-height: 250px;
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .chat-main {
+        height: calc(100vh - 300px);
+    }
+
+    .chat-title {
+        font-size: 1.3rem;
+    }
+
+    .message {
+        max-width: 85%;
+    }
+
+    .message-image {
+        max-width: 150px;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-item {
+        padding: 10px 15px;
+    }
+
+    .chat-item-avatar {
+        width: 35px;
+        height: 35px;
+        margin-right: 10px;
+    }
+
+    .chat-item-name {
+        font-size: 0.9rem;
+    }
+
+    .chat-item-status {
+        font-size: 0.75rem;
+    }
+
+    .chat-messages {
+        padding: 10px;
+    }
+
+    .message {
+        padding: 8px 12px;
+    }
+
+    .message-content {
+        font-size: 0.9rem;
+    }
+
+    .message-meta {
+        font-size: 0.75rem;
+    }
+
+    #chat-message-submit {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}
+/*chat_list.html*/
+   /* Загальні стилі для сторінки списку чатів */
+.chat-list-page {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f5f7fa;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Заголовок сторінки */
+.page-title {
+    font-size: 2rem;
+    color: #1a3c34;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Стилі для вкладок */
+.chat-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.tab-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #7f8c8d;
+    background-color: #ecf0f1;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active,
+.tab-button:hover {
+    background-color: #42a5f5;
+    color: #fff;
+}
+
+.tab-icon {
+    font-size: 1.1rem;
+}
+
+/* Стилі для вмісту вкладок */
+.chat-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.chat-tab {
+    display: none;
+}
+
+.chat-tab.active {
+    display: block;
+}
+
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    text-decoration: none;
+    color: #333;
+    background-color: #fafafa;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chat-item:hover {
+    background-color: #f0f5ff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-item-avatar {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+}
+
+.chat-item-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+}
+
+.chat-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-item-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1a3c34;
+}
+
+.chat-item-status {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    display: flex;
+    align-items: center;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.chat-item-status[data-status="online"] .status-dot {
+    background-color: #2ecc71;
+}
+
+.chat-item-status[data-status="offline"] .status-dot {
+    background-color: #95a5a6;
+}
+
+.empty-message {
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* Адаптивність */
+@media (max-width: 768px) {
+    .chat-list-page {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .chat-tabs {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tab-button {
+        width: 100%;
+        text-align: left;
+        padding: 12px;
+    }
+
+    .chat-item {
+        padding: 12px;
+    }
+
+    .chat-item-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .chat-item-name {
+        font-size: 1rem;
+    }
+
+    .chat-item-status {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-item {
+        padding: 10px;
+    }
+
+    .chat-item-avatar {
+        width: 35px;
+        height: 35px;
+    }
+
+    .chat-item-name {
+        font-size: 0.9rem;
+    }
+
+    .chat-item-status {
+        font-size: 0.8rem;
+    }
+
+    .empty-message {
+        padding: 15px;
+    }
+}

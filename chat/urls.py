@@ -14,4 +14,7 @@ urlpatterns = [
     path('unread-messages-count/', views.unread_messages_count, name='unread_messages_count'),
 
     path('send_message/', views.send_message, name='send_message'),
+    path('edit_message/<int:message_id>/', views.edit_message, name='edit_message'),
+    path('delete_message/<int:message_id>/', views.delete_message, name='delete_message'),
+    path('save_state/', views.save_state, name='save_state'),
 ]

@@ -3,6 +3,55 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/main-page.css' %}">
+    <style>
+        .autocomplete-suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: calc(100% - 20px);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .autocomplete-suggestion {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+        .autocomplete-suggestion:hover {
+            background-color: #f0f0f0;
+        }
+        .search-bar {
+            position: relative;
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        #search-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        #search-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 {% endblock %}
 {% block title %}VseOgolosha{% endblock %}
 
@@ -90,27 +139,51 @@
         const searchInput = document.getElementById("search-input");
         const suggestionsContainer = document.getElementById("autocomplete-suggestions");
         const searchButton = document.getElementById("search-button");
+        let debounceTimeout;
+
+        // Функція для дебагінгу
+        function log(message, data = null) {
+            console.log(`[Автодоповнення] ${message}`, data || "");
+        }
+
+        // Функція для дебансінгу
+        function debounce(func, delay) {
+            return function (...args) {
+                clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Виконання пошуку
+        function performSearch(query) {
+            if (query) {
+                log("Перенаправлення на пошук:", query);
+                window.location.href = `/search_results/?search=${encodeURIComponent(query)}`;
+            } else {
+                log("Запит порожній, пошук не виконано.");
+            }
+        }
 
         // Обробка автодоповнення
-        searchInput.addEventListener("input", function () {
-            const query = this.value.trim();
+        const fetchSuggestions = debounce(function (query) {
             if (query.length < 2) {
                 suggestionsContainer.style.display = "none";
                 suggestionsContainer.innerHTML = "";
+                log("Запит занадто короткий (< 2 символи).");
                 return;
             }
 
-            console.log("Запит автодоповнення для:", query);
-            fetch(`/api/api/announcement/autocomplete/?query=${encodeURIComponent(query)}`)
+            log("Запит автодоповнення для:", query);
+            fetch(`/announcement/autocomplete/?query=${encodeURIComponent(query)}`)
                 .then(response => {
-                    console.log("Статус відповіді:", response.status);  // Дебагінг
+                    log("Статус відповіді:", response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
+                        throw new Error(`HTTP помилка! Статус: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Дані автодоповнення:", data);  // Дебагінг
+                    log("Дані автодоповнення:", data);
                     suggestionsContainer.innerHTML = "";
                     if (data.length > 0) {
                         data.forEach(suggestion => {
@@ -120,19 +193,26 @@
                             div.addEventListener("click", () => {
                                 searchInput.value = suggestion;
                                 suggestionsContainer.style.display = "none";
-                                searchButton.click();
+                                performSearch(suggestion);  // Виконуємо пошук після вибору
                             });
                             suggestionsContainer.appendChild(div);
                         });
                         suggestionsContainer.style.display = "block";
                     } else {
                         suggestionsContainer.style.display = "none";
+                        log("Пропозицій не знайдено.");
                     }
                 })
                 .catch(error => {
-                    console.error("Помилка автодоповнення:", error);
+                    log("Помилка автодоповнення:", error);
                     suggestionsContainer.style.display = "none";
                 });
+        }, 300);  // Затримка 300 мс
+
+        // Обробка введення в поле пошуку
+        searchInput.addEventListener("input", function () {
+            const query = this.value.trim();
+            fetchSuggestions(query);
         });
 
         // Приховати автодоповнення при кліку поза полем
@@ -142,23 +222,21 @@
             }
         });
 
-        // Обробка пошуку
+        // Обробка кліку на кнопку пошуку
         searchButton.addEventListener("click", () => {
             const query = searchInput.value.trim();
-            if (query) {
-                console.log("Перенаправлення на пошук:", query);
-                window.location.href = `search_results/?search=${encodeURIComponent(query)}`;
-            }
+            performSearch(query);
         });
 
         // Пошук при натисканні Enter
         searchInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
-                searchButton.click();
+                const query = searchInput.value.trim();
+                performSearch(query);
             }
         });
 
-        // Додаємо обробку кліку на оголошення
+        // Обробка кліку на оголошення (залишено без змін)
         document.querySelectorAll('.announcement').forEach(announcement => {
             announcement.addEventListener('click', () => {
                 const url = announcement.getAttribute('data-url');
