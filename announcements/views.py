@@ -32,8 +32,16 @@ def paginate_queryset(queryset, request, per_page=10):
 def is_admin(user):
     return user.is_authenticated and user.is_superuser
 
+@login_required(login_url='announcements:login')
 def profile(request):
-    return render(request, 'announcements/profile.html')
+    announcements = Announcement.objects.filter(
+        owner=request.user
+    ).exclude(status='rejected').select_related('category', 'owner').order_by('-created_at')
+    page_obj = paginate_queryset(announcements, request, per_page=9)
+    return render(request, 'announcements/profile.html', {
+        'announcements': page_obj,
+        'page_obj': page_obj,
+    })
 
 def home(request):
     recent_ids = request.session.get('recent_announcements', [])
@@ -137,11 +145,17 @@ def logout_view(request):
 def create_announcement(request):
     if request.method == 'POST':
         form = AnnouncementForm(request.POST, request.FILES)
+        phone = request.POST.get('phone')  # Отримуємо номер телефону з форми
         if form.is_valid():
             announcement = form.save(commit=False)
             announcement.owner = request.user
             announcement.status = 'pending'
             announcement.save()
+
+            # Оновлюємо номер телефону в профілі користувача
+            if request.user.profile and phone:
+                request.user.profile.phone = phone
+                request.user.profile.save()
 
             if announcement.subcategory == "Квартира":
                 apartment_details = ApartmentDetails(
@@ -245,7 +259,8 @@ def signup_view(request):
 
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            login(request, user)  # Автоматичний вхід після реєстрації
             messages.success(request, "Реєстрація пройшла успішно!")
             return redirect('home')
         else:
@@ -304,15 +319,20 @@ def location_api(request):
     ]
     return JsonResponse(results, safe=False)
 
-@login_required
+@login_required(login_url='announcements:login')
 def profile_edit(request):
-    announcements = Announcement.objects.filter(owner=request.user, status='approved').select_related('category', 'owner').order_by(
-        '-created_at')
+    status_filter = request.GET.get('status', '')
+    announcements = Announcement.objects.filter(
+        owner=request.user
+    ).exclude(status='rejected').select_related('category', 'owner').order_by('-created_at')
+    if status_filter:
+        announcements = announcements.filter(status=status_filter)
     page_obj = paginate_queryset(announcements, request, per_page=9)
     return render(request, "announcements/profile_edit.html", {
         "user": request.user,
         "announcements": page_obj,
         "page_obj": page_obj,
+        "status_filter": status_filter,
     })
 
 @login_required
@@ -321,28 +341,37 @@ def update_profile(request):
         username = request.POST.get('username')
         phone = request.POST.get('phone')
         email = request.POST.get('email')
-        if username and username != request.user.username:
-            request.user.username = username
+        try:
+            if username and username != request.user.username:
+                request.user.username = username
+                request.user.save()
+            if request.user.profile:
+                request.user.profile.phone = phone
+                request.user.profile.save()
+            request.user.email = email
             request.user.save()
-        request.user.profile.phone = phone
-        request.user.profile.save()
-        request.user.email = email
-        request.user.save()
-        return JsonResponse({
-            'success': True,
-            'username': username or request.user.username,
-            'phone': phone,
-            'email': email,
-        })
+            return JsonResponse({
+                'success': True,
+                'username': username or request.user.username,
+                'phone': phone or '',
+                'email': email,
+            })
+        except Exception as e:
+            logger.error(f"Помилка оновлення профілю: {e}")
+            return JsonResponse({'success': False, 'error': 'Помилка оновлення профілю'})
     return JsonResponse({'success': False, 'error': 'Невірний метод запиту'})
 
 @login_required
 def update_avatar(request):
     if request.method == "POST" and request.FILES.get('avatar'):
-        avatar = request.FILES['avatar']
-        request.user.profile.avatar = avatar
-        request.user.profile.save()
-        return JsonResponse({'success': True, 'avatar_url': request.user.profile.avatar.url})
+        try:
+            avatar = request.FILES['avatar']
+            request.user.profile.avatar = avatar
+            request.user.profile.save()
+            return JsonResponse({'success': True, 'avatar_url': request.user.profile.avatar.url})
+        except Exception as e:
+            logger.error(f"Помилка оновлення аватара: {e}")
+            return JsonResponse({'success': False, 'error': 'Помилка завантаження аватара'})
     return JsonResponse({'success': False, 'error': 'Файл не завантажено'})
 
 @login_required
@@ -356,7 +385,7 @@ def edit_announcement(request, pk):
         form = AnnouncementForm(request.POST, request.FILES, instance=announcement)
         if form.is_valid():
             announcement = form.save()
-            announcement.status = 'pending'
+            announcement.status = 'pending'  # Повертаємо на модерацію після редагування
             announcement.save()
             if announcement.subcategory == "Квартира":
                 details, created = ApartmentDetails.objects.get_or_create(announcement=announcement)
@@ -481,6 +510,7 @@ def moderate_announcement(request, pk):
             announcement.status = 'rejected'
             messages.success(request, f"Оголошення '{announcement.title}' відхилено.")
         announcement.save()
+        logger.info(f"Оголошення {announcement.pk} змінено статус на {announcement.status} адміністратором {request.user.username}")
         return redirect('announcements:admin_panel')
     return render(request, 'announcements/moderate_announcement.html', {
         'announcement': announcement,
@@ -494,8 +524,8 @@ def get_requests(request):
         'user_id': req.user_id,
         'username': req.username,
         'question': req.question,
-        'response': req.response,
-        'status': 'Очікує',
+        'response': req.response or '',
+        'status': req.get_status_display(),
         'handled_by_admin': req.handled_by_admin
     } for req in requests]
     return JsonResponse(data, safe=False)
@@ -511,12 +541,14 @@ def update_response(request):
 
             req = SupportRequest.objects.get(id=request_id)
             req.response = response_text
-            req.status = 'answered'
-            req.handled_by_admin = False
+            req.status = 'resolved'  # Оновлено на 'resolved' замість 'answered'
+            req.handled_by_admin = True
             req.save()
+            logger.info(f"Запит {request_id} оновлено адміністратором {request.user.username}")
             return JsonResponse({'status': 'success'})
         except SupportRequest.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Запит не знайдено'}, status=404)
         except Exception as e:
+            logger.error(f"Помилка оновлення запиту: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'status': 'error', 'message': 'Невірний метод'}, status=400)

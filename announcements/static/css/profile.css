@@ -1,0 +1,1301 @@
+/* Загальні стилі для сторінки (announcement_create.html) */
+.announcement-create-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #f5f7fa;
+}
+
+/* Заголовок */
+.form-title {
+    text-align: center;
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    color: #1a3c34;
+    font-weight: 700;
+}
+
+/* Сітка для форми */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* .form-column */
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* .form-field */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* .form-label */
+.form-label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #1a3c34;
+}
+
+/* .form-input, select.form-input */
+.form-input,
+select.form-input {
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+
+.form-input:focus,
+select.form-input:focus {
+    border-color: #42a5f5;
+    background-color: #fff;
+    box-shadow: 0 0 5px rgba(66, 165, 245, 0.2);
+    outline: none;
+}
+
+/* textarea.form-input */
+textarea.form-input {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Стилі для кастомного завантаження файлів */
+.custom-file-upload {
+    position: relative;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background-color: #ecf0f1;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.file-button:hover {
+    background-color: #dfe6e9;
+}
+
+.file-label-text {
+    font-size: 1rem;
+    color: #7f8c8d;
+}
+
+.file-icon i {
+    font-size: 1.3rem;
+    color: #7f8c8d;
+}
+
+.file-name {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: #7f8c8d;
+}
+
+/* Стилі для автодоповнення місцезнаходження */
+.location-field {
+    position: relative;
+}
+
+.suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 12px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.suggestion-item:hover {
+    background-color: #b3e5fc;
+    color: #1a3c34;
+}
+
+/* Стилі для додаткової інформації */
+.form-section {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+    font-size: 1.8rem;
+    color: #1a202c;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #2b6cb0;
+    padding-bottom: 8px;
+    position: relative;
+}
+
+.info-container {
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fafafa;
+}
+
+/* Окремі стилі для "Основні характеристики" */
+.info-container:has(.info-grid) {
+    background-color: #f9f9f9;
+}
+
+/* Окремі стилі для "Меблі та зручності" (appliances, multimedia, comfort) */
+.info-container:has(.checkbox-list.appliances),
+.info-container:has(.checkbox-list.multimedia),
+.info-container:has(.checkbox-list.comfort) {
+    background-color: #f5f7fa;
+}
+
+/* Окремі стилі для "Інфраструктура та комунікації" (infrastructure, communications, landscape) */
+.info-container:has(.checkbox-list.infrastructure),
+.info-container:has(.checkbox-list.communications),
+.info-container:has(.checkbox-list.landscape) {
+    background-color: #f0f5ff;
+}
+
+.container-title {
+    font-size: 1.3rem;
+    color: #1a3c34;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+/* Стилі для чекбоксів */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-list {
+    display: grid;
+    gap: 15px;
+    padding: 10px;
+}
+
+/* Усі секції мають 2 колонки */
+.checkbox-list.appliances,
+.checkbox-list.multimedia,
+.checkbox-list.comfort,
+.checkbox-list.communications,
+.checkbox-list.infrastructure,
+.checkbox-list.landscape {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    color: #34495e;
+    padding: 8px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.checkbox-item:hover {
+    background-color: #f0f5ff;
+}
+
+.checkbox-item input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #95a5a6;
+    border-radius: 5px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.checkbox-item input[type="checkbox"]:checked {
+    background-color: #42a5f5;
+    border-color: #42a5f5;
+}
+
+.checkbox-item input[type="checkbox"]:checked::after {
+    content: "✔";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 14px;
+    opacity: 0;
+    animation: checkmark 0.3s ease forwards;
+}
+
+@keyframes checkmark {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.checkbox-item label {
+    cursor: pointer;
+    font-size: 1rem;
+    color: #34495e;
+    transition: color 0.3s ease;
+}
+
+.checkbox-item input[type="checkbox"]:checked + label {
+    color: #42a5f5;
+}
+
+/* Стилі для кнопок (announcement_create.html) */
+.seller-type-option,
+.furnishing-option,
+.deal-type-option,
+.category-option,
+.subcategory-option {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ecf0f1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.seller-type-option:hover,
+.furnishing-option:hover,
+.deal-type-option:hover,
+.category-option:hover,
+.subcategory-option:hover {
+    background-color: #42a5f5;
+    color: #fff;
+    border-color: #42a5f5;
+}
+
+.seller-type-option.selected,
+.furnishing-option.selected,
+.deal-type-option.selected,
+.category-option.selected,
+.subcategory-option.selected {
+    background-color: #1976d2;
+    color: #fff;
+    border-color: #1976d2;
+}
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    margin: 30px auto;
+    padding: 16px;
+    font-size: 1.2rem;
+    background-color: #42a5f5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #1976d2;
+}
+
+/* Стилі для модального вікна */
+.category-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: flex-start;
+    justify-content: center;
+    max-width: none !important;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 5px 25px 25px 25px;
+    border-radius: 10px;
+    width: auto;
+    min-width: 800px;
+    max-width: 1000px;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.8);
+    opacity: 0;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    margin-top: 50px;
+}
+
+.modal-content.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #95a5a6;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: #e74c3c;
+}
+
+.modal-title {
+    font-size: 1.6rem;
+    color: #1a3c34;
+    text-align: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.category-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.option-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Стилі для секції "Тип угоди" */
+.deal-type-section .option-block {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deal-type-option {
+    flex: 0 0 auto;
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
+.category-option,
+.subcategory-option,
+.deal-type-option {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.category-option.show,
+.subcategory-option.show,
+.deal-type-option.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.category-option:hover,
+.subcategory-option:hover,
+.deal-type-option:hover {
+    background-color: #42a5f5;
+    color: #fff;
+    border-color: #42a5f5;
+}
+
+.category-option.selected,
+.subcategory-option.selected,
+.deal-type-option.selected {
+    background-color: #1976d2;
+    color: #fff;
+    border-color: #1976d2;
+}
+
+/* Стилі для кнопки "Підтвердити" */
+.confirm-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #42a5f5 0%, #1976d2 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease, transform 0.2s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(66, 165, 245, 0.3);
+}
+
+.confirm-btn.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.confirm-btn:disabled {
+    background: #bdc3c7;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.confirm-btn:hover:not(:disabled) {
+    background: linear-gradient(90deg, #42a5f5 20%, #1565c0 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 165, 245, 0.4);
+}
+
+.confirm-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(66, 165, 245, 0.2);
+}
+
+/* Стилі для помилок */
+.error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Сторінка профілю (profile.html) */
+.profile-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 15px;
+    font-family: 'Inter', sans-serif;
+    background-color: #f5f7fa;
+    border-radius: 12px;
+    min-height: calc(100vh - 100px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.profile-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Профіль */
+.profile-header {
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-details {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.profile-avatar {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 4px solid #e5e7eb;
+    transition: border-color 0.3s ease;
+}
+
+.profile-avatar:hover {
+    border-color: #2b6cb0;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.profile-avatar:hover .avatar-img {
+    transform: scale(1.1);
+}
+
+.avatar-upload-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(43, 108, 176, 0.8);
+    color: #ffffff;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.avatar-upload-btn:hover {
+    background-color: rgba(29, 78, 216, 0.9);
+}
+
+.profile-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 500px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 1rem;
+    color: #2b6cb0;
+    font-weight: 600;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: #f9fafb;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #2b6cb0;
+    box-shadow: 0 0 8px rgba(43, 108, 176, 0.2);
+}
+
+.form-input[readonly] {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+}
+
+.btn.btn-primary {
+    width: 100%;
+    max-width: 250px;
+    padding: 12px 20px;
+    background-color: #2b6cb0;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn.btn-primary:hover {
+    background-color: #1e4a7f;
+    transform: translateY(-2px);
+}
+
+/* Оголошення */
+.announcements-section {
+    margin-top: 40px;
+}
+
+.announcements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.announcement-card {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.announcement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.announcement-image {
+    width: 100%;
+    height: 120px;
+    overflow: hidden;
+}
+
+.announcement-img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.announcement-details {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.announcement-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.announcement-title a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.announcement-price {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #2b6cb0;
+    margin-bottom: 10px;
+}
+
+.announcement-location {
+    font-size: 0.9rem;
+    color: #718096;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.announcement-location i {
+    color: #2b6cb0;
+}
+
+/* Стилі для статусу оголошень */
+.announcement-status {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+.status-pending {
+    color: #f39c12; /* Помаранчевий для "На модерації" */
+}
+
+.status-approved {
+    color: #28a745; /* Зелений для "Опубліковано" */
+}
+
+.status-rejected {
+    color: #e74c3c; /* Червоний для "Відхилено" */
+}
+
+.empty-message {
+    font-size: 1.1rem;
+    color: #718096;
+    text-align: center;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Пагінація */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    background: #ffffff;
+    color: #2b6cb0;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.pagination-btn:hover {
+    background: #e6f0fa;
+    color: #1e4a7f;
+}
+
+.pagination-current {
+    padding: 8px 12px;
+    font-size: 1rem;
+    color: #4a5568;
+}
+
+/* Адаптивність для announcement_create.html */
+@media screen and (max-width: 1200px) {
+    .category-modal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .modal-content {
+        min-width: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .category-modal-grid {
+        grid-template-columns: repeat(3, 1fr);
+        overflow-x: auto;
+    }
+    .checkbox-list.appliances,
+    .checkbox-list.multimedia,
+    .checkbox-list.comfort,
+    .checkbox-list.communications,
+    .checkbox-list.infrastructure,
+    .checkbox-list.landscape {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .checkbox-item {
+        gap: 8px;
+        padding: 6px;
+    }
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    .checkbox-item input[type="checkbox"]:checked::after {
+        font-size: 12px;
+    }
+    .checkbox-item label {
+        font-size: 0.9rem;
+    }
+    .modal-content {
+        width: 90%;
+        min-width: unset;
+        max-width: 100%;
+        margin-top: 20px;
+    }
+    .deal-type-section .option-block {
+        flex-direction: column;
+    }
+}
+
+/* Адаптивність для profile.html */
+@media (max-width: 768px) {
+    .profile-details {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+    }
+
+    .profile-form {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+    }
+
+    .announcements-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .announcement-image {
+        height: 100px;
+    }
+
+    .announcement-img {
+        height: 100px;
+    }
+
+    .announcement-title {
+        font-size: 1.1rem;
+    }
+
+    .announcement-price {
+        font-size: 1rem;
+    }
+
+    .announcement-location {
+        font-size: 0.9rem;
+    }
+
+    .announcement-status {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-page {
+        padding: 15px 10px;
+    }
+
+    .profile-container {
+        padding: 20px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+    }
+
+    .form-label {
+        font-size: 0.95rem;
+    }
+
+    .form-input {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+
+    .announcement-image {
+        height: 100px;
+    }
+
+    .announcement-img {
+        height: 100px;
+    }
+
+    .announcement-title {
+        font-size: 1rem;
+    }
+
+    .pagination-btn {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+    }
+
+    .pagination-current {
+        font-size: 0.9rem;
+    }
+
+    .announcement-status {
+        font-size: 0.8rem;
+    }
+}
+/* Сторінка адмін-панелі (admin_panel.html) */
+.admin-panel {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background: #f5f7fa;
+    font-family: 'Inter', sans-serif;
+}
+
+.admin-panel__title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a202c;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-panel__tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.admin-panel__tab-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #e5e7eb;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4a5568;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.admin-panel__tab-button.active {
+    background-color: #2b6cb0;
+    color: #fff;
+}
+
+.admin-panel__tab-button:hover {
+    background-color: #d1d5db;
+}
+
+.admin-panel__tab-content {
+    display: none;
+}
+
+.admin-panel__tab-content.active {
+    display: block;
+}
+
+.admin-panel__alert {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.admin-panel__alert--success {
+    background-color: #e6ffed;
+    color: #28a745;
+}
+
+.admin-panel__alert--error {
+    background-color: #ffe6e6;
+    color: #dc3545;
+}
+
+.admin-panel__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-panel__item {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+}
+
+.admin-panel__item-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 10px;
+}
+
+.admin-panel__item-detail {
+    font-size: 0.95rem;
+    color: #4a5568;
+    margin-bottom: 5px;
+}
+
+.admin-panel__label {
+    font-weight: 600;
+    color: #2b6cb0;
+}
+
+.admin-panel__button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #2b6cb0;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.admin-panel__button:hover {
+    background-color: #1e4a7f;
+}
+
+.admin-panel__empty {
+    font-size: 1.1rem;
+    color: #718096;
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.admin-panel__table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-panel__table th,
+.admin-panel__table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.admin-panel__table th {
+    background-color: #2b6cb0;
+    color: #fff;
+    font-weight: 600;
+}
+
+.admin-panel__table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.admin-panel__table tr:hover {
+    background-color: #f0f4f8;
+}
+
+.admin-panel__table textarea {
+    width: 100%;
+    height: 60px;
+    margin-top: 5px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    resize: vertical;
+}
+
+.admin-panel__table button {
+    padding: 5px 10px;
+    background-color: #2b6cb0;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.admin-panel__table button:hover {
+    background-color: #1e4a7f;
+}
+
+@media (max-width: 768px) {
+    .admin-panel {
+        padding: 15px 10px;
+    }
+
+    .admin-panel__title {
+        font-size: 1.5rem;
+    }
+
+    .admin-panel__tab-button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .admin-panel__item-title {
+        font-size: 1.1rem;
+    }
+
+    .admin-panel__table th,
+    .admin-panel__table td {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .admin-panel__table textarea {
+        height: 50px;
+    }
+
+    .admin-panel__table button {
+        padding: 4px 8px;
+        font-size: 0.85rem;
+    }
+}
+/* Сторінка модерації оголошення (moderate_announcement.html) */
+.moderate-panel {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    background: #f5f7fa;
+    font-family: 'Inter', sans-serif;
+}
+
+.moderate-panel__title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a202c;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.moderate-panel__alert {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.moderate-panel__alert--success {
+    background-color: #e6ffed;
+    color: #28a745;
+}
+
+.moderate-panel__alert--error {
+    background-color: #ffe6e6;
+    color: #dc3545;
+}
+
+.moderate-panel__details {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.moderate-panel__detail {
+    font-size: 0.95rem;
+    color: #4a5568;
+    margin-bottom: 10px;
+}
+
+.moderate-panel__label {
+    font-weight: 600;
+    color: #2b6cb0;
+}
+
+.moderate-panel__image {
+    width: 100%;
+    max-width: 400px;
+    margin: 15px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.moderate-panel__img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.moderate-panel__form {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.moderate-panel__button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.moderate-panel__button--success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.moderate-panel__button--success:hover {
+    background-color: #218838;
+}
+
+.moderate-panel__button--danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.moderate-panel__button--danger:hover {
+    background-color: #c82333;
+}
+
+@media (max-width: 768px) {
+    .moderate-panel {
+        padding: 15px 10px;
+    }
+
+    .moderate-panel__title {
+        font-size: 1.5rem;
+    }
+
+    .moderate-panel__detail {
+        font-size: 0.9rem;
+    }
+
+    .moderate-panel__image {
+        max-width: 100%;
+    }
+
+    .moderate-panel__button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+}

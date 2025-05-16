@@ -742,206 +742,7 @@ body {
         font-size: 0.85rem;
     }
 }
-/*search_results.html*/
-.search-results-page {
-    padding: 40px 20px;
-}
 
-.search-results-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.search-results-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.search-results-title {
-    font-size: 2.2rem;
-    color: #3b5998; /* Синьо-фіолетовий для заголовка */
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.search-results-query {
-    font-size: 1.1rem;
-    color: #555;
-}
-
-.search-results-query strong {
-    color: #00aaff; /* Яскравий блакитний для запиту */
-}
-
-.results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.result-card {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-decoration: none;
-    color: inherit;
-}
-
-.result-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.result-image-wrapper {
-    width: 100%;
-    height: 150px;
-    overflow: hidden;
-}
-
-.result-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 5px 5px 0 0;
-}
-
-.result-info {
-    padding: 10px;
-}
-
-.result-title {
-    font-size: 1.2rem;
-    color: #3b5998;
-    margin: 10px 0;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.result-price {
-    font-size: 1rem;
-    color: #4a7043; /* Сіро-зелений для ціни */
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.result-location {
-    font-size: 0.9rem;
-    color: #555;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.no-results {
-    text-align: center;
-    font-size: 1.1rem;
-    color: #e57373; /* М'який червоний для повідомлення */
-    margin-top: 20px;
-}
-
-.pagination {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.pagination-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-}
-
-.pagination-link {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    text-decoration: none;
-    color: #3b5998;
-    font-size: 0.95rem;
-    transition: background 0.3s ease, color 0.3s ease;
-}
-
-.pagination-link:hover {
-    background: #00aaff;
-    color: #fff;
-    border-color: #00aaff;
-}
-
-.pagination-current {
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    color: #555;
-}
-
-/* Адаптивність */
-@media (max-width: 768px) {
-    .search-results-page {
-        padding: 20px 15px;
-    }
-
-    .search-results-title {
-        font-size: 1.8rem;
-    }
-
-    .search-results-query {
-        font-size: 1rem;
-    }
-
-    .results-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .result-title {
-        font-size: 1.1rem;
-    }
-
-    .result-price, .result-location {
-        font-size: 0.85rem;
-    }
-
-    .pagination-link, .pagination-current {
-        padding: 6px 10px;
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .search-results-title {
-        font-size: 1.6rem;
-    }
-
-    .search-results-query {
-        font-size: 0.95rem;
-    }
-
-    .results-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .result-title {
-        font-size: 1rem;
-    }
-
-    .result-price, .result-location {
-        font-size: 0.8rem;
-    }
-
-    .no-results {
-        font-size: 1rem;
-    }
-
-    .pagination-link, .pagination-current {
-        padding: 5px 8px;
-        font-size: 0.85rem;
-    }
-}
 /*profile_edit.html*/
 .profile-edit-container {
     display: flex;
@@ -1453,183 +1254,6 @@ body {
         font-size: 0.85rem;
     }
 }
-/*edit_announcement.html*/
-.announcement-edit-container {
-        max-width: 900px; /* Збільшено ширину */
-        margin: 0 auto;
-        padding: 30px 20px; /* Збільшено відступи */
-    }
-
-    .edit-title {
-        text-align: center;
-        margin-bottom: 30px; /* Збільшено відступ */
-        font-size: 1.8rem;
-        color: #3b5998;
-        font-weight: 700;
-    }
-
-    .form-container {
-        background: linear-gradient(135deg, #ffffff, #e6f0ff); /* Градієнт, як у .search-bar */
-        padding: 30px; /* Збільшено відступи */
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        transition: box-shadow 0.3s ease;
-    }
-
-    .form-container:hover {
-        box-shadow: 0 6px 16px rgba(0, 170, 255, 0.3); /* Тінь при наведенні */
-    }
-
-    .form-group {
-        margin-bottom: 20px; /* Збільшено відступ */
-    }
-
-    .form-label {
-        display: block;
-        margin-bottom: 8px; /* Збільшено відступ */
-        font-weight: 500;
-        font-size: 1.1rem; /* Збільшено шрифт */
-        color: #3b5998;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 12px 15px; /* Збільшено відступи */
-        font-size: 1.1rem; /* Збільшено шрифт */
-        border: 1px solid #e6f0ff !important; /* Легша рамка */
-        border-radius: 5px;
-        background: #fff;
-        color: #333;
-        box-sizing: border-box;
-        transition: box-shadow 0.3s ease, border-color 0.3s ease;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #00aaff !important;
-        box-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
-    }
-
-    textarea.form-control {
-        resize: vertical; /* Дозволяємо змінювати лише висоту */
-    }
-
-    .location-field {
-        position: relative;
-    }
-
-    .suggestions-box {
-        border: 1px solid #00aaff;
-        max-height: 200px; /* Збільшено висоту */
-        overflow-y: auto;
-        background: linear-gradient(180deg, #ffffff, #e6f0ff); /* Градієнт, як у .autocomplete-suggestions */
-        position: absolute;
-        z-index: 1000;
-        width: calc(100% - 2px);
-        border-radius: 5px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-        display: none;
-        opacity: 0;
-        transform: translateY(-10px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-    }
-
-    .suggestions-box[style*="block"] {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .suggestion-item {
-        padding: 10px 15px;
-        font-size: 1rem;
-        color: #333;
-        cursor: pointer;
-        border-bottom: 1px solid #e6f0ff;
-        transition: background 0.2s ease, color 0.2s ease;
-    }
-
-    .suggestion-item:last-child {
-        border-bottom: none;
-    }
-
-    .suggestion-item:hover {
-        background: #00aaff;
-        color: #fff;
-    }
-
-    .custom-file-upload {
-        position: relative;
-        display: inline-block;
-    }
-
-    .custom-file-label {
-        display: inline-block;
-        padding: 10px 15px; /* Збільшено відступи */
-        background: linear-gradient(135deg, #3b5998, #2a4373); /* Градієнт, як у кнопок */
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    .custom-file-label:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 170, 255, 0.5);
-    }
-
-    .custom-file-upload input[type="file"] {
-        display: none; /* Приховуємо стандартний input */
-    }
-
-    .img-thumbnail {
-        margin-top: 15px; /* Збільшено відступ */
-        max-width: 250px; /* Збільшено розмір фото */
-        border-radius: 5px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .button-group {
-        display: flex;
-        gap: 15px; /* Збільшено відстань між кнопками */
-        justify-content: center;
-        margin-top: 20px; /* Додано відступ зверху */
-    }
-
-    .btn {
-        padding: 12px 25px; /* Збільшено відступи */
-        border: none;
-        border-radius: 5px;
-        cursor:линк на сайт xAI: https://x.ai/grok cursor: pointer;
-        text-decoration: none;
-        text-align: center;
-        font-size: 1.1rem; /* Збільшено шрифт */
-        transition: transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #28a745, #1e7e34); /* Градієнт */
-        color: white;
-    }
-
-    .btn-success:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0, 170, 255, 0.5);
-        background: linear-gradient(135deg, #218838, #1a6630); /* Темніший градієнт при наведенні */
-    }
-
-    .btn-secondary {
-        background: linear-gradient(135deg, #6c757d, #545b62); /* Градієнт */
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 4px 12px rgba(0, 170, 255, 0.5);
-        background: linear-gradient(135deg, #5a6268, #454b50); /* Темніший градієнт при наведенні */
-    }
-/* Загальні стилі для сторінки */
 /* Загальні стилі для сторінки */
 .announcement-create-page {
     max-width: 1200px;
@@ -1688,7 +1312,6 @@ select.form-input {
     background-color: #fafafa;
 }
 
-/* .form-input:focus, select.form-input:focus */
 .form-input:focus,
 select.form-input:focus {
     border-color: #42a5f5;
@@ -2106,102 +1729,117 @@ textarea.form-input {
     background-color: #42a5f5;
     color: #fff;
     border-color: #42a5f5;
- ADA-compliant: true
-    media screen and (max-width: 1200px) {
-        .category-modal-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .modal-content {
-            min-width: 600px;
-        }
-    }
+}
 
-    @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
-        .category-modal-grid {
-            grid-template-columns: repeat(3, 1fr);
-            overflow-x: auto;
-        }
-        .checkbox-list.appliances,
-        .checkbox-list.multimedia,
-        .checkbox-list.comfort,
-        .checkbox-list.communications,
-        .checkbox-list.infrastructure,
-        .checkbox-list.landscape {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .checkbox-item {
-            gap: 8px;
-            padding: 6px;
-        }
-        .checkbox-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-        .checkbox-item input[type="checkbox"]:checked::after {
-            font-size: 12px;
-        }
-        .checkbox-item label {
-            font-size: 0.9rem;
-        }
-        .modal-content {
-            width: 90%;
-            min-width: unset;
-            max-width: 100%;
-            margin-top: 20px;
-        }
-        .deal-type-section .option-block {
-            flex-direction: column;
-        }
-    }
+.category-option.selected,
+.subcategory-option.selected,
+.deal-type-option.selected {
+    background-color: #1976d2;
+    color: #fff;
+    border-color: #1976d2;
+}
 
-    .category-option.selected,
-    .subcategory-option.selected,
-    .deal-type-option.selected {
-        background-color: #1976d2;
-        color: #fff;
-        border-color: #1976d2;
-    }
+/* Стилі для кнопки "Підтвердити" */
+.confirm-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg, #42a5f5 0%, #1976d2 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.3s ease, transform 0.2s ease;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(66, 165, 245, 0.3);
+}
 
-    .confirm-btn {
-        display: block;
-        width: 100%;
-        padding: 12px;
-        margin-top: 10px;
-        font-size: 1.1rem;
-        background-color: #42a5f5;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        opacity: 0;
-        transition: all 0.3s ease;
-        font-weight: 500;
-    }
+.confirm-btn.show {
+    opacity: 1;
+    transform: translateY(0);
+}
 
-    .confirm-btn.show {
-        opacity: 1;
-    }
+.confirm-btn:disabled {
+    background: #bdc3c7;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
-    .confirm-btn:disabled {
-        background-color: #bdc3c7;
-        cursor: not-allowed;
-    }
+.confirm-btn:hover:not(:disabled) {
+    background: linear-gradient(90deg, #42a5f5 20%, #1565c0 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 165, 245, 0.4);
+}
 
-    .confirm-btn:hover:not(:disabled) {
-        background-color: #1976d2;
-    }
+.confirm-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(66, 165, 245, 0.2);
+}
 
-    /* Стилі для помилок */
-    .error {
-        color: #e74c3c;
+/* Стилі для помилок */
+.error {
+    color: #e74c3c;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* Медіа-запити */
+@media screen and (max-width: 1200px) {
+    .category-modal-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .modal-content {
+        min-width: 600px;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .category-modal-grid {
+        grid-template-columns: repeat(3, 1fr);
+        overflow-x: auto;
+    }
+    .checkbox-list.appliances,
+    .checkbox-list.multimedia,
+    .checkbox-list.comfort,
+    .checkbox-list.communications,
+    .checkbox-list.infrastructure,
+    .checkbox-list.landscape {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .checkbox-item {
+        gap: 8px;
+        padding: 6px;
+    }
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    .checkbox-item input[type="checkbox"]:checked::after {
+        font-size: 12px;
+    }
+    .checkbox-item label {
         font-size: 0.9rem;
-        margin-top: 5px;
     }
+    .modal-content {
+        width: 90%;
+        min-width: unset;
+        max-width: 100%;
+        margin-top: 20px;
+    }
+    .deal-type-section .option-block {
+        flex-direction: column;
+    }
+}
 /*category_announcement.html*/
-/* Основний контейнер */
 .category-page {
     max-width: 1200px;
     margin: 0 auto;
@@ -2210,12 +1848,10 @@ textarea.form-input {
     font-family: 'Inter', sans-serif;
 }
 
-/* Контейнер вмісту */
 .category-container {
     width: 100%;
 }
 
-/* Заголовок категорії */
 .category-header {
     margin-bottom: 30px;
     text-align: center;
@@ -2235,7 +1871,78 @@ textarea.form-input {
     line-height: 1.6;
 }
 
-/* Сітка оголошень */
+.filter-toggle {
+    padding: 10px 20px;
+    background: #3b5998;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter-toggle:hover {
+    background: #2a4373;
+}
+
+.filter-form {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.filter-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    color: #333;
+    margin-right: 5px;
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.filter-submit {
+    padding: 5px 15px;
+    background: #3b5998;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filter-submit:hover {
+    background: #2a4373;
+}
+
+.filter-reset {
+    padding: 5px 15px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filter-reset:hover {
+    background: #c82333;
+}
+
 .announcement-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -2243,7 +1950,6 @@ textarea.form-input {
     margin-bottom: 20px;
 }
 
-/* Карточка оголошення */
 .announcement-card {
     display: flex;
     flex-direction: column;
@@ -2260,23 +1966,20 @@ textarea.form-input {
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-/* Обгортка зображення */
 .announcement-image-wrapper {
     width: 100%;
-    height: 150px; /* Невелика висота, щоб зображення не було великим */
+    height: 120px;
     overflow: hidden;
 }
 
-/* Зображення */
 .announcement-image {
     width: 100%;
-    height: 100%;
-    object-fit: cover; /* Запобігає розтягуванню, зображення обрізається */
+    height: 120px;
+    object-fit: cover;
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
 }
 
-/* Інформація про оголошення */
 .announcement-info {
     padding: 15px;
     flex-grow: 1;
@@ -2313,7 +2016,6 @@ textarea.form-input {
     margin-bottom: 0;
 }
 
-/* Пагінація */
 .pagination {
     display: flex;
     justify-content: center;
@@ -2349,7 +2051,6 @@ textarea.form-input {
     color: #4a5568;
 }
 
-/* Повідомлення про відсутність оголошень */
 .no-announcements {
     font-size: 1.1rem;
     color: #718096;
@@ -2360,917 +2061,14 @@ textarea.form-input {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Адаптивність */
 @media (max-width: 768px) {
-    .category-page {
-        padding: 20px 15px;
-    }
-
-    .category-title {
-        font-size: 2rem;
-    }
-
-    .category-description {
-        font-size: 1rem;
-    }
-
-    .announcement-image-wrapper {
-        height: 120px; /* Ще менша висота для мобільних */
-    }
-
-    .announcement-title {
-        font-size: 1.1rem;
-    }
-
-    .announcement-price {
-        font-size: 1rem;
-    }
-
-    .announcement-description {
-        font-size: 0.9rem;
-    }
-
-    .pagination-link {
-        padding: 6px 10px;
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .category-title {
-        font-size: 1.5rem;
-    }
-
     .announcement-grid {
-        grid-template-columns: 1fr; /* Одна колонка на малих екранах */
+        grid-template-columns: 1fr;
     }
-
     .announcement-image-wrapper {
         height: 100px;
     }
-}/*announcement_detail.html*/
-/* Основний контейнер сторінки */
-.announcement-detail-page {
-    width: 100%;
-    padding: 30px 20px;
-    background: #f5f7fa;
-}
-
-/* Контейнер оголошення */
-.announcement-detail-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #ffffff, #e6f0ff);
-    border-radius: 6px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-}
-
-/* Основний вміст */
-.announcement-main {
-    margin-bottom: 30px;
-}
-
-/* Дві колонки */
-.announcement-content {
-    display: flex;
-    gap: 20px;
-}
-
-.left-column {
-    flex: 2;
-}
-
-.right-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-/* Зображення оголошення */
-.announcement-image-d {
-    width: 100%;
-    height: 300px;
-    overflow: hidden;
-    border-radius: 6px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-}
-
-.announcement-img {
-    width: 130%;
-    height: 120%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.announcement-image-d:hover .announcement-img {
-    transform: scale(1.03);
-}
-
-/* Додаткова інформація */
-.additional-info {
-    margin-top: 20px;
-    padding: 15px;
-    background: #fff;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.additional-info-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #3b5998;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #e6f0ff;
-    padding-bottom: 5px;
-}
-
-.detail-desc {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 8px;
-    line-height: 1.4;
-    padding: 8px 12px;
-    background: linear-gradient(135deg, #f9fafb, #e6f0ff);
-    border: 1px solid #e6f0ff;
-    border-radius: 12px; /* Закруглені рамки */
-    display: inline-block;
-    width: auto;
-    max-width: 100%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: background 0.2s ease, box-shadow 0.2s ease;
-}
-
-.detail-desc:hover {
-    background: linear-gradient(135deg, #e6f0ff, #d1e3ff);
-    box-shadow: 0 2px 6px rgba(0, 170, 255, 0.2);
-}
-
-.detail-desc span {
-    font-weight: 500;
-    color: #3b5998;
-    margin-right: 5px;
-}
-
-/* Права колонка */
-.detail-header {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #3b5998;
-    line-height: 1.3;
-    display: block;
-}
-
-.detail-price {
-    font-size: 1.1rem;
-    color: #28a745;
-    font-weight: 500;
-    margin: 0;
-}
-
-.detail-author {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.author-name span,
-.author-date span,
-.author-date-updated span {
-    font-weight: 500;
-    color: #3b5998;
-    margin-right: 5px;
-}
-
-/* Карта */
-.location-map {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.detail-location {
-    font-size: 0.9rem;
-    color: #555;
-}
-
-.detail-location span {
-    font-weight: 500;
-    color: #3b5998;
-    margin-right: 5px;
-}
-
-.map-container {
-    height: 150px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-}
-
-/* Кнопки */
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    font-size: 0.95rem;
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #3b5998, #2a4373);
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(0, 170, 255, 0.5);
-}
-
-.chat-action {
-    margin-top: 10px;
-}
-
-/* Меню дій */
-.actions {
-    position: relative;
-}
-
-.menu-button {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    color: #3b5998;
-    cursor: pointer;
-    padding: 5px;
-}
-
-.menu-dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-    z-index: 10;
-}
-
-.menu-dropdown a,
-.menu-dropdown button {
-    display: block;
-    padding: 8px 15px;
-    background: none;
-    border: none;
-    color: #333;
-    text-align: left;
-    width: 100%;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.btn-edit {
-    color: #3b5998;
-}
-
-.btn-delete {
-    color: #e53e3e;
-}
-
-.menu-dropdown a:hover,
-.menu-dropdown button:hover {
-    background: #e6f0ff;
-}
-
-/* Відгуки */
-.reviews {
-    margin-top: 30px;
-}
-
-.reviews-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #3b5998;
-    margin-bottom: 15px;
-}
-
-.review {
-    background: #fff;
-    padding: 15px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    margin-bottom: 15px;
-}
-
-.review-user {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: #3b5998;
-    margin-bottom: 5px;
-}
-
-.review-stars {
-    font-size: 0.9rem;
-    color: #f1c40f;
-    margin-bottom: 5px;
-}
-
-.review-text {
-    font-size: 0.9rem;
-    color: #555;
-    line-height: 1.4;
-    margin-bottom: 5px;
-}
-
-.review-date {
-    font-size: 0.8rem;
-    color: #777;
-}
-
-.no-reviews {
-    font-size: 0.9rem;
-    color: #777;
-    text-align: center;
-}
-
-/* Форма відгуку */
-.review-form {
-    margin-top: 30px;
-}
-
-.review-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #3b5998;
-    margin-bottom: 15px;
-}
-
-.rating-label,
-.review-text-label {
-    display: block;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #3b5998;
-    margin-bottom: 5px;
-}
-
-.star-rating {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 10px;
-}
-
-.star {
-    font-size: 1.2rem;
-    color: #ccc;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.star.selected {
-    color: #f1c40f;
-}
-
-.review-text {
-    width: 100%;
-    padding: 8px;
-    font-size: 0.9rem;
-    border: 1px solid #e6f0ff;
-    border-radius: 4px;
-    resize: vertical;
-    margin-bottom: 10px;
-}
-
-.review-text:focus {
-    outline: none;
-    border-color: #00aaff;
-    box-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
-}
-
-/* Модальне вікно для карти */
-.map-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.map-modal-content {
-    position: relative;
-    width: 90%;
-    max-width: 800px;
-    height: 500px;
-    background: #fff;
-    border-radius: 6px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-}
-
-.map-expanded {
-    width: 100%;
-    height: 100%;
-    border-radius: 6px;
-}
-
-.map-close-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: #e53e3e;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.map-close-btn:hover {
-    background: #c53030;
-}
-
-/* Адаптивність */
-@media (max-width: 768px) {
-    .announcement-detail-page {
-        padding: 20px 15px;
-    }
-
-    .announcement-detail-container {
-        padding: 15px;
-    }
-
-    .announcement-content {
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .announcement-image-d {
-        height: 250px;
-    }
-
-    .detail-header {
-        font-size: 1.2rem;
-    }
-
-    .detail-price {
-        font-size: 1rem;
-    }
-
-    .detail-author {
-        font-size: 0.85rem;
-    }
-
-    .detail-location {
-        font-size: 0.85rem;
-    }
-
-    .map-container {
-        height: 130px;
-    }
-
-    .btn {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-    }
-
-    .reviews-title,
-    .review-title {
-        font-size: 1.1rem;
-    }
-
-    .review {
-        padding: 12px;
-    }
-
-    .review-user {
-        font-size: 0.9rem;
-    }
-
-    .review-text {
-        font-size: 0.85rem;
-    }
-
-    .additional-info {
-        padding: 12px;
-    }
-
-    .detail-desc {
-        font-size: 0.85rem;
-        padding: 6px 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .announcement-detail-page {
-        padding: 15px 10px;
-    }
-
-    .announcement-detail-container {
-        padding: 10px;
-    }
-
-    .announcement-image-d {
-        height: 200px;
-    }
-
-    .detail-header {
-        font-size: 1.1rem;
-    }
-
-    .detail-price {
-        font-size: 0.95rem;
-    }
-
-    .detail-author {
-        font-size: 0.8rem;
-    }
-
-    .detail-location {
-        font-size: 0.8rem;
-    }
-
-    .map-container {
-        height: 120px;
-    }
-
-    .btn {
-        padding: 5px 10px;
-        font-size: 0.85rem;
-    }
-
-    .reviews-title,
-    .review-title {
-        font-size: 1rem;
-    }
-
-    .review {
-        padding: 10px;
-    }
-
-    .review-user {
-        font-size: 0.85rem;
-    }
-
-    .review-text {
-        font-size: 0.8rem;
-    }
-
-    .star {
-        font-size: 1rem;
-    }
-
-    .map-modal-content {
-        height: 400px;
-    }
-
-    .additional-info {
-        padding: 10px;
-    }
-
-    .detail-desc {
-        font-size: 0.8rem;
-        padding: 5px 8px;
-    }
-}
-
-
-/*admin-panel*/
-/* Основний контейнер адмін-панелі */
-.admin-panel {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 30px 20px;
-    background-color: #f5f7fa;
-    min-height: 100vh;
-    font-family: 'Inter', sans-serif;
-}
-
-/* Заголовок */
-.admin-panel__title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 30px;
-    text-align: center;
-    letter-spacing: -0.025em;
-}
-
-/* Список оголошень */
-.admin-panel__list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    list-style: none;
-    padding: 0;
-}
-
-/* Елемент списку */
-.admin-panel__item {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 1px solid #e2e8f0;
-}
-
-.admin-panel__item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-
-/* Заголовок оголошення */
-.admin-panel__item-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 10px;
-    line-height: 1.4;
-}
-
-/* Деталі оголошення */
-.admin-panel__item-detail {
-    font-size: 0.95rem;
-    color: #4a5568;
-    margin: 5px 0;
-    line-height: 1.5;
-}
-
-/* Лейбли для деталей */
-.admin-panel__label {
-    font-weight: 500;
-    color: #718096;
-    margin-right: 5px;
-}
-
-/* Кнопка "Модерувати" */
-.admin-panel__button {
-    display: inline-block;
-    background: linear-gradient(90deg, #4299e1, #3182ce);
-    color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 500;
-    margin-top: 10px;
-    transition: background 0.3s ease, transform 0.2s ease;
-    text-align: center;
-}
-
-.admin-panel__button:hover {
-    background: linear-gradient(90deg, #3182ce, #2b6cb0);
-    transform: translateY(-1px);
-}
-
-/* Повідомлення про відсутність оголошень */
-.admin-panel__empty {
-    font-size: 1.1rem;
-    color: #718096;
-    text-align: center;
-    padding: 20px;
-    background: #edf2f7;
-    border-radius: 8px;
-    margin-top: 20px;
-}
-
-/* Сповіщення */
-.admin-panel__alert {
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-    font-size: 1rem;
-    text-align: center;
-}
-
-.admin-panel__alert--success {
-    background-color: #e6fffa;
-    color: #2b6cb0;
-    border: 1px solid #bee3f8;
-}
-
-.admin-panel__alert--error {
-    background-color: #fff5f5;
-    color: #c53030;
-    border: 1px solid #feb2b2;
-}
-
-/* Адаптивність */
-@media (max-width: 768px) {
-    .admin-panel {
-        padding: 20px 15px;
-    }
-
-    .admin-panel__title {
-        font-size: 1.5rem;
-    }
-
-    .admin-panel__list {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-panel__item {
-        padding: 15px;
-    }
-
-    .admin-panel__item-title {
-        font-size: 1.1rem;
-    }
-
-    .admin-panel__button {
-        padding: 6px 12px;
-        font-size: 0.9rem;
-    }
-
-    .admin-panel__empty {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-panel__title {
-        font-size: 1.3rem;
-    }
-
-    .admin-panel__item {
-        padding: 12px;
-    }
-
-    .admin-panel__item-title {
-        font-size: 1rem;
-    }
-
-    .admin-panel__item-detail {
-        font-size: 0.9rem;
-    }
-}
-/*moderate_announcement*/
-/* Основний контейнер */
-.moderate-panel {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 30px 20px;
-    background: #f5f7fa;
-    font-family: 'Inter', sans-serif;
-}
-
-/* Заголовок */
-.moderate-panel__title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1a202c;
-    margin-bottom: 20px;
-    text-align: center;
-    letter-spacing: -0.025em;
-}
-
-/* Секція деталей */
-.moderate-panel__details {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-}
-
-/* Деталі оголошення */
-.moderate-panel__detail {
-    font-size: 1rem;
-    color: #4a5568;
-    margin: 10px 0;
-    line-height: 1.5;
-}
-
-.moderate-panel__label {
-    font-weight: 500;
-    color: #718096;
-    margin-right: 5px;
-}
-
-/* Зображення */
-.moderate-panel__image {
-    margin: 15px 0;
-}
-
-.moderate-panel__img {
-    max-width: 300px;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Форма */
-.moderate-panel__form {
-    display: flex;
-    gap: 10px;
-}
-
-/* Кнопки */
-.moderate-panel__button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.moderate-panel__button--success {
-    background: linear-gradient(90deg, #28a745, #218838);
-    color: #ffffff;
-}
-
-.moderate-panel__button--success:hover {
-    background: linear-gradient(90deg, #218838, #1e6f3f);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-}
-
-.moderate-panel__button--danger {
-    background: linear-gradient(90deg, #dc3545, #c82333);
-    color: #ffffff;
-}
-
-.moderate-panel__button--danger:hover {
-    background: linear-gradient(90deg, #c82333, #a41e2c);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-/* Сповіщення */
-.moderate-panel__alert {
-    padding: 12px 20px;
-    margin-bottom: 15px;
-    border-radius: 6px;
-    font-size: 1rem;
-    text-align: center;
-}
-
-.moderate-panel__alert--success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-
-.moderate-panel__alert--error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* Адаптивність */
-@media (max-width: 768px) {
-    .moderate-panel {
-        padding: 20px 15px;
-    }
-
-    .moderate-panel__title {
-        font-size: 1.5rem;
-    }
-
-    .moderate-panel__details {
-        padding: 15px;
-    }
-
-    .moderate-panel__detail {
-        font-size: 0.95rem;
-    }
-
-    .moderate-panel__form {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .moderate-panel__button {
-        width: 100%;
-        padding: 10px;
-        font-size: 0.95rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .moderate-panel__title {
-        font-size: 1.3rem;
-    }
-
-    .moderate-panel__img {
-        max-width: 100%;
+    .announcement-image {
+        height: 100px;
     }
 }

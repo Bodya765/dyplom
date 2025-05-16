@@ -24,6 +24,15 @@
                     <label for="{{ form.price.id_for_label }}" class="form-label">Ціна:</label>
                     {{ form.price }}
                 </div>
+                <div class="form-field">
+                    <label for="id_phone" class="form-label">Номер телефону:</label>
+                    <input type="text" id="id_phone" name="phone" class="form-input"
+                           value="{% if user.profile.phone %}{{ user.profile.phone }}{% endif %}"
+                           placeholder="Введіть ваш номер телефону" maxlength="15" />
+                    {% if user.profile.phone %}
+                        <p class="form-help-text">Поточний номер: {{ user.profile.phone }}</p>
+                    {% endif %}
+                </div>
             </div>
 
             <!-- Правий стовпчик: Категорія, Місцезнаходження, Зображення -->
@@ -42,12 +51,12 @@
                 </div>
                 <div class="form-field custom-file-upload">
                     <label for="{{ form.image.id_for_label }}" class="form-label">Зображення:</label>
-                    <input type="file" id="{{ form.image.id_for_label }}" name="image" class="file-input" accept="image/*" />
+                    <input type="file" id="{{ form.image.id_for_label }}" name="image" class="file-input" accept="image/*" multiple />
                     <label for="{{ form.image.id_for_label }}" class="file-button">
                         <span class="file-label-text">Виберіть зображення</span>
                         <span class="file-icon"><i class="fas fa-cloud-upload-alt"></i></span>
                     </label>
-                    <span id="file-name" class="file-name"></span>
+                    <div id="image-previews" class="image-previews"></div>
                     {% if form.image.errors %}
                         <div class="error">{{ form.image.errors }}</div>
                     {% endif %}
@@ -423,7 +432,141 @@
             <button id="confirm-category" class="confirm-btn" disabled>Підтвердити</button>
         </div>
     </div>
+
+    <!-- Модальне вікно для перегляду зображень -->
+    <div id="image-viewer-modal" class="image-viewer-modal">
+        <div class="image-viewer-content">
+            <span class="image-viewer-close">×</span>
+            <div class="image-viewer">
+                <button class="viewer-nav prev" id="viewer-prev">❮</button>
+                <img id="viewer-image" src="" alt="Preview Image" />
+                <button class="viewer-nav next" id="viewer-next">❯</button>
+            </div>
+            <div class="viewer-thumbnails" id="viewer-thumbnails"></div>
+        </div>
+    </div>
+
 </main>
+
+<style>
+/* Стилі для прев’ю-зображень */
+.image-previews {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    margin-top: 10px;
+    padding-bottom: 5px;
+}
+.image-preview {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.image-preview .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* Стилі для модального вікна перегляду зображень */
+.image-viewer-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 2000; /* Вище, ніж category-modal (який має z-index 1000) */
+    justify-content: center;
+    align-items: center;
+}
+.image-viewer-content {
+    position: relative;
+    background: none;
+    max-width: 90%;
+    max-height: 90%;
+    text-align: center;
+}
+.image-viewer-close {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+.image-viewer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#viewer-image {
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+}
+.viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 24px;
+}
+.viewer-nav.prev {
+    left: 10px;
+}
+.viewer-nav.next {
+    right: 10px;
+}
+.viewer-thumbnails {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    overflow-x: auto;
+}
+.thumbnail {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 5px;
+}
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.thumbnail.active {
+    border-color: #3498db;
+}
+</style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -441,6 +584,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const dealTypeOptionsDiv = document.getElementById("deal-type-options");
     const dealTypeOptions = document.querySelectorAll(".deal-type-option");
     const apartmentDetails = document.getElementById("apartment-details");
+    const phoneInput = document.getElementById("id_phone");
 
     let selectedCategory = null;
     let selectedCategoryID = null;
@@ -686,28 +830,121 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    // Обробка зображень
     const fileInput = document.querySelector(".file-input");
-    const fileNameDisplay = document.getElementById("file-name");
+    const imagePreviews = document.getElementById("image-previews");
+    const imageViewerModal = document.getElementById("image-viewer-modal");
+    const viewerImage = document.getElementById("viewer-image");
+    const viewerThumbnails = document.getElementById("viewer-thumbnails");
+    const viewerPrev = document.getElementById("viewer-prev");
+    const viewerNext = document.getElementById("viewer-next");
+    const imageViewerClose = document.querySelector(".image-viewer-close");
+
+    let images = [];
+    let currentIndex = 0;
 
     if (fileInput) {
         fileInput.addEventListener("change", () => {
-            console.log("Файл вибрано:", fileInput.files);
-            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "";
-            fileNameDisplay.textContent = fileName ? `Обрано: ${fileName}` : "";
+            const files = Array.from(fileInput.files);
+            images = [];
+            imagePreviews.innerHTML = "";
+            viewerThumbnails.innerHTML = "";
+
+            files.forEach((file, index) => {
+                if (file.type.startsWith("image/")) {
+                    const url = URL.createObjectURL(file);
+                    images.push(url);
+
+                    // Прев’ю-зображення
+                    const previewDiv = document.createElement("div");
+                    previewDiv.classList.add("image-preview");
+                    const img = document.createElement("img");
+                    img.src = url;
+                    const removeBtn = document.createElement("button");
+                    removeBtn.classList.add("remove-btn");
+                    removeBtn.textContent = "×";
+                    removeBtn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        images.splice(index, 1);
+                        previewDiv.remove();
+                        updateThumbnails();
+                    });
+                    previewDiv.appendChild(img);
+                    previewDiv.appendChild(removeBtn);
+                    previewDiv.addEventListener("click", () => openImageViewer(index));
+                    imagePreviews.appendChild(previewDiv);
+
+                    // Мініатюра для модального вікна
+                    const thumbnailDiv = document.createElement("div");
+                    thumbnailDiv.classList.add("thumbnail");
+                    const thumbImg = document.createElement("img");
+                    thumbImg.src = url;
+                    thumbnailDiv.appendChild(thumbImg);
+                    thumbnailDiv.addEventListener("click", () => openImageViewer(index));
+                    viewerThumbnails.appendChild(thumbnailDiv);
+                }
+            });
+
+            updateThumbnails();
         });
     } else {
         console.error("Елемент .file-input не знайдено");
     }
 
+    function openImageViewer(index) {
+        if (images.length === 0) return;
+        currentIndex = index;
+        viewerImage.src = images[currentIndex];
+        updateThumbnails();
+        imageViewerModal.style.display = "flex";
+    }
+
+    function updateThumbnails() {
+        const thumbnails = document.querySelectorAll(".thumbnail");
+        thumbnails.forEach((thumb, i) => {
+            thumb.classList.toggle("active", i === currentIndex);
+        });
+        viewerPrev.style.display = images.length > 1 ? "block" : "none";
+        viewerNext.style.display = images.length > 1 ? "block" : "none";
+    }
+
+    viewerPrev.addEventListener("click", () => {
+        if (currentIndex > 0) {
+            currentIndex--;
+        } else {
+            currentIndex = images.length - 1;
+        }
+        viewerImage.src = images[currentIndex];
+        updateThumbnails();
+    });
+
+    viewerNext.addEventListener("click", () => {
+        if (currentIndex < images.length - 1) {
+            currentIndex++;
+        } else {
+            currentIndex = 0;
+        }
+        viewerImage.src = images[currentIndex];
+        updateThumbnails();
+    });
+
+    imageViewerClose.addEventListener("click", () => {
+        imageViewerModal.style.display = "none";
+    });
+
+    window.addEventListener("click", (e) => {
+        if (e.target === imageViewerModal) {
+            imageViewerModal.style.display = "none";
+        }
+    });
+
     const form = document.querySelector(".announcement-form");
     form.addEventListener("submit", (e) => {
-        // Логуємо дані форми перед відправкою
         const formData = new FormData(form);
         console.log("Form data before submission:");
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
-        document.querySelector(".preloader").style.display = "block";
     });
 
     // Додаємо обробку кліків на чекбокси
@@ -718,4 +955,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+
 {% endblock %}

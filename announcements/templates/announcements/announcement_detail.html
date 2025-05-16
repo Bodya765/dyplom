@@ -102,14 +102,20 @@
                     </p>
                     <div class="detail-author">
                         <span class="author-name"><span>Автор:</span> {{ announcement.owner.username }}</span>
+                        <!-- Додавання кнопки "Показати номер" -->
+                        {% if announcement.owner.profile.phone %}
+                            <span class="author-phone">
+                                <button id="show-phone-btn" class="btn btn-show-phone">Показати номер</button>
+                                <span id="phone-number" class="phone-number" style="display: none;">
+                                    {{ announcement.owner.profile.phone }}
+                                </span>
+                            </span>
+                        {% else %}
+                            <span class="author-phone">Номер телефону не вказано</span>
+                        {% endif %}
                         <span class="author-date">
                             <span>Створено:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}
                         </span>
-                        {% if announcement.updated_at != announcement.created_at %}
-                            <span class="author-date-updated">
-                                <span>Оновлено:</span> {{ announcement.updated_at|date:"d.m.Y H:i" }}
-                            </span>
-                        {% endif %}
                     </div>
                     <div class="location-map">
                         <p class="detail-location">
@@ -360,304 +366,17 @@ document.addEventListener("DOMContentLoaded", function () {
             alert('Помилка при видаленні оголошення');
         });
     });
+
+    // Додавання логіки для кнопки "Показати номер"
+    const showPhoneButton = document.getElementById("show-phone-btn");
+    const phoneNumberElement = document.getElementById("phone-number");
+
+    if (showPhoneButton) {
+        showPhoneButton.addEventListener("click", () => {
+            showPhoneButton.style.display = "none"; // Ховаємо кнопку
+            phoneNumberElement.style.display = "inline"; // Показуємо номер
+        });
+    }
 });
 </script>
-
-<style>
-/* Модальне вікно для видалення */
-.delete-confirm-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-}
-
-.delete-confirm-modal-content {
-    background: linear-gradient(145deg, #ffffff, #f0f4f8);
-    padding: 25px;
-    border-radius: 12px;
-    width: 400px;
-    max-width: 90%;
-    position: relative;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    text-align: center;
-}
-
-.delete-confirm-modal-content h3 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 15px;
-}
-
-.delete-confirm-modal-content p {
-    font-size: 1rem;
-    color: #4a5568;
-    margin-bottom: 20px;
-}
-
-.btn-cancel {
-    position: absolute;
-    top: 12px;
-    right: 15px;
-    font-size: 26px;
-    color: #718096;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.btn-cancel:hover {
-    color: #e53e3e;
-}
-
-.btn-danger {
-    background: linear-gradient(90deg, #e53e3e, #c53030);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.btn-danger:hover {
-    background: linear-gradient(90deg, #c53030, #9b2c2c);
-    transform: translateY(-1px);
-}
-
-/* Додаткова інформація */
-.additional-info {
-    margin-top: 20px;
-}
-
-.additional-info-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 10px;
-}
-
-/* Кнопки */
-.btn-primary {
-    background: linear-gradient(90deg, #3182ce, #2b6cb0);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    width: 100%;
-    text-align: center;
-}
-
-.btn-primary:hover {
-    background: linear-gradient(90deg, #2b6cb0, #2c5282);
-    transform: translateY(-1px);
-}
-
-.btn-edit {
-    display: block;
-    background: linear-gradient(90deg, #38a169, #2f855a);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    text-align: center;
-    margin-bottom: 8px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.btn-edit:hover {
-    background: linear-gradient(90deg, #2f855a, #276749);
-    transform: translateY(-1px);
-}
-
-.btn-delete {
-    display: block;
-    background: linear-gradient(90deg, #e53e3e, #c53030);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-/* Секція відгуків */
-.reviews {
-    margin-top: 30px;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.reviews-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 20px;
-}
-
-#reviews-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.review {
-    padding: 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #f7fafc;
-}
-
-.review-user {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #2b6cb0;
-    margin-bottom: 5px;
-}
-
-.review-stars {
-    font-size: 1rem;
-    color: #d69e2e;
-    margin-bottom: 5px;
-}
-
-.review-text {
-    font-size: 0.95rem;
-    color: #4a5568;
-    margin-bottom: 5px;
-    line-height: 1.5;
-}
-
-.review-date {
-    font-size: 0.85rem;
-    color: #718096;
-}
-
-.no-reviews {
-    font-size: 1rem;
-    color: #718096;
-    text-align: center;
-    padding: 10px;
-}
-
-/* Форма для відгуків */
-.review-form {
-    margin-top: 30px;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.review-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 20px;
-}
-
-.rating-label {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #4a5568;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.star-rating {
-    display: flex;
-    gap: 5px;
-    margin-bottom: 15px;
-}
-
-.star {
-    font-size: 1.5rem;
-    color: #e2e8f0;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.star:hover,
-.star.selected {
-    color: #d69e2e;
-}
-
-.review-text-label {
-    font-size: 1rem;
-    font-weight: 500;
-    color: #4a5568;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.review-text {
-    width: 100%;
-    min-height: 100px;
-    padding: 10px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    color: #4a5568;
-    resize: vertical;
-    margin-bottom: 15px;
-}
-
-.review-text:focus {
-    outline: none;
-    border-color: #2b6cb0;
-    box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
-}
-
-/* Адаптивність */
-@media (max-width: 768px) {
-    .delete-confirm-modal-content {
-        width: 90%;
-        padding: 20px;
-    }
-
-    .additional-info-title {
-        font-size: 1.1rem;
-    }
-
-    .btn-primary, .btn-edit, .btn-delete {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-
-    .reviews-title, .review-title {
-        font-size: 1.3rem;
-    }
-
-    .review {
-        padding: 10px;
-    }
-
-    .review-user {
-        font-size: 1rem;
-    }
-
-    .review-text {
-        font-size: 0.9rem;
-    }
-}
-</style>
 {% endblock %}

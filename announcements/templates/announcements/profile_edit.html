@@ -11,7 +11,7 @@
             <h1 class="section-title">Мій профіль</h1>
             <div class="profile-details">
                 <div class="profile-avatar">
-                    <img id="avatar-preview" src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="Avatar" class="avatar-img">
+                    <img id="avatar-preview" src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" alt="" class="avatar-img">
                     <label for="avatar-upload" class="avatar-upload-btn">
                         <i class="fas fa-camera"></i> Змінити фото
                     </label>
@@ -42,18 +42,19 @@
             {% if announcements %}
                 <div class="announcements-grid">
                     {% for announcement in announcements %}
-                        <div class="announcement-card">
+                        <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-card">
                             <div class="announcement-image">
                                 <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-img">
                             </div>
                             <div class="announcement-details">
-                                <h3 class="announcement-title">
-                                    <a href="{% url 'announcements:announcement-detail' announcement.id %}">{{ announcement.title }}</a>
-                                </h3>
+                                <h3 class="announcement-title">{{ announcement.title }}</h3>
                                 <p class="announcement-price">{{ announcement.price }} грн</p>
                                 <p class="announcement-location"><i class="fas fa-map-marker-alt"></i> {{ announcement.location }}</p>
+                                <p class="announcement-status status-{{ announcement.status }}">
+                                    Статус: {{ announcement.get_status_display }}
+                                </p>
                             </div>
-                        </div>
+                        </a>
                     {% endfor %}
                 </div>
 
@@ -81,379 +82,6 @@
         </section>
     </div>
 </main>
-
-<style>
-    .profile-page {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px 15px;
-        font-family: 'Roboto', sans-serif;
-        background-color: #f9fbfd;
-        border-radius: 12px;
-        min-height: calc(100vh - 100px);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    }
-
-    .profile-container {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    /* Профіль */
-    .profile-header {
-        padding-bottom: 30px;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    .section-title {
-        font-size: 1.8rem;
-        color: #1e3a8a;
-        font-weight: 700;
-        margin-bottom: 20px;
-        border-bottom: 2px solid #3b82f6;
-        padding-bottom: 8px;
-        position: relative;
-    }
-
-    .profile-details {
-        display: flex;
-        gap: 30px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-    .profile-avatar {
-        position: relative;
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        overflow: hidden;
-        flex-shrink: 0;
-        border: 4px solid #e5e7eb;
-        transition: border-color 0.3s ease;
-    }
-
-    .profile-avatar:hover {
-        border-color: #3b82f6;
-    }
-
-    .avatar-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .profile-avatar:hover .avatar-img {
-        transform: scale(1.1);
-    }
-
-    .avatar-upload-btn {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: rgba(59, 130, 246, 0.8);
-        color: #ffffff;
-        font-size: 0.9rem;
-        text-align: center;
-        padding: 8px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        transition: background-color 0.3s ease;
-    }
-
-    .avatar-upload-btn:hover {
-        background-color: rgba(29, 78, 216, 0.9);
-    }
-
-    .profile-form {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        max-width: 500px;
-    }
-
-    .form-field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .form-label {
-        font-size: 1rem;
-        color: #1e293b;
-        font-weight: 600;
-    }
-
-    .form-input {
-        width: 100%;
-        padding: 10px 14px;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 1rem;
-        font-family: 'Roboto', sans-serif;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        background-color: #f9fafb;
-    }
-
-    .form-input:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-    }
-
-    .form-input[readonly] {
-        background-color: #f3f4f6;
-        cursor: not-allowed;
-    }
-
-    .btn.btn-primary {
-        width: 100%;
-        max-width: 250px;
-        padding: 12px 20px;
-        background-color: #3b82f6;
-        color: #ffffff;
-        border: none;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .btn.btn-primary:hover {
-        background-color: #2563eb;
-        transform: translateY(-2px);
-    }
-
-    /* Оголошення */
-    .announcements-section {
-        margin-top: 40px;
-    }
-
-    .announcements-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-    }
-
-    .announcement-card {
-        background-color: #ffffff;
-        border-radius: 10px;
-        overflow: hidden;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .announcement-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    }
-
-    .announcement-image {
-        width: 100%;
-        height: 200px;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .announcement-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .announcement-card:hover .announcement-img {
-        transform: scale(1.05);
-    }
-
-    .announcement-details {
-        padding: 15px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: 10px;
-    }
-
-    .announcement-title {
-        font-size: 1.2rem;
-        color: #1e3a8a;
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .announcement-title a {
-        text-decoration: none;
-        color: inherit;
-        transition: color 0.3s ease;
-    }
-
-    .announcement-title a:hover {
-        color: #3b82f6;
-    }
-
-    .announcement-price {
-        font-size: 1.1rem;
-        color: #16a34a;
-        font-weight: 600;
-        margin: 0;
-    }
-
-    .announcement-location {
-        font-size: 0.95rem;
-        color: #64748b;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .announcement-location i {
-        color: #1e3a8a;
-    }
-
-    .empty-message {
-        font-size: 1rem;
-        color: #64748b;
-        text-align: center;
-        font-style: italic;
-        margin-top: 20px;
-        padding: 15px;
-        background-color: #f9fafb;
-        border-radius: 8px;
-    }
-
-    /* Пагінація */
-    .pagination {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        margin-top: 30px;
-    }
-
-    .pagination-btn {
-        padding: 8px 16px;
-        background-color: #f9fafb;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 1rem;
-        color: #1e293b;
-        text-decoration: none;
-        transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
-    }
-
-    .pagination-btn:hover {
-        background-color: #f3f4f6;
-        border-color: #3b82f6;
-        transform: translateY(-2px);
-    }
-
-    .pagination-current {
-        font-size: 1rem;
-        color: #1e293b;
-        font-weight: 500;
-    }
-
-    /* Адаптивність */
-    @media (max-width: 768px) {
-        .profile-details {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .profile-avatar {
-            width: 150px;
-            height: 150px;
-        }
-
-        .profile-form {
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .section-title {
-            font-size: 1.6rem;
-        }
-
-        .announcements-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .announcement-image {
-            height: 180px;
-        }
-
-        .announcement-title {
-            font-size: 1.1rem;
-        }
-
-        .announcement-price {
-            font-size: 1rem;
-        }
-
-        .announcement-location {
-            font-size: 0.9rem;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .profile-page {
-            padding: 15px 10px;
-        }
-
-        .profile-container {
-            padding: 20px;
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-        }
-
-        .form-label {
-            font-size: 0.95rem;
-        }
-
-        .form-input {
-            font-size: 0.9rem;
-            padding: 8px 12px;
-        }
-
-        .announcement-image {
-            height: 150px;
-        }
-
-        .announcement-title {
-            font-size: 1rem;
-        }
-
-        .pagination-btn {
-            font-size: 0.9rem;
-            padding: 6px 12px;
-        }
-
-        .pagination-current {
-            font-size: 0.9rem;
-        }
-    }
-</style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -490,7 +118,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         profilePhotoHeader.src = data.avatar_url;
                     }
                 }
-            });
+            })
+            .catch(error => console.error("Помилка оновлення аватара:", error));
         }
     });
 
@@ -509,9 +138,13 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data.success) {
                 document.getElementById("username").value = data.username || "{{ user.username }}";
                 document.getElementById("phone").value = data.phone || "";
-                document.getElementById("email").value = data.email;
+                document.getElementById("email").value = data.email || "{{ user.email }}";
+                alert("Профіль успішно оновлено!");
+            } else {
+                alert("Помилка оновлення профілю. Спробуйте ще раз.");
             }
-        });
+        })
+        .catch(error => console.error("Помилка оновлення профілю:", error));
     });
 });
 </script>

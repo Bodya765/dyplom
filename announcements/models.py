@@ -9,16 +9,26 @@ from django.urls import reverse
 from django.db.models import Avg
 from django.contrib.auth.models import User
 
-from django.db import models
+
 
 class SupportRequest(models.Model):
-    user_id = models.CharField(max_length=50)
-    username = models.CharField(max_length=100)
-    question = models.TextField()
-    response = models.TextField(null=True, blank=True)
-    status = models.CharField(max_length=20, default="pending")
-    created_at = models.DateTimeField(auto_now_add=True)
-    handled_by_admin = models.BooleanField(default=False)
+    user_id = models.CharField(max_length=50, verbose_name="ID користувача")
+    username = models.CharField(max_length=100, verbose_name="Ім'я користувача")
+    question = models.TextField(verbose_name="Питання")
+    response = models.TextField(null=True, blank=True, verbose_name="Відповідь")
+    STATUS_CHOICES = [
+        ('pending', 'Очікує'),
+        ('resolved', 'Вирішено'),
+        ('rejected', 'Відхилено'),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="Статус"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення")
+    handled_by_admin = models.BooleanField(default=False, verbose_name="Оброблено адміністратором")
 
     def __str__(self):
         return f"Запит від @{self.username}: {self.question[:50]}"
@@ -26,6 +36,10 @@ class SupportRequest(models.Model):
     class Meta:
         verbose_name = "Запит на підтримку"
         verbose_name_plural = "Запити на підтримку"
+        indexes = [
+            models.Index(fields=['user_id', 'status', 'created_at']),
+        ]
+
 class Location(models.Model):
     name = models.CharField(max_length=255, verbose_name="Назва")
     district = models.CharField(max_length=255, blank=True, verbose_name="Район")
@@ -37,6 +51,9 @@ class Location(models.Model):
         verbose_name = "Місцезнаходження"
         verbose_name_plural = "Місцезнаходження"
         unique_together = ('name', 'district')
+        indexes = [
+            models.Index(fields=['name', 'district']),
+        ]
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True, verbose_name="Категорія")
@@ -50,6 +67,9 @@ class Category(models.Model):
     class Meta:
         verbose_name = "Категорія"
         verbose_name_plural = "Категорії"
+        indexes = [
+            models.Index(fields=['name', 'slug']),
+        ]
 
 @receiver(pre_save, sender=Category)
 def set_category_slug(sender, instance, **kwargs):
@@ -82,9 +102,7 @@ class Announcement(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name="Автор",
-        related_name="announcements",
-        null=True,
-        blank=True
+        related_name="announcements"
     )
     image = models.ImageField(upload_to='announcement_images/', null=True, blank=True, verbose_name="Зображення")
     rating = models.FloatField(default=0, verbose_name="Рейтинг")
@@ -114,8 +132,7 @@ class Announcement(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['category', 'subcategory', 'deal_type']),
-            models.Index(fields=['owner']),
-            models.Index(fields=['status']),
+            models.Index(fields=['owner', 'status', 'created_at']),
         ]
 
 class ApartmentDetails(models.Model):
@@ -197,6 +214,9 @@ class ApartmentDetails(models.Model):
     class Meta:
         verbose_name = "Деталі квартири"
         verbose_name_plural = "Деталі квартир"
+        indexes = [
+            models.Index(fields=['announcement']),
+        ]
 
     def __str__(self):
         return f"Деталі для {self.announcement.title}"
@@ -227,6 +247,9 @@ class Review(models.Model):
         verbose_name = "Відгук"
         verbose_name_plural = "Відгуки"
         unique_together = ('announcement', 'user')
+        indexes = [
+            models.Index(fields=['announcement', 'user', 'created_at']),
+        ]
 
 @receiver(post_save, sender=Review)
 @receiver(post_delete, sender=Review)
@@ -259,6 +282,9 @@ class UserProfile(models.Model):
     class Meta:
         verbose_name = "Профіль користувача"
         verbose_name_plural = "Профілі користувачів"
+        indexes = [
+            models.Index(fields=['user']),
+        ]
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -269,4 +295,3 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     if hasattr(instance, 'profile'):
         instance.profile.save()
-
