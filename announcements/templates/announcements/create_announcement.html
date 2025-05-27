@@ -47,7 +47,7 @@
                         <span class="file-label-text">Виберіть зображення</span>
                         <span class="file-icon"><i class="fas fa-cloud-upload-alt"></i></span>
                     </label>
-                    <span id="file-name" class="file-name"></span>
+                    <div id="image-preview" class="image-preview"></div>
                     {% if form.image.errors %}
                         <div class="error">{{ form.image.errors }}</div>
                     {% endif %}
@@ -425,6 +425,46 @@
     </div>
 </main>
 
+<style>
+.custom-file-upload {
+    display: block;
+    position: relative;
+}
+
+.file-button {
+    display: inline-block;
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.file-input {
+    display: none;
+}
+
+.image-preview {
+    margin-top: 10px;
+    max-width: 300px; /* Збільшуємо максимальну ширину */
+    max-height: 300px; /* Збільшуємо максимальну висоту */
+    width: 300px; /* Фіксована ширина */
+    height: 300px; /* Фіксована висота */
+    display: block;
+    overflow: hidden;
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    display: block;
+}
+</style>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const modal = document.getElementById("category-modal");
@@ -687,15 +727,39 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const fileInput = document.querySelector(".file-input");
-    const fileNameDisplay = document.getElementById("file-name");
+    const imagePreview = document.getElementById("image-preview");
 
-    if (fileInput) {
+    if (fileInput && imagePreview) {
         fileInput.addEventListener("change", () => {
-            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "";
-            fileNameDisplay.textContent = fileName ? `Обрано: ${fileName}` : "";
+            console.log("Файл вибрано, обробка...");
+            imagePreview.innerHTML = "";
+            const file = fileInput.files[0];
+            if (file) {
+                console.log("Файл:", file.name, "Тип:", file.type);
+                if (file.type.startsWith("image/")) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        console.log("Зображення завантажено, відображаємо прев’ю...");
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.alt = "Прев’ю зображення";
+                        imagePreview.appendChild(img);
+                    };
+                    reader.onerror = function () {
+                        console.error("Помилка при зчитуванні файлу");
+                        imagePreview.innerHTML = "<span>Помилка при зчитуванні файлу.</span>";
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    console.log("Обраний файл не є зображенням");
+                    imagePreview.innerHTML = "<span>Обраний файл не є зображенням.</span>";
+                }
+            } else {
+                console.log("Файл не вибрано");
+            }
         });
     } else {
-        console.error("Елемент .file-input не знайдено");
+        console.error("Елемент .file-input або #image-preview не знайдено");
     }
 
     const form = document.querySelector(".announcement-form");

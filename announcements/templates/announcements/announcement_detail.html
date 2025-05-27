@@ -5,183 +5,181 @@
 
 {% block content %}
 <main class="announcement-detail-page">
-    <div class="announcement-detail-container">
-        <div class="announcement-main">
-            <div class="announcement-content">
-                <div class="left-column">
-                    {% if announcement.image %}
-                        <div class="announcement-image-d">
-                            <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="announcement-img">
-                        </div>
-                    {% endif %}
-                    {% if announcement.subcategory == "Квартира" %}
-                        {% if announcement.apartment_details %}
-                            <div class="additional-info">
-                                <h3 class="additional-info-title">Додаткова інформація</h3>
-                                {% if announcement.apartment_details.seller_type %}
-                                    <p class="detail-desc"><span>Тип продавця:</span> {{ announcement.apartment_details.seller_type }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.building_type %}
-                                    <p class="detail-desc"><span>Тип будинку:</span> {{ announcement.apartment_details.building_type }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.residential_complex %}
-                                    <p class="detail-desc"><span>Назва ЖК:</span> {{ announcement.apartment_details.residential_complex }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.floor %}
-                                    <p class="detail-desc"><span>Поверх:</span> {{ announcement.apartment_details.floor }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.total_area %}
-                                    <p class="detail-desc"><span>Загальна площа:</span> {{ announcement.apartment_details.total_area }} м²</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.kitchen_area %}
-                                    <p class="detail-desc"><span>Площа кухні:</span> {{ announcement.apartment_details.kitchen_area }} м²</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.wall_type %}
-                                    <p class="detail-desc"><span>Тип стін:</span> {{ announcement.apartment_details.wall_type }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.housing_type %}
-                                    <p class="detail-desc"><span>Тип житла:</span> {{ announcement.apartment_details.housing_type }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.rooms %}
-                                    <p class="detail-desc"><span>Кількість кімнат:</span> {{ announcement.apartment_details.rooms }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.layout %}
-                                    <p class="detail-desc"><span>Планування:</span> {{ announcement.apartment_details.layout }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.bathroom %}
-                                    <p class="detail-desc"><span>Санвузол:</span> {{ announcement.apartment_details.bathroom }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.heating %}
-                                    <p class="detail-desc"><span>Опалення:</span> {{ announcement.apartment_details.heating }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.renovation %}
-                                    <p class="detail-desc"><span>Ремонт:</span> {{ announcement.apartment_details.renovation }}</p>
-                                {% endif %}
-                                {% if announcement.apartment_details.furnishing %}
-                                    <p class="detail-desc"><span>Меблювання:</span> {{ announcement.apartment_details.furnishing }}</p>
-                                {% endif %}
-                                <p class="detail-desc">
-                                    <span>Побутова техніка:</span>
-                                    {{ announcement.apartment_details.appliances|join:", " }}
-                                </p>
-                                <p class="detail-desc">
-                                    <span>Мультимедіа:</span>
-                                    {{ announcement.apartment_details.multimedia|join:", " }}
-                                </p>
-                                <p class="detail-desc">
-                                    <span>Комфорт:</span>
-                                    {{ announcement.apartment_details.comfort|join:", " }}
-                                </p>
-                                <p class="detail-desc">
-                                    <span>Комунікації:</span>
-                                    {{ announcement.apartment_details.communications|join:", " }}
-                                </p>
-                                <p class="detail-desc">
-                                    <span>Інфраструктура:</span>
-                                    {{ announcement.apartment_details.infrastructure|join:", " }}
-                                </p>
-                                <p class="detail-desc">
-                                    <span>Ландшафт:</span>
-                                    {{ announcement.apartment_details.landscape|join:", " }}
-                                </p>
-                            </div>
-                        {% endif %}
-                    {% else %}
-                    {% endif %}
-                    <span class="detail-desc"><span>Опис:</span> {{ announcement.description }}</span>
-                </div>
-
-                <div class="right-column">
-                    <span class="detail-header">{{ announcement.title }}</span>
-                    <p class="detail-price">
-                        {% if announcement.price %}
-                            {{ announcement.price }} грн
-                        {% else %}
-                            Ціна не вказана
-                        {% endif %}
-                    </p>
-                    <div class="detail-author">
-                        <span class="author-name"><span>Автор:</span> {{ announcement.owner.username }}</span>
-                        <!-- Додавання кнопки "Показати номер" -->
-                        {% if announcement.owner.profile.phone %}
-                            <span class="author-phone">
-                                <button id="show-phone-btn" class="btn btn-show-phone">Показати номер</button>
-                                <span id="phone-number" class="phone-number" style="display: none;">
-                                    {{ announcement.owner.profile.phone }}
-                                </span>
-                            </span>
-                        {% else %}
-                            <span class="author-phone">Номер телефону не вказано</span>
-                        {% endif %}
-                        <span class="author-date">
-                            <span>Створено:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}
-                        </span>
+    <div class="announcement-main">
+        <div class="announcement-content">
+            <div class="left-column">
+                {% if announcement.image %}
+                    <div class="announcement-image-d">
+                        <img src="{{ announcement.image.url }}" alt="{{ announcement.title }}" class="announcement-img-det">
                     </div>
-                    <div class="location-map">
-                        <p class="detail-location">
-                            <span>Місцезнаходження:</span>
-                            {{ announcement.location|default:"Невідомо" }}
-                        </p>
-                        <div id="map" class="map-container"></div>
-                    </div>
-                    {% if user.is_authenticated and user != announcement.owner %}
-                        <div class="chat-action">
-                            <a href="{% url 'chat:start_chat' announcement.id %}" class="btn btn-primary">Зв’язатися з продавцем</a>
+                {% endif %}
+                {% if announcement.subcategory == "Квартира" %}
+                    {% if announcement.apartment_details %}
+                        <div class="additional-info">
+                            <h3 class="additional-info-title">Додаткова інформація</h3>
+                            {% if announcement.apartment_details.seller_type %}
+                                <p class="detail-desc"><span>Тип продавця:</span> {{ announcement.apartment_details.seller_type }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.building_type %}
+                                <p class="detail-desc"><span>Тип будинку:</span> {{ announcement.apartment_details.building_type }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.residential_complex %}
+                                <p class="detail-desc"><span>Назва ЖК:</span> {{ announcement.apartment_details.residential_complex }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.floor %}
+                                <p class="detail-desc"><span>Поверх:</span> {{ announcement.apartment_details.floor }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.total_area %}
+                                <p class="detail-desc"><span>Загальна площа:</span> {{ announcement.apartment_details.total_area }} м²</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.kitchen_area %}
+                                <p class="detail-desc"><span>Площа кухні:</span> {{ announcement.apartment_details.kitchen_area }} м²</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.wall_type %}
+                                <p class="detail-desc"><span>Тип стін:</span> {{ announcement.apartment_details.wall_type }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.housing_type %}
+                                <p class="detail-desc"><span>Тип житла:</span> {{ announcement.apartment_details.housing_type }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.rooms %}
+                                <p class="detail-desc"><span>Кількість кімнат:</span> {{ announcement.apartment_details.rooms }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.layout %}
+                                <p class="detail-desc"><span>Планування:</span> {{ announcement.apartment_details.layout }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.bathroom %}
+                                <p class="detail-desc"><span>Санвузол:</span> {{ announcement.apartment_details.bathroom }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.heating %}
+                                <p class="detail-desc"><span>Опалення:</span> {{ announcement.apartment_details.heating }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.renovation %}
+                                <p class="detail-desc"><span>Ремонт:</span> {{ announcement.apartment_details.renovation }}</p>
+                            {% endif %}
+                            {% if announcement.apartment_details.furnishing %}
+                                <p class="detail-desc"><span>Меблювання:</span> {{ announcement.apartment_details.furnishing }}</p>
+                            {% endif %}
+                            <p class="detail-desc">
+                                <span>Побутова техніка:</span>
+                                {{ announcement.apartment_details.appliances|join:", " }}
+                            </p>
+                            <p class="detail-desc">
+                                <span>Мультимедіа:</span>
+                                {{ announcement.apartment_details.multimedia|join:", " }}
+                            </p>
+                            <p class="detail-desc">
+                                <span>Комфорт:</span>
+                                {{ announcement.apartment_details.comfort|join:", " }}
+                            </p>
+                            <p class="detail-desc">
+                                <span>Комунікації:</span>
+                                {{ announcement.apartment_details.communications|join:", " }}
+                            </p>
+                            <p class="detail-desc">
+                                <span>Інфраструктура:</span>
+                                {{ announcement.apartment_details.infrastructure|join:", " }}
+                            </p>
+                            <p class="detail-desc">
+                                <span>Ландшафт:</span>
+                                {{ announcement.apartment_details.landscape|join:", " }}
+                            </p>
                         </div>
                     {% endif %}
-                    {% if user.is_authenticated and user == announcement.owner %}
-                        <div class="actions">
-                            <div class="menu">
-                                <button class="menu-button" aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <div class="menu-dropdown">
-                                    <a href="{% url 'announcements:edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
-                                    <button id="open-delete-modal" class="btn btn-delete">Видалити оголошення</button>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
+                {% else %}
+                {% endif %}
+                <span class="detail-desc"><span>Опис:</span> {{ announcement.description }}</span>
             </div>
 
-            <!-- Відгуки -->
-            <section class="reviews">
-                <h2 class="reviews-title">Відгуки</h2>
-                <div id="reviews-container">
-                    {% for review in reviews %}
-                        <div class="review">
-                            <p class="review-user"><strong>{{ review.user.username }}</strong></p>
-                            <p class="review-stars">{{ review.rating }} ★</p>
-                            <p class="review-text">{{ review.text }}</p>
-                            <p class="review-date"><small>{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
-                        </div>
-                    {% empty %}
-                        <p class="no-reviews">Ще немає відгуків.</p>
-                    {% endfor %}
+            <div class="right-column">
+                <span class="detail-header">{{ announcement.title }}</span>
+                <p class="detail-price">
+                    {% if announcement.price %}
+                        {{ announcement.price }} грн
+                    {% else %}
+                        Ціна не вказана
+                    {% endif %}
+                </p>
+                <div class="detail-author">
+                    <span class="author-name"><span>Автор:</span> {{ announcement.owner.username }}</span>
+                    <!-- Додавання кнопки "Показати номер" -->
+                    {% if announcement.owner.profile.phone %}
+                        <span class="author-phone">
+                            <button id="show-phone-btn" class="btn btn-show-phone">Показати номер</button>
+                            <span id="phone-number" class="phone-number" style="display: none;">
+                                {{ announcement.owner.profile.phone }}
+                            </span>
+                        </span>
+                    {% else %}
+                        <span class="author-phone">Номер телефону не вказано</span>
+                    {% endif %}
+                    <span class="author-date">
+                        <span>Створено:</span> {{ announcement.created_at|date:"d.m.Y H:i" }}
+                    </span>
                 </div>
-            </section>
-            {% if user.is_authenticated %}
-                <section class="review-form">
-                    <h2 class="review-title">Додати відгук</h2>
-                    <form method="post" action="{% url 'announcements:add_review' announcement.id %}">
-                        {% csrf_token %}
-                        <label for="rating" class="rating-label">Рейтинг:</label>
-                        <div class="star-rating">
-                            <input type="hidden" name="rating" id="rating-value" value="0" required>
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                <div class="location-map">
+                    <p class="detail-location">
+                        <span>Місцезнаходження:</span>
+                        {{ announcement.location|default:"Невідомо" }}
+                    </p>
+                    <div id="map" class="map-container"></div>
+                </div>
+                {% if user.is_authenticated and user != announcement.owner %}
+                    <div class="chat-action">
+                        <a href="{% url 'chat:start_chat' announcement.id %}" class="btn btn-primary">Зв’язатися з продавцем</a>
+                    </div>
+                {% endif %}
+                {% if user.is_authenticated and user == announcement.owner %}
+                    <div class="actions">
+                        <div class="menu">
+                            <button class="menu-button" aria-expanded="false">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <div class="menu-dropdown">
+                                <a href="{% url 'announcements:edit_announcement' announcement.id %}" class="btn btn-edit">Редагувати</a>
+                                <button id="open-delete-modal" class="btn btn-delete">Видалити оголошення</button>
+                            </div>
                         </div>
-                        <label for="text" class="review-text-label">Відгук:</label>
-                        <textarea id="text" name="text" class="review-text" required></textarea>
-                        <button type="submit" class="btn btn-primary">Залишити відгук</button>
-                    </form>
-                </section>
-            {% endif %}
+                    </div>
+                {% endif %}
+            </div>
         </div>
+
+        <!-- Відгуки -->
+        <section class="reviews">
+            <h2 class="reviews-title">Відгуки</h2>
+            <div id="reviews-container">
+                {% for review in reviews %}
+                    <div class="review">
+                        <p class="review-user"><strong>{{ review.user.username }}</strong></p>
+                        <p class="review-stars">{{ review.rating }} ★</p>
+                        <p class="review-text">{{ review.text }}</p>
+                        <p class="review-date"><small>{{ review.created_at|date:" Harrison.m.Y H:i" }}</small></p>
+                    </div>
+                {% empty %}
+                    <p class="no-reviews">Ще немає відгуків.</p>
+                {% endfor %}
+            </div>
+        </section>
+        {% if user.is_authenticated %}
+            <section class="review-form">
+                <h2 class="review-title">Додати відгук</h2>
+                <form method="post" action="{% url 'announcements:add_review' announcement.id %}">
+                    {% csrf_token %}
+                    <label for="rating" class="rating-label">Рейтинг:</label>
+                    <div class="star-rating">
+                        <input type="hidden" name="rating" id="rating-value" value="0" required>
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <label for="text" class="review-text-label">Відгук:</label>
+                    <textarea id="text" name="text" class="review-text" required></textarea>
+                    <button type="submit" class="btn btn-primary">Залишити відгук</button>
+                </form>
+            </section>
+        {% endif %}
     </div>
 
     <!-- Модальне вікно для мапи -->
@@ -193,7 +191,7 @@
     </div>
 
     <!-- Модальне вікно для видалення -->
-    <div id="delete-modal" class="delete-confirm-modal">
+    <div id="delete-modal" class="delete-confirm-modal" style="display: none;">
         <div class="delete-confirm-modal-content">
             <span class="btn-cancel" id="close-modal">✖</span>
             <h3>Підтвердження видалення</h3>
@@ -379,4 +377,51 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 </script>
+
+<style>
+    /* Додатковий стиль для приховання модального вікна за замовчуванням */
+    #delete-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .delete-confirm-modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        text-align: center;
+        width: 300px;
+    }
+
+    .btn-cancel {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+</style>
 {% endblock %}
