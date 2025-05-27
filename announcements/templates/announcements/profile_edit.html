@@ -42,19 +42,24 @@
             {% if announcements %}
                 <div class="announcements-grid">
                     {% for announcement in announcements %}
-                        <a href="{% url 'announcements:announcement-detail' announcement.id %}" class="announcement-card">
-                            <div class="announcement-image">
-                                <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-img">
-                            </div>
-                            <div class="announcement-details">
-                                <h3 class="announcement-title">{{ announcement.title }}</h3>
-                                <p class="announcement-price">{{ announcement.price }} грн</p>
-                                <p class="announcement-location"><i class="fas fa-map-marker-alt"></i> {{ announcement.location }}</p>
-                                <p class="announcement-status status-{{ announcement.status }}">
-                                    Статус: {{ announcement.get_status_display }}
-                                </p>
-                            </div>
-                        </a>
+                        {% if announcement.status == 'pending' or announcement.status == 'approved' %}
+                            <a href="{% url 'announcements:announcement_detail' announcement.id %}" class="announcement-card">
+                                <div class="announcement-image">
+                                    <img src="{% if announcement.image %}{{ announcement.image.url }}{% else %}{% static 'images/default_image.png' %}{% endif %}" alt="{{ announcement.title }}" class="announcement-img">
+                                </div>
+                                <div class="announcement-details">
+                                    <h3 class="announcement-title">{{ announcement.title }}</h3>
+                                    <p class="announcement-price">{{ announcement.price }} грн</p>
+                                    <p class="announcement-location"><i class="fas fa-map-marker-alt"></i> {{ announcement.location }}</p>
+                                    {% if announcement.status == 'pending' %}
+                                        <p class="announcement-status status-pending">
+                                            Статус: На модерації
+                                        </p>
+                                    {% endif %}
+                                    <!-- Для approved статус не відображаємо -->
+                                </div>
+                            </a>
+                        {% endif %}
                     {% endfor %}
                 </div>
 

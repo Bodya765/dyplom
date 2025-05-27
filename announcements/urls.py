@@ -9,7 +9,7 @@ urlpatterns = [
     path('search_results/', views.search_results, name='search_results'),
     path('locations/', views.location_list, name='location_list'),
     path('api/locations/', views.location_api, name='location_api'),
-    path('announcement/<int:pk>/', views.announcement_detail, name='announcement-detail'),
+    path('announcement/<int:pk>/', views.announcement_detail, name='announcement_detail'),
     path('announcement/create/', views.create_announcement, name='announcement-create'),
     path("category_products/<int:category_id>/", views.category_announcements, name="category_products"),
     path('about-us/', views.about_us, name='about_us'),
@@ -30,4 +30,5 @@ urlpatterns = [
     path('admin-panel/moderate/<int:pk>/', views.moderate_announcement, name='moderate_announcement'),
     path('admin-panel/get_requests/', views.get_requests, name='get_requests'),
     path('admin-panel/update_response/', views.update_response, name='update_response'),
+    path('notifications/', views.notifications, name='notifications'),
 ]

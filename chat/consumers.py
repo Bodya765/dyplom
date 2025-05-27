@@ -338,7 +338,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        """Обробляє підключення до WebSocket для сповіщень."""
         self.user_id = self.scope['url_route']['kwargs']['user_id']
         self.user = self.scope['user']
         self.notification_group_name = f'notifications_{self.user_id}'

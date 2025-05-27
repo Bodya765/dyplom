@@ -164,111 +164,173 @@ class AnnouncementForm(forms.ModelForm):
     )
     # ApartmentDetails fields
     seller_type = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('seller_type').choices,
+        choices=[
+            ('', 'Оберіть тип продавця'),
+            ('Приватна особа', 'Приватна особа'),
+            ('Бізнес', 'Бізнес'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.HiddenInput(attrs={'id': 'id_seller_type'}),
         label="Тип продавця"
     )
     building_type = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('building_type').choices,
+        choices=[
+            ('', 'Оберіть тип будинку'),
+            ('Царський', 'Царський'),
+            ('Сталінка', 'Сталінка'),
+            ('Хрущовка', 'Хрущовка'),
+            ('Чешка', 'Чешка'),
+            ('Гостинка', 'Гостинка'),
+            ('Гуртожиток', 'Гуртожиток'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_building_type'}),
         label="Тип будинку"
     )
     residential_complex = forms.CharField(
         max_length=100,
         required=False,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Назва ЖК'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Назва ЖК', 'id': 'id_residential_complex'}),
         label="Назва ЖК"
     )
     floor = forms.IntegerField(
         min_value=1,
         max_value=100,
         required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_floor'}),
         label="Поверх"
     )
     total_area = forms.FloatField(
         min_value=10,
         required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'id': 'id_total_area'}),
         label="Загальна площа (м²)"
     )
     kitchen_area = forms.FloatField(
         min_value=5,
         required=False,
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'}),
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1', 'id': 'id_kitchen_area'}),
         label="Площа кухні (м²)"
     )
     wall_type = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('wall_type').choices,
+        choices=[
+            ('', 'Оберіть тип стін'),
+            ('Цегла', 'Цегла'),
+            ('Панельний', 'Панельний'),
+            ('Шпакоблочний', 'Шпакоблочний'),
+            ('Газоблок', 'Газоблок'),
+            ('СІП панель', 'СІП панель'),
+            ('Інше', 'Інше'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_wall_type'}),
         label="Тип стін"
     )
     housing_type = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('housing_type').choices,
+        choices=[
+            ('', 'Оберіть тип житла'),
+            ('Новобудова', 'Новобудова'),
+            ('Вторинне', 'Вторинне'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_housing_type'}),
         label="Тип житла"
     )
     rooms = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('rooms').choices,
+        choices=[
+            ('', 'Оберіть кількість'),
+            ('1', '1'),
+            ('2', '2'),
+            ('3', '3'),
+            ('4+', '4+'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_rooms'}),
         label="Кількість кімнат"
     )
     layout = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('layout').choices,
+        choices=[
+            ('', 'Оберіть планування'),
+            ('Студія', 'Студія'),
+            ('Розділені', 'Розділені'),
+            ('Суміжна,прохідна', 'Суміжна,прохідна'),
+            ('Пентхаус', 'Пентхаус'),
+            ('Багаторівнева', 'Багаторівнева'),
+            ('Малосімейка', 'Малосімейка'),
+            ('Смарт-квартира', 'Смарт-квартира'),
+            ('Вільне планування', 'Вільне планування'),
+            ('Двохстороння', 'Двохстороння'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_layout'}),
         label="Планування"
     )
     bathroom = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('bathroom').choices,
+        choices=[
+            ('', 'Оберіть санвузол'),
+            ('Суміжний', 'Суміжний'),
+            ('Розділений', 'Розділений'),
+            ('2+', '2+'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_bathroom'}),
         label="Санвузол"
     )
     heating = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('heating').choices,
+        choices=[
+            ('', 'Оберіть опалення'),
+            ('Центральне', 'Центральне'),
+            ('Індивідуальне', 'Індивідуальне'),
+            ('Газове', 'Газове'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_heating'}),
         label="Опалення"
     )
     renovation = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('renovation').choices,
+        choices=[
+            ('', 'Оберіть стан'),
+            ('Євроремонт', 'Євроремонт'),
+            ('Косметичний', 'Косметичний'),
+            ('Без ремонту', 'Без ремонту'),
+            ('Житловий стан', 'Житловий стан'),
+            ('Авторський проект', 'Авторський проект'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_renovation'}),
         label="Ремонт"
     )
     furnishing = forms.ChoiceField(
-        choices=ApartmentDetails._meta.get_field('furnishing').choices,
+        choices=[
+            ('', 'Оберіть меблювання'),
+            ('Так', 'Так'),
+            ('Ні', 'Ні'),
+        ],
         required=False,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.HiddenInput(attrs={'id': 'id_furnishing'}),
         label="Меблювання"
     )
     appliances = forms.MultipleChoiceField(
         choices=[
             ('Холодильник', 'Холодильник'),
-            ('Піч', 'Піч'),
-            ('Мікрохвильовка', 'Мікрохвильовка'),
+            ('Пральна машина', 'Пральна машина'),
             ('Посудомийна машина', 'Посудомийна машина'),
-            ('Пральна машина', 'Пральна машина')
+            ('Мікрохвильовка', 'Мікрохвильовка'),
+            ('Телевізор', 'Телевізор'),
         ],
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-item'}),
         label="Побутова техніка"
     )
     multimedia = forms.MultipleChoiceField(
         choices=[
-            ('Телевізор', 'Телевізор'),
             ('Wi-Fi', 'Wi-Fi'),
+            ('Телевізор', 'Телевізор'),
             ('Кабельне ТБ', 'Кабельне ТБ'),
-            ('Супутникове ТБ', 'Супутникове ТБ')
+            ('Супутникове ТБ', 'Супутникове ТБ'),
         ],
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-item'}),
         label="Мультимедіа"
     )
     comfort = forms.MultipleChoiceField(
@@ -282,10 +344,10 @@ class AnnouncementForm(forms.ModelForm):
             ('Конс’єрж', 'Конс’єрж'),
             ('Парковка', 'Парковка'),
             ('Тераса', 'Тераса'),
-            ('Дитячий майданчик', 'Дитячий майданчик')
+            ('Дитячий майданчик', 'Дитячий майданчик'),
         ],
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-item'}),
         label="Комфорт"
     )
     communications = forms.MultipleChoiceField(
@@ -293,10 +355,10 @@ class AnnouncementForm(forms.ModelForm):
             ('Газ', 'Газ'),
             ('Центральний водопровід', 'Центральний водопровід'),
             ('Електрика', 'Електрика'),
-            ('Каналізація', 'Каналізація')
+            ('Каналізація', 'Каналізація'),
         ],
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-item'}),
         label="Комунікації"
     )
     infrastructure = forms.MultipleChoiceField(
@@ -310,10 +372,10 @@ class AnnouncementForm(forms.ModelForm):
             ('Автовокзал', 'Автовокзал'),
             ('Банк,банкомат', 'Банк,банкомат'),
             ('Відділення пошти', 'Відділення пошти'),
-            ('Кінотеатр,театр', 'Кінотеатр,театр')
+            ('Кінотеатр,театр', 'Кінотеатр,театр'),
         ],
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-item'}),
         label="Інфраструктура"
     )
     landscape = forms.MultipleChoiceField(
@@ -324,10 +386,10 @@ class AnnouncementForm(forms.ModelForm):
             ('Ліс', 'Ліс'),
             ('Пляж', 'Пляж'),
             ('Гора', 'Гора'),
-            ('Сквер', 'Сквер')
+            ('Сквер', 'Сквер'),
         ],
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-item'}),
         label="Ландшафт"
     )
 
@@ -335,7 +397,11 @@ class AnnouncementForm(forms.ModelForm):
         model = Announcement
         fields = [
             'title', 'description', 'price', 'location', 'category',
-            'subcategory', 'deal_type', 'image'
+            'subcategory', 'deal_type', 'image', 'seller_type', 'building_type',
+            'residential_complex', 'floor', 'total_area', 'kitchen_area', 'wall_type',
+            'housing_type', 'rooms', 'layout', 'bathroom', 'heating', 'renovation',
+            'furnishing', 'appliances', 'multimedia', 'comfort', 'communications',
+            'infrastructure', 'landscape'
         ]
         widgets = {
             'title': forms.TextInput(
@@ -369,20 +435,22 @@ class AnnouncementForm(forms.ModelForm):
                     'placeholder': 'Введіть місто або адресу'
                 }
             ),
-            'category': forms.Select(
-                attrs={'aria-label': 'Категорія', 'class': 'form-control', 'id': 'id_category'}
+            'category': forms.HiddenInput(
+                attrs={'aria-label': 'Категорія', 'id': 'id_category'}
             ),
         }
 
     def clean_location(self):
-        location = self.cleaned_data.get('location').strip()
-        if not location:
+        location = self.cleaned_data.get('location')
+        if not location or not location.strip():
             raise forms.ValidationError("Місцезнаходження не може бути порожнім.")
-        return location
+        return location.strip()
 
     def clean_price(self):
         price = self.cleaned_data.get('price')
-        if price is not None and price < 0:
+        if price is None:
+            raise forms.ValidationError("Ціна є обов'язковим полем.")
+        if price < 0:
             raise forms.ValidationError("Ціна не може бути від'ємною.")
         return price
 
@@ -397,7 +465,8 @@ class AnnouncementForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if cleaned_data.get('subcategory') == "Квартира":
+        subcategory = cleaned_data.get('subcategory')
+        if subcategory == "Квартира":
             total_area = cleaned_data.get('total_area')
             kitchen_area = cleaned_data.get('kitchen_area')
             if total_area and kitchen_area and total_area < kitchen_area:

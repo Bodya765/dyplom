@@ -3,56 +3,8 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/main-page.css' %}">
-    <style>
-        .autocomplete-suggestions {
-            position: absolute;
-            background: white;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: calc(100% - 20px);
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .autocomplete-suggestion {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s;
-        }
-        .autocomplete-suggestion:hover {
-            background-color: #f0f0f0;
-        }
-        .search-bar {
-            position: relative;
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        #search-input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        #search-button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.2s;
-        }
-        #search-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
 {% endblock %}
+
 {% block title %}VseOgolosha{% endblock %}
 
 {% block content %}
@@ -60,7 +12,7 @@
     <div class="container">
         <div class="search-container">
             <div class="search-bar">
-                <input type="text" id="search-input" placeholder="Введіть запит, наприклад: Продам будинок..." autocomplete="off">
+                <input type="text" id="search-input" placeholder="Введіть запит, наприклад: vgbhjkl..." autocomplete="off">
                 <button id="search-button">Шукати</button>
                 <div id="autocomplete-suggestions" class="autocomplete-suggestions"></div>
             </div>
@@ -118,7 +70,7 @@
         <div class="recent-announcements">
             {% for recent in recent_announcements %}
                 <div class="announcement-item">
-                    <a href="{% url 'announcements:announcement-detail' pk=recent.pk %}">
+                    <a href="{% url 'announcements:announcement_detail' pk=recent.pk %}">
                         {% if recent.image %}
                             <img src="{{ recent.image.url }}" alt="{{ recent.title }}" class="announcement-image">
                         {% endif %}
@@ -139,14 +91,25 @@
         const searchInput = document.getElementById("search-input");
         const suggestionsContainer = document.getElementById("autocomplete-suggestions");
         const searchButton = document.getElementById("search-button");
+
+        // Перевірка елементів
+        if (!searchInput || !suggestionsContainer || !searchButton) {
+            console.error("[Автодоповнення] Елементи не знайдено:", {
+                searchInput: !!searchInput,
+                suggestionsContainer: !!suggestionsContainer,
+                searchButton: !!searchButton
+            });
+            return;
+        }
+
         let debounceTimeout;
 
-        // Функція для дебагінгу
+        // Логування
         function log(message, data = null) {
             console.log(`[Автодоповнення] ${message}`, data || "");
         }
 
-        // Функція для дебансінгу
+        // Дебансинг
         function debounce(func, delay) {
             return function (...args) {
                 clearTimeout(debounceTimeout);
@@ -160,56 +123,70 @@
                 log("Перенаправлення на пошук:", query);
                 window.location.href = `/search_results/?search=${encodeURIComponent(query)}`;
             } else {
-                log("Запит порожній, пошук не виконано.");
+                log("Запит порожній");
+                alert("Введіть запит для пошуку");
             }
         }
 
-        // Обробка автодоповнення
+        // Отримання пропозицій
         const fetchSuggestions = debounce(function (query) {
             if (query.length < 2) {
                 suggestionsContainer.style.display = "none";
                 suggestionsContainer.innerHTML = "";
-                log("Запит занадто короткий (< 2 символи).");
+                log("Запит занадто короткий (< 2 символи)");
                 return;
             }
 
-            log("Запит автодоповнення для:", query);
-            fetch(`/announcement/autocomplete/?query=${encodeURIComponent(query)}`)
+            log("Запит автодоповнення:", query);
+            fetch(`/announcement/autocomplete/?query=${encodeURIComponent(query)}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
                 .then(response => {
                     log("Статус відповіді:", response.status);
+                    log("Заголовки:", Object.fromEntries(response.headers.entries()));
                     if (!response.ok) {
-                        throw new Error(`HTTP помилка! Статус: ${response.status}`);
+                        throw new Error(`HTTP помилка: ${response.status}`);
                     }
                     return response.json();
                 })
                 .then(data => {
-                    log("Дані автодоповнення:", data);
+                    log("Тип даних:", typeof data);
+                    log("Дані:", data);
                     suggestionsContainer.innerHTML = "";
-                    if (data.length > 0) {
+                    if (data && Array.isArray(data) && data.length > 0) {
                         data.forEach(suggestion => {
+                            log("Додаємо пропозицію:", suggestion);
                             const div = document.createElement("div");
                             div.classList.add("autocomplete-suggestion");
                             div.textContent = suggestion;
                             div.addEventListener("click", () => {
                                 searchInput.value = suggestion;
                                 suggestionsContainer.style.display = "none";
-                                performSearch(suggestion);  // Виконуємо пошук після вибору
+                                performSearch(suggestion);
                             });
                             suggestionsContainer.appendChild(div);
                         });
                         suggestionsContainer.style.display = "block";
+                        log("Контейнер пропозицій видимий");
+                        log("Стилі контейнера:", window.getComputedStyle(suggestionsContainer));
                     } else {
-                        suggestionsContainer.style.display = "none";
-                        log("Пропозицій не знайдено.");
+                        suggestionsContainer.innerHTML = '<div class="no-suggestions">Немає пропозицій</div>';
+                        suggestionsContainer.style.display = "block";
+                        log("Пропозицій не знайдено");
                     }
                 })
                 .catch(error => {
-                    log("Помилка автодоповнення:", error);
-                    suggestionsContainer.style.display = "none";
+                    log("Помилка:", error);
+                    suggestionsContainer.innerHTML = '<div class="no-suggestions">Помилка при отриманні пропозицій</div>';
+                    suggestionsContainer.style.display = "block";
                 });
-        }, 300);  // Затримка 300 мс
+        }, 300);
 
-        // Обробка введення в поле пошуку
+        // Обробка введення
         searchInput.addEventListener("input", function () {
             const query = this.value.trim();
             fetchSuggestions(query);
@@ -219,10 +196,11 @@
         document.addEventListener("click", (e) => {
             if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
                 suggestionsContainer.style.display = "none";
+                log("Контейнер пропозицій прихований");
             }
         });
 
-        // Обробка кліку на кнопку пошуку
+        // Обробка кнопки пошуку
         searchButton.addEventListener("click", () => {
             const query = searchInput.value.trim();
             performSearch(query);
@@ -231,19 +209,10 @@
         // Пошук при натисканні Enter
         searchInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
+                e.preventDefault();
                 const query = searchInput.value.trim();
                 performSearch(query);
             }
-        });
-
-        // Обробка кліку на оголошення (залишено без змін)
-        document.querySelectorAll('.announcement').forEach(announcement => {
-            announcement.addEventListener('click', () => {
-                const url = announcement.getAttribute('data-url');
-                if (url) {
-                    window.location.href = url;
-                }
-            });
         });
     });
 </script>

@@ -7,7 +7,7 @@ from telegram import Update, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboard
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 from asgiref.sync import sync_to_async
 from django.db.models import Q
-from openai import OpenAI  # Новий імпорт для OpenAI API
+from openai import OpenAI
 
 # Завантаження змінних середовища
 load_dotenv()
@@ -32,7 +32,7 @@ get_pending_requests = sync_to_async(SupportRequest.objects.filter)
 update_request = sync_to_async(SupportRequest.objects.get)
 
 # Налаштування OpenAI
-client = OpenAI(api_key=OPENAI_API_KEY)  # Новий клієнт OpenAI
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Кнопки
 CONTACT_ADMIN_BUTTON = "📞 Зв’язатися з адміністратором"
@@ -61,7 +61,7 @@ async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     context.user_data['awaiting_admin_message'] = True
 
-# Функція для генерації відповіді від AI (оновлена для нового API)
+# Функція для генерації відповіді від AI
 async def get_ai_response(question: str) -> str:
     try:
         response = await asyncio.get_event_loop().run_in_executor(
@@ -107,22 +107,59 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Радий, що зміг допомогти! Якщо будуть інші питання, пиши!",
             reply_markup=REPLY_MARKUP
         )
+        # Очищаємо збережене питання
+        if 'last_question' in context.user_data:
+            del context.user_data['last_question']
     elif query.data == "contact_admin":
-        await query.message.reply_text(
-            "Напиши своє повідомлення для адміністратора, і я передам його!",
-            reply_markup=REPLY_MARKUP
-        )
-        context.user_data['awaiting_admin_message'] = True
+        if 'last_question' in context.user_data:
+            user = query.message.chat
+            user_id = str(user.id)
+            username = user.username or "Невідомий"
+            question = context.user_data['last_question']
+
+            # Створюємо запит до адміністратора
+            support_request = await create_support_request(
+                user_id=user_id,
+                username=username,
+                question=question,
+                status="pending",
+                handled_by_admin=False
+            )
+
+            admin_keyboard = [
+                [InlineKeyboardButton("Переглянути в адмін-панелі", url="http://127.0.0.1:8000/admin-panel/")]
+            ]
+            admin_reply_markup = InlineKeyboardMarkup(admin_keyboard)
+
+            await context.bot.send_message(
+                chat_id=ADMIN_CHAT_ID,
+                text=f"Запит #{support_request.id} від @{username} (ID: {user_id}):\n{question}",
+                reply_markup=admin_reply_markup
+            )
+
+            await query.message.reply_text(
+                f"Твоє повідомлення надіслане адміністратору ({ADMIN_USERNAME})! Очікуй відповіді.",
+                reply_markup=REPLY_MARKUP
+            )
+            # Очищаємо збережене питання
+            del context.user_data['last_question']
+        else:
+            await query.message.reply_text(
+                "Не вдалося знайти твоє останнє питання. Будь ласка, напиши його ще раз.",
+                reply_markup=REPLY_MARKUP
+            )
+            context.user_data['awaiting_admin_message'] = True
 
 # Обробка текстових повідомлень
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
-    user_id = str(user.id)
-    username = user.username or "Невідомий"
     message_text = update.message.text.strip()
 
     # Якщо користувач очікує написання повідомлення для адміністратора
     if 'awaiting_admin_message' in context.user_data and context.user_data['awaiting_admin_message']:
+        user_id = str(user.id)
+        username = user.username or "Невідомий"
+
         support_request = await create_support_request(
             user_id=user_id,
             username=username,
@@ -149,14 +186,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data['awaiting_admin_message'] = False
         return
 
-    # Якщо користувач натиснув кнопку "Зв’язатися з адміністратором"
-    if message_text.lower() == CONTACT_ADMIN_BUTTON.lower():
-        await update.message.reply_text(
-            "Напиши своє повідомлення для адміністратора, і я передам його!",
-            reply_markup=REPLY_MARKUP
-        )
-        context.user_data['awaiting_admin_message'] = True
-        return
+    # Зберігаємо питання для можливого звернення до адміністратора
+    context.user_data['last_question'] = message_text
 
     # Відповідь від AI
     ai_response = await get_ai_response(message_text)

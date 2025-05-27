@@ -1,4 +1,3 @@
-
 .main-content {
     min-height: 100vh;
     display: flex;
@@ -30,52 +29,52 @@
     max-width: 800px;
     width: 90%;
     margin: 0 auto;
-    background: linear-gradient(135deg, #ffffff, #e6f0ff) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(135deg, #ffffff, #e6f0ff);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     padding: 5px;
-    transition: box-shadow 0.3s ease !important;
+    transition: box-shadow 0.3s ease;
 }
 
 .search-bar:hover {
-    box-shadow: 0 6px 16px rgba(0, 170, 255, 0.3) !important;
+    box-shadow: 0 6px 16px rgba(0, 170, 255, 0.3);
 }
 
 #search-input {
     width: 100%;
     padding: 15px 25px;
     font-size: 1.2rem;
-    border: none !important;
-    border-radius: 5px 0 0 5px !important;
-    background: transparent !important;
-    color: #333 !important;
-    transition: box-shadow 0.3s ease !important;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    background: transparent;
+    color: #333;
+    transition: box-shadow 0.3s ease;
 }
 
 #search-input:focus {
-    outline: none !important;
-    box-shadow: inset 0 0 5px rgba(0, 170, 255, 0.5) !important;
+    outline: none;
+    box-shadow: inset 0 0 5px rgba(0, 170, 255, 0.5);
 }
 
 #search-input::placeholder {
-    color: #888 !important;
-    font-size: 1rem !important;
+    color: #888;
+    font-size: 1rem;
 }
 
 #search-button {
     padding: 15px 30px;
-    background: linear-gradient(135deg, #3b5998, #2a4373) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 0 5px 5px 0 !important;
+    background: linear-gradient(135deg, #3b5998, #2a4373);
+    color: #fff;
+    border: none;
+    border-radius: 0 5px 5px 0;
     font-size: 1.2rem;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.3s ease !important;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
 #search-button:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 4px 12px rgba(0, 170, 255, 0.5) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 170, 255, 0.5);
 }
 
 .autocomplete-suggestions {
@@ -91,15 +90,10 @@
     overflow-y: auto;
     z-index: 1000;
     display: none;
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.autocomplete-suggestions.active {
+.autocomplete-suggestions.visible {
     display: block;
-    opacity: 1;
-    transform: translateY(0);
 }
 
 .autocomplete-suggestion {
@@ -197,13 +191,13 @@
 
 .recent-announcements {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Збільшено мінімальну ширину */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
     width: 100%;
 }
 
 .announcement-item {
-    transition: transform 0.3s ease; /* Залишено лише анімацію підйому */
+    transition: transform 0.3s ease;
 }
 
 .announcement-item:hover {
@@ -218,15 +212,15 @@
 
 .announcement-image {
     width: 100%;
-    height: 120px; /* Збільшено висоту */
+    height: 120px;
     object-fit: cover;
     border-radius: 5px 5px 0 0;
 }
 
 .announcement-title {
-    font-size: 1.1rem; /* Збільшено шрифт */
+    font-size: 1.1rem;
     color: #3b5998;
-    padding: 10px 0; /* Прибрано бічні відступи */
+    padding: 10px 0;
     margin: 0;
     font-weight: 500;
     overflow: hidden;
@@ -235,9 +229,9 @@
 }
 
 .announcement-price {
-    font-size: 1rem; /* Збільшено шрифт */
+    font-size: 1rem;
     color: #4a7043;
-    padding: 0 0 10px; /* Прибрано бічні відступи */
+    padding: 0 0 10px;
     margin: 0;
     font-weight: bold;
 }
@@ -249,7 +243,6 @@
     margin-top: 20px;
 }
 
-/* Адаптивність */
 @media (max-width: 768px) {
     .main-content {
         padding: 20px 15px;
@@ -300,20 +293,20 @@
     }
 
     .recent-announcements {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Зменшено для адаптивності */
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 15px;
     }
 
     .announcement-image {
-        height: 100px; /* Зменшено для адаптивності */
+        height: 100px;
     }
 
     .announcement-title {
-        font-size: 1rem; /* Зменшено для адаптивності */
+        font-size: 1rem;
     }
 
     .announcement-price {
-        font-size: 0.95rem; /* Зменшено для адаптивності */
+        font-size: 0.95rem;
     }
 }
 
@@ -365,7 +358,7 @@
     }
 
     .announcement-image {
-        height: 90px; /* Зменшено для адаптивності */
+        height: 90px;
     }
 
     .announcement-title {

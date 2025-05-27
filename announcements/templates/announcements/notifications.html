@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="notifications-container">
+        <h1 class="notifications-title">Сповіщення</h1>
+        <a href="{% url 'announcements:profile_edit' %}" class="back-link">Повернутися до профілю</a>
+        <hr class="divider">
+
+        {% if notifications %}
+            <div class="notifications-list">
+                {% for notification in notifications %}
+                    <div class="notification-card">
+                        <div class="notification-content">
+                            <p class="notification-message">{{ notification.message }}</p>
+                            <small class="notification-date">Дата: {{ notification.created_at|date:"d.m.Y H:i" }}</small>
+                        </div>
+                        {% if notification.related_announcement %}
+                            <a href="{% url 'announcement_detail' notification.related_announcement.pk %}" class="notification-link">Переглянути оголошення</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-notifications">
+                <p>У вас немає сповіщень.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

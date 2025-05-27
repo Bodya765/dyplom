@@ -24,15 +24,6 @@
                     <label for="{{ form.price.id_for_label }}" class="form-label">Ціна:</label>
                     {{ form.price }}
                 </div>
-                <div class="form-field">
-                    <label for="id_phone" class="form-label">Номер телефону:</label>
-                    <input type="text" id="id_phone" name="phone" class="form-input"
-                           value="{% if user.profile.phone %}{{ user.profile.phone }}{% endif %}"
-                           placeholder="Введіть ваш номер телефону" maxlength="15" />
-                    {% if user.profile.phone %}
-                        <p class="form-help-text">Поточний номер: {{ user.profile.phone }}</p>
-                    {% endif %}
-                </div>
             </div>
 
             <!-- Правий стовпчик: Категорія, Місцезнаходження, Зображення -->
@@ -51,12 +42,12 @@
                 </div>
                 <div class="form-field custom-file-upload">
                     <label for="{{ form.image.id_for_label }}" class="form-label">Зображення:</label>
-                    <input type="file" id="{{ form.image.id_for_label }}" name="image" class="file-input" accept="image/*" multiple />
+                    <input type="file" id="{{ form.image.id_for_label }}" name="image" class="file-input" accept="image/*" />
                     <label for="{{ form.image.id_for_label }}" class="file-button">
                         <span class="file-label-text">Виберіть зображення</span>
                         <span class="file-icon"><i class="fas fa-cloud-upload-alt"></i></span>
                     </label>
-                    <div id="image-previews" class="image-previews"></div>
+                    <span id="file-name" class="file-name"></span>
                     {% if form.image.errors %}
                         <div class="error">{{ form.image.errors }}</div>
                     {% endif %}
@@ -197,23 +188,23 @@
                         <label class="form-label">Побутова техніка:</label>
                         <div class="checkbox-list">
                             <span class="checkbox-item">
-                                <input type="checkbox" id="appliance-refrigerator" name="appliances[]" value="Холодильник" />
+                                <input type="checkbox" id="appliance-refrigerator" name="appliances" value="Холодильник" />
                                 <label for="appliance-refrigerator">Холодильник</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="appliance-washing-machine" name="appliances[]" value="Пральна машина" />
+                                <input type="checkbox" id="appliance-washing-machine" name="appliances" value="Пральна машина" />
                                 <label for="appliance-washing-machine">Пральна машина</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="appliance-dishwasher" name="appliances[]" value="Посудомийна машина" />
+                                <input type="checkbox" id="appliance-dishwasher" name="appliances" value="Посудомийна машина" />
                                 <label for="appliance-dishwasher">Посудомийна машина</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="appliance-microwave" name="appliances[]" value="Мікрохвильовка" />
+                                <input type="checkbox" id="appliance-microwave" name="appliances" value="Мікрохвильовка" />
                                 <label for="appliance-microwave">Мікрохвильовка</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="appliance-tv" name="appliances[]" value="Телевізор" />
+                                <input type="checkbox" id="appliance-tv" name="appliances" value="Телевізор" />
                                 <label for="appliance-tv">Телевізор</label>
                             </span>
                         </div>
@@ -222,19 +213,19 @@
                         <label class="form-label">Мультимедіа:</label>
                         <div class="checkbox-list">
                             <span class="checkbox-item">
-                                <input type="checkbox" id="multimedia-wifi" name="multimedia[]" value="Wi-Fi" />
+                                <input type="checkbox" id="multimedia-wifi" name="multimedia" value="Wi-Fi" />
                                 <label for="multimedia-wifi">Wi-Fi</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="multimedia-tv" name="multimedia[]" value="Телевізор" />
+                                <input type="checkbox" id="multimedia-tv" name="multimedia" value="Телевізор" />
                                 <label for="multimedia-tv">Телевізор</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="multimedia-cable-tv" name="multimedia[]" value="Кабельне ТБ" />
+                                <input type="checkbox" id="multimedia-cable-tv" name="multimedia" value="Кабельне ТБ" />
                                 <label for="multimedia-cable-tv">Кабельне ТБ</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="multimedia-satellite-tv" name="multimedia[]" value="Супутникове ТБ" />
+                                <input type="checkbox" id="multimedia-satellite-tv" name="multimedia" value="Супутникове ТБ" />
                                 <label for="multimedia-satellite-tv">Супутникове ТБ</label>
                             </span>
                         </div>
@@ -243,43 +234,43 @@
                         <label class="form-label">Комфорт:</label>
                         <div class="checkbox-list">
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-balcony" name="comfort[]" value="Балкон" />
+                                <input type="checkbox" id="comfort-balcony" name="comfort" value="Балкон" />
                                 <label for="comfort-balcony">Балкон</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-ac" name="comfort[]" value="Кондиціонер" />
+                                <input type="checkbox" id="comfort-ac" name="comfort" value="Кондиціонер" />
                                 <label for="comfort-ac">Кондиціонер</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-elevator" name="comfort[]" value="Ліфт" />
+                                <input type="checkbox" id="comfort-elevator" name="comfort" value="Ліфт" />
                                 <label for="comfort-elevator">Ліфт</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-garage" name="comfort[]" value="Гараж" />
+                                <input type="checkbox" id="comfort-garage" name="comfort" value="Гараж" />
                                 <label for="comfort-garage">Гараж</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-security" name="comfort[]" value="Охорона" />
+                                <input type="checkbox" id="comfort-security" name="comfort" value="Охорона" />
                                 <label for="comfort-security">Охорона</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-cctv" name="comfort[]" value="Відеоспостереження" />
+                                <input type="checkbox" id="comfort-cctv" name="comfort" value="Відеоспостереження" />
                                 <label for="comfort-cctv">Відеоспостереження</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-concierge" name="comfort[]" value="Конс’єрж" />
+                                <input type="checkbox" id="comfort-concierge" name="comfort" value="Конс’єрж" />
                                 <label for="comfort-concierge">Конс’єрж</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-parking" name="comfort[]" value="Парковка" />
+                                <input type="checkbox" id="comfort-parking" name="comfort" value="Парковка" />
                                 <label for="comfort-parking">Парковка</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-terrace" name="comfort[]" value="Тераса" />
+                                <input type="checkbox" id="comfort-terrace" name="comfort" value="Тераса" />
                                 <label for="comfort-terrace">Тераса</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="comfort-playground" name="comfort[]" value="Дитячий майданчик" />
+                                <input type="checkbox" id="comfort-playground" name="comfort" value="Дитячий майданчик" />
                                 <label for="comfort-playground">Дитячий майданчик</label>
                             </span>
                         </div>
@@ -295,19 +286,19 @@
                         <label class="form-label">Комунікації:</label>
                         <div class="checkbox-list">
                             <span class="checkbox-item">
-                                <input type="checkbox" id="communication-gas" name="communications[]" value="Газ" />
+                                <input type="checkbox" id="communication-gas" name="communications" value="Газ" />
                                 <label for="communication-gas">Газ</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="communication-water" name="communications[]" value="Центральний водопровід" />
+                                <input type="checkbox" id="communication-water" name="communications" value="Центральний водопровід" />
                                 <label for="communication-water">Центральний водопровід</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="communication-electricity" name="communications[]" value="Електрика" />
+                                <input type="checkbox" id="communication-electricity" name="communications" value="Електрика" />
                                 <label for="communication-electricity">Електрика</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="communication-sewerage" name="communications[]" value="Каналізація" />
+                                <input type="checkbox" id="communication-sewerage" name="communications" value="Каналізація" />
                                 <label for="communication-sewerage">Каналізація</label>
                             </span>
                         </div>
@@ -316,43 +307,43 @@
                         <label class="form-label">Інфраструктура (до 800м):</label>
                         <div class="checkbox-list">
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-school" name="infrastructure[]" value="Школа" />
+                                <input type="checkbox" id="infrastructure-school" name="infrastructure" value="Школа" />
                                 <label for="infrastructure-school">Школа</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-supermarket" name="infrastructure[]" value="Супермаркет" />
+                                <input type="checkbox" id="infrastructure-supermarket" name="infrastructure" value="Супермаркет" />
                                 <label for="infrastructure-supermarket">Супермаркет</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-hospital" name="infrastructure[]" value="Лікарня" />
+                                <input type="checkbox" id="infrastructure-hospital" name="infrastructure" value="Лікарня" />
                                 <label for="infrastructure-hospital">Лікарня</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-pharmacy" name="infrastructure[]" value="Аптека" />
+                                <input type="checkbox" id="infrastructure-pharmacy" name="infrastructure" value="Аптека" />
                                 <label for="infrastructure-pharmacy">Аптека</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-bus-stop" name="infrastructure[]" value="Транспортна зупинка" />
+                                <input type="checkbox" id="infrastructure-bus-stop" name="infrastructure" value="Транспортна зупинка" />
                                 <label for="infrastructure-bus-stop">Транспортна зупинка</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-train-station" name="infrastructure[]" value="Залізнична станція" />
+                                <input type="checkbox" id="infrastructure-train-station" name="infrastructure" value="Залізнична станція" />
                                 <label for="infrastructure-train-station">Залізнична станція</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-bus-station" name="infrastructure[]" value="Автовокзал" />
+                                <input type="checkbox" id="infrastructure-bus-station" name="infrastructure" value="Автовокзал" />
                                 <label for="infrastructure-bus-station">Автовокзал</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-bank" name="infrastructure[]" value="Банк,банкомат" />
+                                <input type="checkbox" id="infrastructure-bank" name="infrastructure" value="Банк,банкомат" />
                                 <label for="infrastructure-bank">Банк,банкомат</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-post-office" name="infrastructure[]" value="Відділення пошти" />
+                                <input type="checkbox" id="infrastructure-post-office" name="infrastructure" value="Відділення пошти" />
                                 <label for="infrastructure-post-office">Відділення пошти</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="infrastructure-cinema" name="infrastructure[]" value="Кінотеатр,театр" />
+                                <input type="checkbox" id="infrastructure-cinema" name="infrastructure" value="Кінотеатр,театр" />
                                 <label for="infrastructure-cinema">Кінотеатр,театр</label>
                             </span>
                         </div>
@@ -361,31 +352,31 @@
                         <label class="form-label">Ландшафт (до 1км):</label>
                         <div class="checkbox-list">
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-park" name="landscape[]" value="Парк" />
+                                <input type="checkbox" id="landscape-park" name="landscape" value="Парк" />
                                 <label for="landscape-park">Парк</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-lake" name="landscape[]" value="Озеро" />
+                                <input type="checkbox" id="landscape-lake" name="landscape" value="Озеро" />
                                 <label for="landscape-lake">Озеро</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-river" name="landscape[]" value="Річка" />
+                                <input type="checkbox" id="landscape-river" name="landscape" value="Річка" />
                                 <label for="landscape-river">Річка</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-forest" name="landscape[]" value="Ліс" />
+                                <input type="checkbox" id="landscape-forest" name="landscape" value="Ліс" />
                                 <label for="landscape-forest">Ліс</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-beach" name="landscape[]" value="Пляж" />
+                                <input type="checkbox" id="landscape-beach" name="landscape" value="Пляж" />
                                 <label for="landscape-beach">Пляж</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-mountain" name="landscape[]" value="Гора" />
+                                <input type="checkbox" id="landscape-mountain" name="landscape" value="Гора" />
                                 <label for="landscape-mountain">Гора</label>
                             </span>
                             <span class="checkbox-item">
-                                <input type="checkbox" id="landscape-square" name="landscape[]" value="Сквер" />
+                                <input type="checkbox" id="landscape-square" name="landscape" value="Сквер" />
                                 <label for="landscape-square">Сквер</label>
                             </span>
                         </div>
@@ -432,141 +423,7 @@
             <button id="confirm-category" class="confirm-btn" disabled>Підтвердити</button>
         </div>
     </div>
-
-    <!-- Модальне вікно для перегляду зображень -->
-    <div id="image-viewer-modal" class="image-viewer-modal">
-        <div class="image-viewer-content">
-            <span class="image-viewer-close">×</span>
-            <div class="image-viewer">
-                <button class="viewer-nav prev" id="viewer-prev">❮</button>
-                <img id="viewer-image" src="" alt="Preview Image" />
-                <button class="viewer-nav next" id="viewer-next">❯</button>
-            </div>
-            <div class="viewer-thumbnails" id="viewer-thumbnails"></div>
-        </div>
-    </div>
-
 </main>
-
-<style>
-/* Стилі для прев’ю-зображень */
-.image-previews {
-    display: flex;
-    overflow-x: auto;
-    gap: 10px;
-    margin-top: 10px;
-    padding-bottom: 5px;
-}
-.image-preview {
-    position: relative;
-    flex: 0 0 auto;
-    width: 100px;
-    height: 100px;
-    cursor: pointer;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-}
-.image-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.image-preview .remove-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255, 0, 0, 0.7);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-/* Стилі для модального вікна перегляду зображень */
-.image-viewer-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 2000; /* Вище, ніж category-modal (який має z-index 1000) */
-    justify-content: center;
-    align-items: center;
-}
-.image-viewer-content {
-    position: relative;
-    background: none;
-    max-width: 90%;
-    max-height: 90%;
-    text-align: center;
-}
-.image-viewer-close {
-    position: absolute;
-    top: -30px;
-    right: 0;
-    color: white;
-    font-size: 30px;
-    cursor: pointer;
-}
-.image-viewer {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-#viewer-image {
-    max-width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-}
-.viewer-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    font-size: 24px;
-}
-.viewer-nav.prev {
-    left: 10px;
-}
-.viewer-nav.next {
-    right: 10px;
-}
-.viewer-thumbnails {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-    overflow-x: auto;
-}
-.thumbnail {
-    width: 60px;
-    height: 60px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 5px;
-}
-.thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.thumbnail.active {
-    border-color: #3498db;
-}
-</style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -584,7 +441,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const dealTypeOptionsDiv = document.getElementById("deal-type-options");
     const dealTypeOptions = document.querySelectorAll(".deal-type-option");
     const apartmentDetails = document.getElementById("apartment-details");
-    const phoneInput = document.getElementById("id_phone");
 
     let selectedCategory = null;
     let selectedCategoryID = null;
@@ -715,7 +571,7 @@ document.addEventListener("DOMContentLoaded", function () {
             modalContent.classList.remove("show");
             setTimeout(() => {
                 modal.style.display = "none";
-                apartmentDetails.style.display = (selectedSubcategory === "Квартира" || selectedSubcategory === "Будинок") && selectedDealType ? "block" : "none";
+                apartmentDetails.style.display = (selectedSubcategory === "Квартира") && selectedDealType ? "block" : "none";
             }, 300);
         }
     });
@@ -830,113 +686,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Обробка зображень
     const fileInput = document.querySelector(".file-input");
-    const imagePreviews = document.getElementById("image-previews");
-    const imageViewerModal = document.getElementById("image-viewer-modal");
-    const viewerImage = document.getElementById("viewer-image");
-    const viewerThumbnails = document.getElementById("viewer-thumbnails");
-    const viewerPrev = document.getElementById("viewer-prev");
-    const viewerNext = document.getElementById("viewer-next");
-    const imageViewerClose = document.querySelector(".image-viewer-close");
-
-    let images = [];
-    let currentIndex = 0;
+    const fileNameDisplay = document.getElementById("file-name");
 
     if (fileInput) {
         fileInput.addEventListener("change", () => {
-            const files = Array.from(fileInput.files);
-            images = [];
-            imagePreviews.innerHTML = "";
-            viewerThumbnails.innerHTML = "";
-
-            files.forEach((file, index) => {
-                if (file.type.startsWith("image/")) {
-                    const url = URL.createObjectURL(file);
-                    images.push(url);
-
-                    // Прев’ю-зображення
-                    const previewDiv = document.createElement("div");
-                    previewDiv.classList.add("image-preview");
-                    const img = document.createElement("img");
-                    img.src = url;
-                    const removeBtn = document.createElement("button");
-                    removeBtn.classList.add("remove-btn");
-                    removeBtn.textContent = "×";
-                    removeBtn.addEventListener("click", (e) => {
-                        e.stopPropagation();
-                        images.splice(index, 1);
-                        previewDiv.remove();
-                        updateThumbnails();
-                    });
-                    previewDiv.appendChild(img);
-                    previewDiv.appendChild(removeBtn);
-                    previewDiv.addEventListener("click", () => openImageViewer(index));
-                    imagePreviews.appendChild(previewDiv);
-
-                    // Мініатюра для модального вікна
-                    const thumbnailDiv = document.createElement("div");
-                    thumbnailDiv.classList.add("thumbnail");
-                    const thumbImg = document.createElement("img");
-                    thumbImg.src = url;
-                    thumbnailDiv.appendChild(thumbImg);
-                    thumbnailDiv.addEventListener("click", () => openImageViewer(index));
-                    viewerThumbnails.appendChild(thumbnailDiv);
-                }
-            });
-
-            updateThumbnails();
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "";
+            fileNameDisplay.textContent = fileName ? `Обрано: ${fileName}` : "";
         });
     } else {
         console.error("Елемент .file-input не знайдено");
     }
-
-    function openImageViewer(index) {
-        if (images.length === 0) return;
-        currentIndex = index;
-        viewerImage.src = images[currentIndex];
-        updateThumbnails();
-        imageViewerModal.style.display = "flex";
-    }
-
-    function updateThumbnails() {
-        const thumbnails = document.querySelectorAll(".thumbnail");
-        thumbnails.forEach((thumb, i) => {
-            thumb.classList.toggle("active", i === currentIndex);
-        });
-        viewerPrev.style.display = images.length > 1 ? "block" : "none";
-        viewerNext.style.display = images.length > 1 ? "block" : "none";
-    }
-
-    viewerPrev.addEventListener("click", () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-        } else {
-            currentIndex = images.length - 1;
-        }
-        viewerImage.src = images[currentIndex];
-        updateThumbnails();
-    });
-
-    viewerNext.addEventListener("click", () => {
-        if (currentIndex < images.length - 1) {
-            currentIndex++;
-        } else {
-            currentIndex = 0;
-        }
-        viewerImage.src = images[currentIndex];
-        updateThumbnails();
-    });
-
-    imageViewerClose.addEventListener("click", () => {
-        imageViewerModal.style.display = "none";
-    });
-
-    window.addEventListener("click", (e) => {
-        if (e.target === imageViewerModal) {
-            imageViewerModal.style.display = "none";
-        }
-    });
 
     const form = document.querySelector(".announcement-form");
     form.addEventListener("submit", (e) => {
@@ -945,15 +705,8 @@ document.addEventListener("DOMContentLoaded", function () {
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
-    });
-
-    // Додаємо обробку кліків на чекбокси
-    document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(checkbox => {
-        checkbox.addEventListener('change', (e) => {
-            console.log(`${checkbox.value} is now ${checkbox.checked ? 'checked' : 'unchecked'}`);
-        });
+        document.querySelector(".preloader").style.display = "block";
     });
 });
 </script>
-
 {% endblock %}

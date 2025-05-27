@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Location, Category, Announcement, ApartmentDetails, Review, UserProfile
+from .models import Location, Category, Announcement, ApartmentDetails, Review, UserProfile,Notification
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
@@ -57,3 +57,9 @@ class UserProfileAdmin(admin.ModelAdmin):
         return obj.user.username if obj.user else '-'
     get_username.short_description = 'Користувач'
     get_username.admin_order_field = 'user__username'
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'message', 'created_at', 'is_read')
+    list_filter = ('is_read', 'user', 'created_at')
+    search_fields = ('message', 'user__username')

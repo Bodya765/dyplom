@@ -231,6 +231,7 @@
     }
 }
 /* Основний контейнер сторінки */
+/* Основні стилі для сторінки оголошення */
 .announcement-detail-page {
     width: 100%;
     padding: 30px 20px;
@@ -272,21 +273,40 @@
 /* Зображення оголошення */
 .announcement-image-d {
     width: 100%;
-    height: 300px;
+    min-height: 200px;
+    max-height: 400px;
     overflow: hidden;
-    border-radius: 6px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(145deg, #f9fafb, #e6f0ff);
+    border: 2px solid rgba(59, 89, 152, 0.1);
+    position: relative;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    aspect-ratio: 4 / 3; /* Співвідношення 4:3, яке підходить для більшості фото */
+}
+
+.announcement-image-d:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    border-color: rgba(59, 89, 152, 0.3);
 }
 
 .announcement-img {
-    width: 130%;
-    height: 120%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+    display: block;
+    padding: 8px;
+    background-color: #ffffff; /* Фон для білих полів */
+    transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+    opacity: 1;
+    filter: brightness(1);
 }
 
 .announcement-image-d:hover .announcement-img {
-    transform: scale(1.03);
+    transform: scale(1.05);
+    opacity: 0.98;
+    filter: brightness(1.05);
 }
 
 /* Додаткова інформація */
@@ -315,7 +335,7 @@
     padding: 8px 12px;
     background: linear-gradient(135deg, #f9fafb, #e6f0ff);
     border: 1px solid #e6f0ff;
-    border-radius: 12px; /* Закруглені рамки */
+    border-radius: 12px;
     display: inline-block;
     width: auto;
     max-width: 100%;
@@ -641,7 +661,8 @@
     }
 
     .announcement-image-d {
-        height: 250px;
+        max-height: 300px;
+        min-height: 150px;
     }
 
     .detail-header {
@@ -706,7 +727,8 @@
     }
 
     .announcement-image-d {
-        height: 200px;
+        max-height: 200px;
+        min-height: 120px;
     }
 
     .detail-header {
@@ -768,8 +790,6 @@
         padding: 5px 8px;
     }
 }
-
-
 /* Сторінка редагування оголошення (announcement_edit.html) */
 .announcement-edit-container {
     max-width: 800px;
