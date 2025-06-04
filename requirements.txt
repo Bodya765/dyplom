@@ -12,3 +12,4 @@ social-auth-app-django
 mysqlclient
 clerk
 django-clerk
+pip install django-cors-headers
